@@ -4,9 +4,9 @@ import DoorPreviewModal from './DoorPreviewModal';
 
 const COLS = 6;
 const ROWS = 4;
-const CELL_W = 220;
-const CELL_H = 380;
-const GAP = 12;
+const CELL_W = 242;
+const CELL_H = 418;
+const GAP = 14;
 const TILE_W = COLS * (CELL_W + GAP);
 const TILE_H = ROWS * (CELL_H + GAP);
 
@@ -144,7 +144,7 @@ const InfiniteCanvas = () => {
                   }}
                 >
                   <div
-                    className="w-full h-full rounded-lg overflow-hidden bg-secondary/40 flex items-center justify-center relative cursor-pointer"
+                    className="w-full h-full overflow-hidden flex items-center justify-center relative cursor-pointer"
                     onClick={() => {
                       if (!hasDragged) setSelectedDoor(door);
                     }}
@@ -152,7 +152,7 @@ const InfiniteCanvas = () => {
                     <img
                       src={door.image}
                       alt={door.name}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                      className="h-full w-auto object-contain transition-transform duration-500 group-hover:scale-[1.05]"
                       draggable={false}
                     />
                     {/* Hover info */}
