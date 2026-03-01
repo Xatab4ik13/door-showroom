@@ -1,12 +1,24 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import Header from '@/components/Header';
+import HeroSection from '@/components/HeroSection';
+import ShowroomGrid from '@/components/ShowroomGrid';
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main>
+        <HeroSection />
+        <ShowroomGrid />
+      </main>
+      <footer className="px-6 md:px-12 py-16 border-t border-border">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div>
+            <p className="font-serif text-xl tracking-[0.3em] font-light text-foreground mb-2">RUSDOORS</p>
+            <p className="text-xs text-muted-foreground">Премиальные двери для вашего пространства</p>
+          </div>
+          <p className="text-xs text-muted-foreground">© 2026 Rusdoors.su — Все права защищены</p>
+        </div>
+      </footer>
     </div>
   );
 };
