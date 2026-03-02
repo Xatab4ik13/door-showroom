@@ -117,7 +117,7 @@ const Product = () => {
           <p className="text-muted-foreground text-sm mb-8">
             Нажмите «Разобрать» и наведите на деталь
           </p>
-          <DoorExplodedSVG accentColor={product.colors[0]} />
+          <DoorExplodedSVG accentColor={product.colors[0]} doorImage={product.image} />
         </section>
       </main>
     </div>
