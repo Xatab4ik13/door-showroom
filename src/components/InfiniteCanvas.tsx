@@ -39,6 +39,10 @@ const InfiniteCanvas = () => {
   const [cursorGrabbing, setCursorGrabbing] = useState(false);
 
   const openPreview = useCallback((door: Door) => {
+    cancelAnimationFrame(animRef.current);
+    velocityRef.current = { x: 0, y: 0 };
+    draggingRef.current = false;
+    setCursorGrabbing(false);
     setSelectedDoor(door);
     setIsPreviewOpen(true);
   }, []);
@@ -60,6 +64,8 @@ const InfiniteCanvas = () => {
   }, []);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    if (isPreviewOpen) return;
+
     draggingRef.current = true;
     hasDraggedRef.current = false;
     setCursorGrabbing(true);
@@ -69,10 +75,11 @@ const InfiniteCanvas = () => {
     lastMouseRef.current = { x: e.clientX, y: e.clientY, t: Date.now() };
     cancelAnimationFrame(animRef.current);
     (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
-  }, []);
+  }, [isPreviewOpen]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!draggingRef.current) return;
+    if (isPreviewOpen || !draggingRef.current) return;
+
     const dx = e.clientX - dragStartRef.current.x;
     const dy = e.clientY - dragStartRef.current.y;
     if (Math.abs(dx) > 4 || Math.abs(dy) > 4) hasDraggedRef.current = true;
@@ -80,8 +87,8 @@ const InfiniteCanvas = () => {
     const now = Date.now();
     const dt = Math.max(now - lastMouseRef.current.t, 1);
     velocityRef.current = {
-      x: (e.clientX - lastMouseRef.current.x) / dt * 16,
-      y: (e.clientY - lastMouseRef.current.y) / dt * 16,
+      x: ((e.clientX - lastMouseRef.current.x) / dt) * 16,
+      y: ((e.clientY - lastMouseRef.current.y) / dt) * 16,
     };
     lastMouseRef.current = { x: e.clientX, y: e.clientY, t: now };
 
@@ -97,16 +104,20 @@ const InfiniteCanvas = () => {
         applyTransform();
       });
     }
-  }, [applyTransform]);
+  }, [applyTransform, isPreviewOpen]);
 
   const handlePointerUp = useCallback(() => {
+    if (isPreviewOpen) return;
+
     draggingRef.current = false;
     setCursorGrabbing(false);
     const v = { ...velocityRef.current };
+
     const decay = () => {
       v.x *= 0.95;
       v.y *= 0.95;
       if (Math.abs(v.x) < 0.3 && Math.abs(v.y) < 0.3) return;
+
       offsetRef.current = {
         x: offsetRef.current.x + v.x,
         y: offsetRef.current.y + v.y,
@@ -114,12 +125,22 @@ const InfiniteCanvas = () => {
       applyTransform();
       animRef.current = requestAnimationFrame(decay);
     };
+
     animRef.current = requestAnimationFrame(decay);
-  }, [applyTransform]);
+  }, [applyTransform, isPreviewOpen]);
 
   useEffect(() => {
     return () => cancelAnimationFrame(animRef.current);
   }, []);
+
+  useEffect(() => {
+    if (!isPreviewOpen) return;
+
+    cancelAnimationFrame(animRef.current);
+    velocityRef.current = { x: 0, y: 0 };
+    draggingRef.current = false;
+    setCursorGrabbing(false);
+  }, [isPreviewOpen]);
 
   // Initial render: set tiles count based on viewport
   const vw = typeof window !== 'undefined' ? window.innerWidth : 1920;
@@ -141,8 +162,8 @@ const InfiniteCanvas = () => {
     <>
       <div
         ref={containerRef}
-        className="fixed inset-0 overflow-hidden select-none"
-        style={{ cursor: cursorGrabbing ? 'grabbing' : 'grab' }}
+        className={`fixed inset-0 overflow-hidden select-none ${isPreviewOpen ? 'pointer-events-none' : ''}`}
+        style={{ cursor: isPreviewOpen ? 'default' : cursorGrabbing ? 'grabbing' : 'grab' }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
