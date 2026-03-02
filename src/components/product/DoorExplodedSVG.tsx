@@ -7,8 +7,11 @@ interface DoorPart {
   label: string;
   dimensions: string;
   material: string;
-  /** Clickable zone as % of image */
   zone: { left: number; top: number; width: number; height: number };
+  /** Point on the part where arrow ends (%) */
+  dot: { x: number; y: number };
+  /** Where the label card appears (%) */
+  card: { x: number; y: number };
 }
 
 const parts: DoorPart[] = [
@@ -16,31 +19,43 @@ const parts: DoorPart[] = [
     id: 'dobor', label: 'Доборный брус',
     dimensions: '15 × 100–200 × 2080 мм', material: 'МДФ, ламинат',
     zone: { left: 3, top: 8, width: 11, height: 78 },
+    dot: { x: 10, y: 50 },
+    card: { x: 2, y: 28 },
   },
   {
     id: 'korobka', label: 'Коробка',
     dimensions: '40 × 74 × 2080 мм', material: 'МДФ, шпон или экошпон',
     zone: { left: 18, top: 5, width: 14, height: 82 },
+    dot: { x: 26, y: 45 },
+    card: { x: 16, y: 25 },
   },
   {
     id: 'nalichnik', label: 'Наличник',
     dimensions: '10 × 70 × 2150 мм', material: 'МДФ с покрытием',
     zone: { left: 35, top: 12, width: 8, height: 72 },
+    dot: { x: 39, y: 50 },
+    card: { x: 32, y: 78 },
   },
   {
     id: 'stoevaya', label: 'Продольная стоевая',
     dimensions: '40 × 74 × 2000 мм', material: 'Массив сосны / МДФ',
     zone: { left: 46, top: 8, width: 8, height: 78 },
+    dot: { x: 50, y: 45 },
+    card: { x: 43, y: 78 },
   },
   {
     id: 'filyonka', label: 'Филёнка',
     dimensions: 'По модели двери', material: 'МДФ, стекло или шпон',
     zone: { left: 57, top: 6, width: 14, height: 80 },
+    dot: { x: 64, y: 42 },
+    card: { x: 56, y: 78 },
   },
   {
     id: 'polotno', label: 'Дверное полотно',
     dimensions: '36 × 800 × 2000 мм', material: 'МДФ каркас, сотовый наполнитель',
     zone: { left: 74, top: 3, width: 22, height: 88 },
+    dot: { x: 85, y: 40 },
+    card: { x: 76, y: 22 },
   },
 ];
 
@@ -59,7 +74,6 @@ const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
 
   return (
     <div className="w-full">
-      {/* Image with interactive overlay zones */}
       <div className="relative w-full rounded-xl overflow-hidden">
         <img
           src={explodedView}
@@ -69,72 +83,111 @@ const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
         />
 
         {/* Clickable zones */}
-        {parts.map((part) => {
-          const isActive = activeId === part.id;
-          const isOther = activeId !== null && !isActive;
+        {parts.map((part) => (
+          <div
+            key={part.id}
+            className="absolute cursor-pointer z-10"
+            style={{
+              left: `${part.zone.left}%`,
+              top: `${part.zone.top}%`,
+              width: `${part.zone.width}%`,
+              height: `${part.zone.height}%`,
+            }}
+            onClick={() => handleClick(part.id)}
+          />
+        ))}
 
-          return (
-            <motion.div
-              key={part.id}
-              className="absolute cursor-pointer rounded-md"
-              style={{
-                left: `${part.zone.left}%`,
-                top: `${part.zone.top}%`,
-                width: `${part.zone.width}%`,
-                height: `${part.zone.height}%`,
-              }}
-              animate={{
-                backgroundColor: isActive
-                  ? `${accentColor}20`
-                  : 'rgba(0,0,0,0)',
-                boxShadow: isActive
-                  ? `inset 0 0 0 2px ${accentColor}, 0 0 20px ${accentColor}30`
-                  : 'inset 0 0 0 0px transparent',
-              }}
-              whileHover={{
-                backgroundColor: isActive ? `${accentColor}20` : `${accentColor}10`,
-                boxShadow: `inset 0 0 0 1px ${accentColor}60`,
-              }}
-              transition={{ duration: 0.25 }}
-              onClick={() => handleClick(part.id)}
-            />
-          );
-        })}
-
-        {/* Dimming overlay with cutout for active zone */}
+        {/* Callout: arrow line + dot + label */}
         <AnimatePresence>
-          {activeId && (() => {
-            const p = parts.find(pp => pp.id === activeId);
-            if (!p) return null;
-            // SVG mask: white = visible (dimmed), black rect = transparent hole
-            const maskSvg = `url("data:image/svg+xml,${encodeURIComponent(
-              `<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100' preserveAspectRatio='none'>` +
-              `<rect width='100' height='100' fill='white'/>` +
-              `<rect x='${p.zone.left}' y='${p.zone.top}' width='${p.zone.width}' height='${p.zone.height}' fill='black' rx='1'/>` +
-              `</svg>`
-            )}")`;
-            return (
-              <motion.div
-                key="dim"
-                className="absolute inset-0 pointer-events-none"
+          {activePart && (
+            <>
+              {/* SVG arrow */}
+              <motion.svg
+                key={`svg-${activePart.id}`}
+                className="absolute inset-0 w-full h-full pointer-events-none z-20"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.25 }}
+              >
+                {/* Line from card to dot */}
+                <motion.line
+                  x1={`${activePart.card.x + 7}%`}
+                  y1={`${activePart.card.y}%`}
+                  x2={`${activePart.dot.x}%`}
+                  y2={`${activePart.dot.y}%`}
+                  stroke={accentColor}
+                  strokeWidth="1.5"
+                  strokeDasharray="4 3"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.4 }}
+                />
+                {/* Dot on the part */}
+                <motion.circle
+                  cx={`${activePart.dot.x}%`}
+                  cy={`${activePart.dot.y}%`}
+                  r="5"
+                  fill={accentColor}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.3, type: 'spring' }}
+                />
+                <motion.circle
+                  cx={`${activePart.dot.x}%`}
+                  cy={`${activePart.dot.y}%`}
+                  r="9"
+                  fill="none"
+                  stroke={accentColor}
+                  strokeWidth="1.5"
+                  opacity="0.5"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.35, type: 'spring' }}
+                />
+              </motion.svg>
+
+              {/* Label card */}
+              <motion.div
+                key={`label-${activePart.id}`}
+                className="absolute z-30 pointer-events-none"
                 style={{
-                  backgroundColor: 'rgba(0,0,0,0.3)',
-                  WebkitMaskImage: maskSvg,
-                  maskImage: maskSvg,
-                  WebkitMaskSize: '100% 100%',
-                  maskSize: '100% 100%',
+                  left: `${activePart.card.x}%`,
+                  top: `${activePart.card.y}%`,
                 }}
-              />
-            );
-          })()}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 8 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div
+                  className="rounded-lg px-3 py-2 shadow-xl border backdrop-blur-md"
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.9)',
+                    borderColor: accentColor,
+                    maxWidth: '170px',
+                  }}
+                >
+                  <p
+                    className="text-xs font-bold leading-tight"
+                    style={{ fontFamily: "'Oswald', sans-serif", color: accentColor }}
+                  >
+                    {activePart.label}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">
+                    {activePart.dimensions}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {activePart.material}
+                  </p>
+                </div>
+              </motion.div>
+            </>
+          )}
         </AnimatePresence>
       </div>
 
-      {/* Part selector buttons */}
+      {/* Buttons */}
       <div className="flex flex-wrap gap-2 mt-6 justify-center">
         {parts.map((part) => {
           const isActive = activeId === part.id;
@@ -157,33 +210,6 @@ const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
           );
         })}
       </div>
-
-      {/* Info card */}
-      <AnimatePresence mode="wait">
-        {activePart && (
-          <motion.div
-            key={`info-${activePart.id}`}
-            initial={{ opacity: 0, y: 10, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: 10, height: 0 }}
-            transition={{ duration: 0.25 }}
-            className="overflow-hidden mt-4"
-          >
-            <div
-              className="rounded-lg px-5 py-4 border max-w-md mx-auto text-center"
-              style={{ backgroundColor: 'hsl(var(--card))', borderColor: accentColor }}
-            >
-              <p className="text-base font-bold text-foreground mb-1" style={{ fontFamily: "'Oswald', sans-serif" }}>
-                {activePart.label}
-              </p>
-              <p className="text-sm font-mono text-muted-foreground">{activePart.dimensions}</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                <span className="font-semibold">Материал:</span> {activePart.material}
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
