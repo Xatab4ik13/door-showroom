@@ -24,7 +24,7 @@ const DoorPreviewModal = ({ door, isOpen, onClose, onClosed }: Props) => {
           />
 
           <motion.div
-            className="relative bg-card rounded-2xl border border-border shadow-2xl w-[min(1100px,calc(100vw-2rem))] max-h-[90vh] overflow-y-auto grid grid-cols-1 md:grid-cols-2"
+            className="relative bg-card rounded-2xl border border-border shadow-2xl w-[min(1100px,calc(100vw-2rem))] max-h-[90vh] overflow-y-auto overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden grid grid-cols-1 md:grid-cols-2"
             onClick={(e) => e.stopPropagation()}
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
