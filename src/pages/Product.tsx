@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import ProductGallery from '@/components/product/ProductGallery';
 import ProductSpecs from '@/components/product/ProductSpecs';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
-import DoorExplodedView from '@/components/product/DoorExplodedView';
+import DoorExplodedSVG from '@/components/product/DoorExplodedSVG';
 import { catalogProducts } from '@/data/catalog';
 
 const formatPrice = (price: number) =>
@@ -106,20 +106,18 @@ const Product = () => {
           </div>
         </div>
 
-        {/* 3D Section */}
+        {/* Door Block Schema */}
         <section className="mb-16">
           <h2
-            className="text-2xl md:text-3xl font-bold uppercase tracking-wide text-foreground mb-6 text-center"
+            className="text-2xl md:text-3xl font-bold uppercase tracking-wide text-foreground mb-2 text-center"
             style={{ fontFamily: "'Oswald', sans-serif" }}
           >
-            3D-схема дверного блока
+            Схема дверного блока
           </h2>
-          <p className="text-center text-muted-foreground text-sm mb-6">
-            Вращайте мышкой • Нажмите кнопку для покомпонентного разбора
+          <p className="text-center text-muted-foreground text-sm mb-8">
+            Наведите на элемент для просмотра размеров
           </p>
-          <div className="max-w-lg mx-auto">
-            <DoorExplodedView color={product.colors[0]} />
-          </div>
+          <DoorExplodedSVG accentColor={product.colors[0]} />
         </section>
       </main>
     </div>
