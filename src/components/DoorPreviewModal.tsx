@@ -12,31 +12,32 @@ interface Props {
 
 const DoorPreviewModal = ({ door, isOpen, onClose, onClosed }: Props) => {
   return (
-    <AnimatePresence onExitComplete={onClosed}>
+    <AnimatePresence mode="wait" onExitComplete={onClosed}>
       {isOpen && door && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 [perspective:1200px]"
           onClick={onClose}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
         >
           <motion.div
             className="absolute inset-0 bg-foreground/20"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.35, ease: 'easeOut' }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           />
 
           <motion.div
             className="relative bg-card rounded-2xl border border-border shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row will-change-transform"
             onClick={(e) => e.stopPropagation()}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 14 }}
-            transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 22, rotateX: -8 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            exit={{ opacity: 0, y: 12, rotateX: 6 }}
+            transition={{ type: 'spring', stiffness: 210, damping: 26, mass: 0.95 }}
+            style={{ transformOrigin: '50% 20%' }}
           >
             {/* Close */}
             <button
