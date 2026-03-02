@@ -1,4 +1,6 @@
 import { useState, useMemo } from 'react';
+import { ShoppingCart, Check } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
 import type { CatalogProduct } from '@/data/catalog';
 
 interface ProductConfiguratorProps {
@@ -33,6 +35,8 @@ const ProductConfigurator = ({ product }: ProductConfiguratorProps) => {
   const [selectedSize, setSelectedSize] = useState(1);
   const [selectedHardware, setSelectedHardware] = useState(0);
   const [selectedExtras, setSelectedExtras] = useState<string[]>(['box', 'casings']);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const { addItem } = useCart();
 
   const totalPrice = useMemo(() => {
     let total = product.price;
@@ -164,10 +168,29 @@ const ProductConfigurator = ({ product }: ProductConfiguratorProps) => {
           </div>
         </div>
         <button
-          className="w-full py-3 bg-[hsl(205,85%,45%)] text-white rounded-md font-medium uppercase tracking-wider hover:opacity-90 transition-opacity"
+          onClick={() => {
+            addItem(product);
+            setAddedToCart(true);
+            setTimeout(() => setAddedToCart(false), 2000);
+          }}
+          className={`w-full flex items-center justify-center gap-2 py-3 rounded-md font-medium uppercase tracking-wider transition-all ${
+            addedToCart
+              ? 'bg-green-600 text-white'
+              : 'bg-[hsl(205,85%,45%)] text-white hover:opacity-90'
+          }`}
           style={{ fontFamily: "'Oswald', sans-serif" }}
         >
-          Добавить в корзину
+          {addedToCart ? (
+            <>
+              <Check className="w-4 h-4" />
+              Добавлено
+            </>
+          ) : (
+            <>
+              <ShoppingCart className="w-4 h-4" />
+              Добавить в корзину
+            </>
+          )}
         </button>
       </div>
     </div>
