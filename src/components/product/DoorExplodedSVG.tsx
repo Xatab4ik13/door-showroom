@@ -1,322 +1,236 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import partKorobka from '@/assets/parts/part-korobka.jpg';
+import partPolotno from '@/assets/parts/part-polotno.jpg';
+import partNalichnik from '@/assets/parts/part-nalichnik.jpg';
+import partDobor from '@/assets/parts/part-dobor.jpg';
+import partStoevaya from '@/assets/parts/part-stoevaya.jpg';
+import partFilyonka from '@/assets/parts/part-filyonka.jpg';
+
 interface DoorPart {
   id: string;
-  label: string;
-  description: string;
-  dimensions: string;
   num: number;
+  label: string;
+  dimensions: string;
+  material: string;
+  image: string;
 }
 
 const parts: DoorPart[] = [
-  { id: 'korobka', label: 'Коробка', description: 'Рама, в которую вставляется дверь. Крепится к стене проёма.', dimensions: '40×74×2080 мм', num: 1 },
-  { id: 'polotno', label: 'Дверное полотно', description: 'Сама дверь — то, что открывается и закрывается.', dimensions: '36×800×2000 мм', num: 2 },
-  { id: 'nalichnik', label: 'Наличники', description: 'Декоративные планки, закрывающие щель между коробкой и стеной.', dimensions: '10×70×2150 мм', num: 3 },
-  { id: 'dobor', label: 'Доборный брус', description: 'Расширяет коробку, если стена толще стандартной.', dimensions: '15×100–200×2080 мм', num: 4 },
-  { id: 'stoevaya', label: 'Стоевая', description: 'Вертикальная часть каркаса полотна. Обеспечивает прочность.', dimensions: '40×74×2000 мм', num: 5 },
-  { id: 'filyonka', label: 'Филёнка', description: 'Декоративная вставка в полотно — МДФ, стекло или шпон.', dimensions: 'По модели', num: 6 },
+  { id: 'korobka', num: 1, label: 'Коробка', dimensions: '40 × 74 × 2080 мм', material: 'МДФ, шпон или экошпон', image: partKorobka },
+  { id: 'polotno', num: 2, label: 'Дверное полотно', dimensions: '36 × 800 × 2000 мм', material: 'МДФ каркас, сотовый наполнитель', image: partPolotno },
+  { id: 'nalichnik', num: 3, label: 'Наличники', dimensions: '10 × 70 × 2150 мм', material: 'МДФ с покрытием', image: partNalichnik },
+  { id: 'dobor', num: 4, label: 'Доборный брус', dimensions: '15 × 100–200 × 2080 мм', material: 'МДФ, ламинат', image: partDobor },
+  { id: 'stoevaya', num: 5, label: 'Стоевая', dimensions: '40 × 74 × 2000 мм', material: 'Массив сосны / МДФ', image: partStoevaya },
+  { id: 'filyonka', num: 6, label: 'Филёнка', dimensions: 'По модели двери', material: 'МДФ, стекло или шпон', image: partFilyonka },
 ];
-
-// Offsets for "exploded" state — each part slides away from center
-const explodeOffsets: Record<string, { x: number; y: number }> = {
-  korobka:  { x: -80, y: -20 },
-  polotno:  { x: 0,   y: 0 },
-  nalichnik:{ x: 80,  y: -10 },
-  dobor:    { x: -120,y: 10 },
-  stoevaya: { x: 100, y: 20 },
-  filyonka: { x: 60,  y: 50 },
-};
 
 interface Props {
   accentColor?: string;
+  doorImage?: string;
 }
 
-const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
-  const [exploded, setExploded] = useState(false);
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
+const DoorExplodedSVG = ({ accentColor = '#8B7355', doorImage }: Props) => {
+  const [activeId, setActiveId] = useState<string | null>(null);
 
-  const springTransition = { type: 'spring' as const, stiffness: 80, damping: 18, mass: 1 };
+  const activePart = parts.find((p) => p.id === activeId) || null;
 
-  const getOffset = (id: string) => {
-    if (!exploded) return { x: 0, y: 0 };
-    return explodeOffsets[id] || { x: 0, y: 0 };
-  };
-
-  const isActive = (id: string) => hoveredId === id;
-  const isFaded = (id: string) => hoveredId !== null && hoveredId !== id;
+  // Use the product's first gallery image or fallback
+  const mainImage = doorImage || partPolotno;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
-      {/* Left: SVG diagram */}
-      <div className="lg:col-span-3 relative">
-        {/* Toggle button */}
-        <div className="flex justify-center mb-6">
-          <button
-            onClick={() => setExploded(!exploded)}
-            className="group relative px-8 py-3 rounded-full border-2 border-border bg-card text-foreground transition-all duration-300 hover:border-foreground hover:shadow-lg"
-            style={{ fontFamily: "'Oswald', sans-serif" }}
-          >
-            <span className="text-sm font-semibold uppercase tracking-widest">
-              {exploded ? 'Собрать' : 'Разобрать'}
-            </span>
-          </button>
+    <div className="w-full">
+      {/* Main layout: door image center, cards around */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        {/* Left column — parts 1-3 */}
+        <div className="lg:col-span-3 flex flex-col gap-3 order-2 lg:order-1">
+          {parts.slice(0, 3).map((part) => (
+            <PartCard
+              key={part.id}
+              part={part}
+              isActive={activeId === part.id}
+              accentColor={accentColor}
+              onHover={setActiveId}
+            />
+          ))}
         </div>
 
-        <svg
-          viewBox="0 0 600 700"
-          className="w-full h-auto max-h-[80vh]"
-          preserveAspectRatio="xMidYMid meet"
-        >
-          <defs>
-            <filter id="partShadow">
-              <feDropShadow dx="2" dy="3" stdDeviation="4" floodColor="#000" floodOpacity="0.12" />
-            </filter>
-          </defs>
+        {/* Center — door render with callout dots */}
+        <div className="lg:col-span-6 order-1 lg:order-2 relative flex justify-center">
+          <div className="relative w-full max-w-md">
+            <img
+              src={mainImage}
+              alt="Дверной блок"
+              className="w-full h-auto rounded-2xl shadow-lg"
+            />
+            
+            {/* Callout dots on the image */}
+            <CalloutDot id="korobka" num={1} top="8%" left="5%" activeId={activeId} accentColor={accentColor} onHover={setActiveId} side="left" />
+            <CalloutDot id="polotno" num={2} top="45%" left="50%" activeId={activeId} accentColor={accentColor} onHover={setActiveId} side="right" />
+            <CalloutDot id="nalichnik" num={3} top="15%" left="92%" activeId={activeId} accentColor={accentColor} onHover={setActiveId} side="right" />
+            <CalloutDot id="dobor" num={4} top="70%" left="8%" activeId={activeId} accentColor={accentColor} onHover={setActiveId} side="left" />
+            <CalloutDot id="stoevaya" num={5} top="30%" left="18%" activeId={activeId} accentColor={accentColor} onHover={setActiveId} side="left" />
+            <CalloutDot id="filyonka" num={6} top="55%" left="50%" activeId={activeId} accentColor={accentColor} onHover={setActiveId} side="right" />
+          </div>
+        </div>
 
-          {/* ① Коробка — U-shaped frame */}
-          <motion.g
-            animate={getOffset('korobka')}
-            transition={springTransition}
-            onMouseEnter={() => setHoveredId('korobka')}
-            onMouseLeave={() => setHoveredId(null)}
-            style={{ cursor: 'pointer' }}
-            filter="url(#partShadow)"
-          >
-            <motion.g animate={{ opacity: isFaded('korobka') ? 0.15 : 1 }} transition={{ duration: 0.4 }}>
-              {/* Left jamb */}
-              <rect x="130" y="60" width="22" height="560" rx="2"
-                fill={isActive('korobka') ? accentColor : 'hsl(30, 15%, 45%)'}
-                className="transition-colors duration-500" />
-              {/* Top header */}
-              <rect x="130" y="60" width="260" height="22" rx="2"
-                fill={isActive('korobka') ? accentColor : 'hsl(30, 15%, 42%)'}
-                className="transition-colors duration-500" />
-              {/* Right jamb */}
-              <rect x="368" y="60" width="22" height="560" rx="2"
-                fill={isActive('korobka') ? accentColor : 'hsl(30, 15%, 45%)'}
-                className="transition-colors duration-500" />
-              {/* Badge */}
-              <circle cx="120" cy="50" r="14" fill={isActive('korobka') ? accentColor : 'hsl(30, 10%, 15%)'} className="transition-colors duration-500" />
-              <text x="120" y="55" textAnchor="middle" fill="hsl(38, 33%, 97%)" fontSize="13" fontWeight="700" style={{ fontFamily: "'Oswald', sans-serif" }}>1</text>
-            </motion.g>
-          </motion.g>
-
-          {/* ② Дверное полотно */}
-          <motion.g
-            animate={getOffset('polotno')}
-            transition={springTransition}
-            onMouseEnter={() => setHoveredId('polotno')}
-            onMouseLeave={() => setHoveredId(null)}
-            style={{ cursor: 'pointer' }}
-            filter="url(#partShadow)"
-          >
-            <motion.g animate={{ opacity: isFaded('polotno') ? 0.15 : 1 }} transition={{ duration: 0.4 }}>
-              <rect x="162" y="90" width="200" height="520" rx="3"
-                fill={isActive('polotno') ? accentColor : 'hsl(35, 20%, 88%)'}
-                stroke={isActive('polotno') ? accentColor : 'hsl(30, 15%, 75%)'}
-                strokeWidth="1.5"
-                className="transition-colors duration-500" />
-              {/* Panel details */}
-              {[110, 250, 400].map((py, i) => (
-                <rect key={i} x="182" y={py} width="160" height="100" rx="4"
-                  fill="none"
-                  stroke={isActive('polotno') ? 'hsl(38, 33%, 97%)' : 'hsl(30, 15%, 75%)'}
-                  strokeWidth="1"
-                  className="transition-colors duration-500" />
-              ))}
-              {/* Door handle */}
-              <rect x="340" y="330" width="8" height="30" rx="4"
-                fill={isActive('polotno') ? 'hsl(40, 60%, 65%)' : 'hsl(30, 20%, 55%)'}
-                className="transition-colors duration-500" />
-              {/* Badge */}
-              <circle cx="262" cy="50" r="14" fill={isActive('polotno') ? accentColor : 'hsl(30, 10%, 15%)'} className="transition-colors duration-500" />
-              <text x="262" y="55" textAnchor="middle" fill="hsl(38, 33%, 97%)" fontSize="13" fontWeight="700" style={{ fontFamily: "'Oswald', sans-serif" }}>2</text>
-            </motion.g>
-          </motion.g>
-
-          {/* ③ Наличники — trim strips */}
-          <motion.g
-            animate={getOffset('nalichnik')}
-            transition={springTransition}
-            onMouseEnter={() => setHoveredId('nalichnik')}
-            onMouseLeave={() => setHoveredId(null)}
-            style={{ cursor: 'pointer' }}
-            filter="url(#partShadow)"
-          >
-            <motion.g animate={{ opacity: isFaded('nalichnik') ? 0.15 : 1 }} transition={{ duration: 0.4 }}>
-              {/* Left trim */}
-              <rect x="105" y="55" width="14" height="570" rx="2"
-                fill={isActive('nalichnik') ? accentColor : 'hsl(35, 18%, 82%)'}
-                className="transition-colors duration-500" />
-              {/* Right trim */}
-              <rect x="400" y="55" width="14" height="570" rx="2"
-                fill={isActive('nalichnik') ? accentColor : 'hsl(35, 18%, 82%)'}
-                className="transition-colors duration-500" />
-              {/* Top trim */}
-              <rect x="105" y="42" width="309" height="14" rx="2"
-                fill={isActive('nalichnik') ? accentColor : 'hsl(35, 18%, 80%)'}
-                className="transition-colors duration-500" />
-              {/* Badge */}
-              <circle cx="424" cy="50" r="14" fill={isActive('nalichnik') ? accentColor : 'hsl(30, 10%, 15%)'} className="transition-colors duration-500" />
-              <text x="424" y="55" textAnchor="middle" fill="hsl(38, 33%, 97%)" fontSize="13" fontWeight="700" style={{ fontFamily: "'Oswald', sans-serif" }}>3</text>
-            </motion.g>
-          </motion.g>
-
-          {/* ④ Доборный брус */}
-          <motion.g
-            animate={getOffset('dobor')}
-            transition={springTransition}
-            onMouseEnter={() => setHoveredId('dobor')}
-            onMouseLeave={() => setHoveredId(null)}
-            style={{ cursor: 'pointer' }}
-            filter="url(#partShadow)"
-          >
-            <motion.g animate={{ opacity: isFaded('dobor') ? 0.15 : 1 }} transition={{ duration: 0.4 }}>
-              <rect x="80" y="60" width="16" height="560" rx="2"
-                fill={isActive('dobor') ? accentColor : 'hsl(35, 15%, 72%)'}
-                className="transition-colors duration-500" />
-              <rect x="420" y="60" width="16" height="560" rx="2"
-                fill={isActive('dobor') ? accentColor : 'hsl(35, 15%, 72%)'}
-                className="transition-colors duration-500" />
-              {/* Badge */}
-              <circle cx="70" cy="340" r="14" fill={isActive('dobor') ? accentColor : 'hsl(30, 10%, 15%)'} className="transition-colors duration-500" />
-              <text x="70" y="345" textAnchor="middle" fill="hsl(38, 33%, 97%)" fontSize="13" fontWeight="700" style={{ fontFamily: "'Oswald', sans-serif" }}>4</text>
-            </motion.g>
-          </motion.g>
-
-          {/* ⑤ Стоевая — inner frame verticals */}
-          <motion.g
-            animate={getOffset('stoevaya')}
-            transition={springTransition}
-            onMouseEnter={() => setHoveredId('stoevaya')}
-            onMouseLeave={() => setHoveredId(null)}
-            style={{ cursor: 'pointer' }}
-            filter="url(#partShadow)"
-          >
-            <motion.g animate={{ opacity: isFaded('stoevaya') ? 0.15 : 1 }} transition={{ duration: 0.4 }}>
-              <rect x="165" y="92" width="10" height="515" rx="1"
-                fill={isActive('stoevaya') ? accentColor : 'hsl(30, 12%, 65%)'}
-                className="transition-colors duration-500" />
-              <rect x="349" y="92" width="10" height="515" rx="1"
-                fill={isActive('stoevaya') ? accentColor : 'hsl(30, 12%, 65%)'}
-                className="transition-colors duration-500" />
-              {/* Badge */}
-              <circle cx="450" cy="340" r="14" fill={isActive('stoevaya') ? accentColor : 'hsl(30, 10%, 15%)'} className="transition-colors duration-500" />
-              <text x="450" y="345" textAnchor="middle" fill="hsl(38, 33%, 97%)" fontSize="13" fontWeight="700" style={{ fontFamily: "'Oswald', sans-serif" }}>5</text>
-            </motion.g>
-          </motion.g>
-
-          {/* ⑥ Филёнка — panel inserts */}
-          <motion.g
-            animate={getOffset('filyonka')}
-            transition={springTransition}
-            onMouseEnter={() => setHoveredId('filyonka')}
-            onMouseLeave={() => setHoveredId(null)}
-            style={{ cursor: 'pointer' }}
-            filter="url(#partShadow)"
-          >
-            <motion.g animate={{ opacity: isFaded('filyonka') ? 0.15 : 1 }} transition={{ duration: 0.4 }}>
-              {[115, 255, 405].map((py, i) => (
-                <rect key={i} x="186" y={py} width="152" height="90" rx="4"
-                  fill={isActive('filyonka') ? accentColor : 'hsl(35, 25%, 92%)'}
-                  stroke={isActive('filyonka') ? 'hsl(38, 33%, 97%)' : 'hsl(30, 15%, 82%)'}
-                  strokeWidth="0.8"
-                  className="transition-colors duration-500" />
-              ))}
-              {/* Badge */}
-              <circle cx="262" cy="645" r="14" fill={isActive('filyonka') ? accentColor : 'hsl(30, 10%, 15%)'} className="transition-colors duration-500" />
-              <text x="262" y="650" textAnchor="middle" fill="hsl(38, 33%, 97%)" fontSize="13" fontWeight="700" style={{ fontFamily: "'Oswald', sans-serif" }}>6</text>
-            </motion.g>
-          </motion.g>
-
-          {/* Dimension lines */}
-          <g style={{ opacity: exploded ? 0 : 0.5, transition: 'opacity 0.6s ease' }}>
-            {/* Height */}
-            <line x1="50" y1="42" x2="50" y2="625" stroke="hsl(30, 8%, 55%)" strokeWidth="0.7" strokeDasharray="4,3" />
-            <line x1="44" y1="42" x2="56" y2="42" stroke="hsl(30, 8%, 55%)" strokeWidth="0.7" />
-            <line x1="44" y1="625" x2="56" y2="625" stroke="hsl(30, 8%, 55%)" strokeWidth="0.7" />
-            <text x="38" y="340" fill="hsl(30, 8%, 55%)" fontSize="12" textAnchor="middle" transform="rotate(-90, 38, 340)"
-              style={{ fontFamily: "'Oswald', sans-serif", letterSpacing: '0.08em' }}>2080 мм</text>
-            {/* Width */}
-            <line x1="105" y1="650" x2="414" y2="650" stroke="hsl(30, 8%, 55%)" strokeWidth="0.7" strokeDasharray="4,3" />
-            <line x1="105" y1="644" x2="105" y2="656" stroke="hsl(30, 8%, 55%)" strokeWidth="0.7" />
-            <line x1="414" y1="644" x2="414" y2="656" stroke="hsl(30, 8%, 55%)" strokeWidth="0.7" />
-            <text x="260" y="670" fill="hsl(30, 8%, 55%)" fontSize="12" textAnchor="middle"
-              style={{ fontFamily: "'Oswald', sans-serif", letterSpacing: '0.08em' }}>880 мм</text>
-          </g>
-        </svg>
+        {/* Right column — parts 4-6 */}
+        <div className="lg:col-span-3 flex flex-col gap-3 order-3">
+          {parts.slice(3, 6).map((part) => (
+            <PartCard
+              key={part.id}
+              part={part}
+              isActive={activeId === part.id}
+              accentColor={accentColor}
+              onHover={setActiveId}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* Right: Parts list */}
-      <div className="lg:col-span-2 flex flex-col gap-3">
-        <h3
-          className="text-xl font-bold uppercase tracking-wider text-foreground mb-2"
-          style={{ fontFamily: "'Oswald', sans-serif" }}
-        >
-          Состав дверного блока
-        </h3>
-
-        {parts.map((part) => (
+      {/* Expanded detail panel */}
+      <AnimatePresence>
+        {activePart && (
           <motion.div
-            key={part.id}
-            onMouseEnter={() => setHoveredId(part.id)}
-            onMouseLeave={() => setHoveredId(null)}
-            className="rounded-xl border border-border cursor-pointer overflow-hidden"
-            animate={{
-              backgroundColor: isActive(part.id) ? 'hsl(30, 10%, 15%)' : 'hsl(38, 33%, 97%)',
-            }}
+            key={activePart.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.35 }}
+            className="mt-8 rounded-2xl border border-border bg-card overflow-hidden"
           >
-            <div className="px-5 py-4">
-              <div className="flex items-start gap-3">
-                <motion.span
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 mt-0.5"
-                  animate={{
-                    backgroundColor: isActive(part.id) ? accentColor : 'hsl(30, 10%, 15%)',
-                  }}
-                  transition={{ duration: 0.35 }}
-                  style={{ color: 'hsl(38, 33%, 97%)', fontFamily: "'Oswald', sans-serif" }}
-                >
-                  {part.num}
-                </motion.span>
-                <div className="flex-1 min-w-0">
-                  <motion.p
-                    className="text-sm font-bold"
-                    animate={{ color: isActive(part.id) ? 'hsl(38, 33%, 97%)' : 'hsl(30, 10%, 15%)' }}
-                    transition={{ duration: 0.35 }}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
+              <div className="aspect-square md:aspect-auto overflow-hidden bg-secondary">
+                <img
+                  src={activePart.image}
+                  alt={activePart.label}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="md:col-span-2 p-8 flex flex-col justify-center">
+                <div className="flex items-center gap-3 mb-4">
+                  <span
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold text-primary-foreground shrink-0"
+                    style={{ backgroundColor: accentColor, fontFamily: "'Oswald', sans-serif" }}
+                  >
+                    {activePart.num}
+                  </span>
+                  <h4
+                    className="text-2xl font-bold uppercase tracking-wide text-foreground"
                     style={{ fontFamily: "'Oswald', sans-serif" }}
                   >
-                    {part.label}
-                  </motion.p>
-                  <motion.p
-                    className="text-xs font-mono mt-0.5"
-                    animate={{ color: isActive(part.id) ? 'hsl(35, 30%, 70%)' : 'hsl(30, 8%, 55%)' }}
-                    transition={{ duration: 0.35 }}
-                  >
-                    {part.dimensions}
-                  </motion.p>
-                  <AnimatePresence>
-                    {isActive(part.id) && (
-                      <motion.p
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="text-xs leading-relaxed mt-2 overflow-hidden"
-                        style={{ color: 'hsl(35, 20%, 70%)' }}
-                      >
-                        {part.description}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
+                    {activePart.label}
+                  </h4>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                      Размеры
+                    </p>
+                    <p className="text-sm font-mono text-foreground">{activePart.dimensions}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                      Материал
+                    </p>
+                    <p className="text-sm text-foreground">{activePart.material}</p>
+                  </div>
                 </div>
               </div>
             </div>
           </motion.div>
-        ))}
-      </div>
+        )}
+      </AnimatePresence>
     </div>
+  );
+};
+
+/* ---- Part Card ---- */
+interface PartCardProps {
+  part: DoorPart;
+  isActive: boolean;
+  accentColor: string;
+  onHover: (id: string | null) => void;
+}
+
+const PartCard = ({ part, isActive, accentColor, onHover }: PartCardProps) => (
+  <motion.div
+    onMouseEnter={() => onHover(part.id)}
+    onMouseLeave={() => onHover(null)}
+    onClick={() => onHover(isActive ? null : part.id)}
+    className="rounded-xl border cursor-pointer overflow-hidden flex items-center gap-3 px-4 py-3"
+    animate={{
+      borderColor: isActive ? accentColor : 'hsl(35, 15%, 88%)',
+      boxShadow: isActive ? `0 4px 20px -4px ${accentColor}40` : '0 0 0 0 transparent',
+    }}
+    transition={{ duration: 0.3 }}
+    style={{ backgroundColor: 'hsl(38, 33%, 97%)' }}
+  >
+    <motion.span
+      className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+      animate={{ backgroundColor: isActive ? accentColor : 'hsl(30, 10%, 15%)' }}
+      transition={{ duration: 0.3 }}
+      style={{ color: 'hsl(38, 33%, 97%)', fontFamily: "'Oswald', sans-serif" }}
+    >
+      {part.num}
+    </motion.span>
+    <div className="min-w-0">
+      <p className="text-sm font-bold text-foreground truncate" style={{ fontFamily: "'Oswald', sans-serif" }}>
+        {part.label}
+      </p>
+      <p className="text-xs font-mono text-muted-foreground truncate">{part.dimensions}</p>
+    </div>
+  </motion.div>
+);
+
+/* ---- Callout Dot ---- */
+interface CalloutDotProps {
+  id: string;
+  num: number;
+  top: string;
+  left: string;
+  activeId: string | null;
+  accentColor: string;
+  onHover: (id: string | null) => void;
+  side: 'left' | 'right';
+}
+
+const CalloutDot = ({ id, num, top, left, activeId, accentColor, onHover }: CalloutDotProps) => {
+  const isActive = activeId === id;
+
+  return (
+    <motion.div
+      className="absolute z-10 cursor-pointer"
+      style={{ top, left, transform: 'translate(-50%, -50%)' }}
+      onMouseEnter={() => onHover(id)}
+      onMouseLeave={() => onHover(null)}
+      onClick={() => onHover(isActive ? null : id)}
+    >
+      {/* Pulse ring */}
+      <motion.div
+        className="absolute inset-0 rounded-full"
+        animate={{
+          scale: isActive ? [1, 1.8, 1] : 1,
+          opacity: isActive ? [0.5, 0, 0.5] : 0,
+        }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ backgroundColor: accentColor, width: 32, height: 32, margin: '-4px' }}
+      />
+      {/* Main dot */}
+      <motion.div
+        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-md"
+        animate={{
+          backgroundColor: isActive ? accentColor : 'hsl(30, 10%, 15%)',
+          scale: isActive ? 1.3 : 1,
+        }}
+        transition={{ type: 'spring' as const, stiffness: 300, damping: 20 }}
+        style={{ color: 'hsl(38, 33%, 97%)', fontFamily: "'Oswald', sans-serif" }}
+      >
+        {num}
+      </motion.div>
+    </motion.div>
   );
 };
 
