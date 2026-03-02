@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import { doors, type Door } from '@/data/doors';
 import DoorPreviewModal from './DoorPreviewModal';
 
@@ -25,7 +25,6 @@ const tileDoors = (() => {
 const InfiniteCanvas = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef({ x: 0, y: 0 });
-  const [, forceRender] = useState(0);
   const draggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const startOffsetRef = useRef({ x: 0, y: 0 });
@@ -36,7 +35,21 @@ const InfiniteCanvas = () => {
   const rafPending = useRef(false);
   const innerRef = useRef<HTMLDivElement>(null);
   const [selectedDoor, setSelectedDoor] = useState<Door | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [cursorGrabbing, setCursorGrabbing] = useState(false);
+
+  const openPreview = useCallback((door: Door) => {
+    setSelectedDoor(door);
+    setIsPreviewOpen(true);
+  }, []);
+
+  const closePreview = useCallback(() => {
+    setIsPreviewOpen(false);
+  }, []);
+
+  const clearPreviewDoor = useCallback(() => {
+    setSelectedDoor(null);
+  }, []);
 
   const applyTransform = useCallback(() => {
     if (!innerRef.current) return;
@@ -114,12 +127,15 @@ const InfiniteCanvas = () => {
   const tilesX = Math.ceil(vw / TILE_W) + 2;
   const tilesY = Math.ceil(vh / TILE_H) + 2;
 
-  const tiles: { tx: number; ty: number }[] = [];
-  for (let ty = -1; ty < tilesY; ty++) {
-    for (let tx = -1; tx < tilesX; tx++) {
-      tiles.push({ tx, ty });
+  const tiles = useMemo(() => {
+    const result: { tx: number; ty: number }[] = [];
+    for (let ty = -1; ty < tilesY; ty++) {
+      for (let tx = -1; tx < tilesX; tx++) {
+        result.push({ tx, ty });
+      }
     }
-  }
+    return result;
+  }, [tilesX, tilesY]);
 
   return (
     <>
@@ -161,7 +177,7 @@ const InfiniteCanvas = () => {
                   <div
                     className="w-full h-full overflow-hidden flex items-center justify-center cursor-pointer"
                     onClick={() => {
-                      if (!hasDraggedRef.current) setSelectedDoor(door);
+                      if (!hasDraggedRef.current) openPreview(door);
                     }}
                   >
                     <img
@@ -179,7 +195,7 @@ const InfiniteCanvas = () => {
         </div>
       </div>
 
-      <DoorPreviewModal door={selectedDoor} onClose={() => setSelectedDoor(null)} />
+      <DoorPreviewModal door={selectedDoor} isOpen={isPreviewOpen} onClose={closePreview} onClosed={clearPreviewDoor} />
     </>
   );
 };
