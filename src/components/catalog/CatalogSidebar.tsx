@@ -78,8 +78,8 @@ const CatalogSidebar = ({
               onClick={() => onCategoryChange(cat.key)}
               className={`block w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
                 selectedCategory === cat.key
-                  ? 'bg-primary text-primary-foreground font-medium'
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                  ? 'bg-[hsl(205,85%,45%)] text-white font-medium'
+                  : 'text-muted-foreground hover:text-[hsl(205,85%,45%)] hover:bg-accent'
               }`}
             >
               {cat.label}
@@ -96,8 +96,8 @@ const CatalogSidebar = ({
             onClick={() => onTagChange(tag.key)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium uppercase tracking-wide transition-colors ${
               selectedTag === tag.key
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-secondary text-secondary-foreground hover:bg-accent'
+                ? 'bg-[hsl(205,85%,45%)] text-white'
+                : 'bg-secondary text-secondary-foreground hover:text-[hsl(205,85%,45%)] hover:bg-accent'
             }`}
             style={{ fontFamily: "'Oswald', sans-serif" }}
           >
