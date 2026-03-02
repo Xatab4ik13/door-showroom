@@ -140,6 +140,13 @@ const InfiniteCanvas = () => {
   }, []);
 
   useEffect(() => {
+    doors.forEach((door) => {
+      const img = new Image();
+      img.src = door.image;
+    });
+  }, []);
+
+  useEffect(() => {
     if (!isPreviewOpen) return;
 
     cancelAnimationFrame(animRef.current);
