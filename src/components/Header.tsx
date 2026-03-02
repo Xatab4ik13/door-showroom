@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
-import door06 from '@/assets/doors/door-06-decorative-green.png';
+import door06 from '@/assets/doors/door-06.jpg';
 
 const navItems = ['Каталог', 'Коллекции', 'Дизайнерам', 'Вдохновение', 'Контакты'];
 
