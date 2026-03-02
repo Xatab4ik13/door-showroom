@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { Door } from '@/data/doors';
 
 interface Props {
@@ -18,90 +19,93 @@ const DoorPreviewModal = ({ door, onClose }: Props) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8"
+          transition={{ duration: 0.25 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
           onClick={onClose}
         >
-          {/* Backdrop blur */}
-          <div className="absolute inset-0 bg-foreground/20 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
 
-          {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.4 }}
-            className="relative bg-card rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto flex flex-col md:flex-row"
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+            transition={{ duration: 0.3 }}
+            className="relative bg-card rounded-lg border border-border shadow-2xl w-full max-w-sm overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close button */}
+            {/* Close */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 z-10 p-2 rounded-full bg-background/80 text-foreground hover:text-muted-foreground transition-colors"
+              className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-background/80 text-foreground hover:bg-background transition-colors"
               aria-label="Закрыть"
             >
-              <X className="w-5 h-5" strokeWidth={1.5} />
+              <X className="w-4 h-4" strokeWidth={1.5} />
             </button>
 
-            {/* Image */}
-            <div className="md:w-1/2 p-6 md:p-10 flex items-center justify-center bg-secondary/30 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none">
+            {/* Image — matches ProductCard aspect ratio */}
+            <div className="relative aspect-[3/4] overflow-hidden bg-secondary">
               <img
                 src={door.image}
                 alt={door.name}
-                className="max-h-[50vh] md:max-h-[70vh] w-auto object-contain"
+                className="w-full h-full object-cover"
               />
+              {/* Collection tag */}
+              <span
+                className="absolute top-3 left-3 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-[hsl(205,85%,45%)] text-white"
+                style={{ fontFamily: "'Oswald', sans-serif" }}
+              >
+                {door.collection}
+              </span>
             </div>
 
-            {/* Info */}
-            <div className="md:w-1/2 p-6 md:p-10 flex flex-col justify-center">
-              <p className="text-xs tracking-[0.15em] uppercase text-muted-foreground mb-2">
-                {door.collection}
-              </p>
-              <h3 className="font-serif text-3xl md:text-4xl font-light text-foreground mb-4">
+            {/* Info — matches ProductCard layout */}
+            <div className="p-4">
+              <p className="text-xs text-muted-foreground mb-1">{door.finish}</p>
+              <h3
+                className="text-base font-semibold text-foreground uppercase tracking-wide mb-2"
+                style={{ fontFamily: "'Oswald', sans-serif" }}
+              >
                 {door.name}
               </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-8">
+              <p className="text-sm text-muted-foreground leading-relaxed mb-3 line-clamp-2">
                 {door.description}
               </p>
 
-              {/* Specs */}
-              <div className="space-y-3 mb-8 text-sm">
-                <div className="flex justify-between border-b border-border pb-2">
-                  <span className="text-muted-foreground">Материал</span>
-                  <span className="text-foreground">{door.material}</span>
-                </div>
-                <div className="flex justify-between border-b border-border pb-2">
-                  <span className="text-muted-foreground">Размеры</span>
-                  <span className="text-foreground">{door.sizes}</span>
-                </div>
-                <div className="flex justify-between border-b border-border pb-2">
-                  <span className="text-muted-foreground">Покрытие</span>
-                  <span className="text-foreground">{door.finish}</span>
-                </div>
+              {/* Specs row */}
+              <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+                <span>{door.material}</span>
+                <span className="w-1 h-1 rounded-full bg-border" />
+                <span>{door.sizes}</span>
               </div>
 
               {/* Color swatches */}
-              <div className="mb-8">
-                <p className="text-xs text-muted-foreground mb-3 tracking-wide uppercase">Оттенки</p>
-                <div className="flex gap-3">
-                  {door.colors.map((color, i) => (
-                    <div
-                      key={i}
-                      className="w-8 h-8 rounded-full border border-border shadow-sm cursor-pointer hover:scale-110 transition-transform"
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
+              <div className="flex gap-2 mb-4">
+                {door.colors.map((color, i) => (
+                  <div
+                    key={i}
+                    className="w-6 h-6 rounded-full border border-border shadow-sm"
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
               </div>
 
               {/* Actions */}
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button className="flex-1 px-6 py-3 bg-foreground text-background rounded-lg text-sm tracking-wide hover:opacity-90 transition-opacity">
+              <div className="flex gap-2">
+                <button
+                  className="flex-1 px-4 py-2.5 bg-foreground text-background rounded-lg text-sm font-medium tracking-wide hover:opacity-90 transition-opacity"
+                  style={{ fontFamily: "'Oswald', sans-serif" }}
+                >
                   Получить расчёт
                 </button>
-                <button className="flex-1 px-6 py-3 border border-border rounded-lg text-sm tracking-wide text-foreground hover:bg-secondary transition-colors">
+                <Link
+                  to={`/product/${door.id}`}
+                  onClick={onClose}
+                  className="flex items-center gap-1.5 px-4 py-2.5 border border-border rounded-lg text-sm tracking-wide text-foreground hover:bg-secondary transition-colors"
+                  style={{ fontFamily: "'Oswald', sans-serif" }}
+                >
                   Подробнее
-                </button>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
             </div>
           </motion.div>
