@@ -1,290 +1,246 @@
 import { useState } from 'react';
-import { Info } from 'lucide-react';
 
 interface DoorPart {
   id: string;
   label: string;
   dimensions: string;
-  tip: string; // понятная подсказка для покупателя
-  // SVG isometric box params: cx, cy, w, h, d
-  boxes: { cx: number; cy: number; w: number; h: number; d: number; top: string; front: string; side: string }[];
-  // How much to shift when "exploded" (dx, dy)
-  shift: [number, number];
-  // Leader line endpoint on the schema (from shifted position)
-  leaderTo: [number, number];
-  // Extra elements (panel grooves, handle, etc.)
-  extras?: 'panels' | 'filyonka-inner';
+  tip: string;
+  num: number;
 }
 
 const parts: DoorPart[] = [
-  {
-    id: 'dobor', label: 'Доборный брус', dimensions: '15×100–200×2080 мм',
-    tip: 'Нужен, если стена толще стандартной. Расширяет коробку, чтобы дверь закрывала весь проём.',
-    boxes: [
-      { cx: 155, cy: 100, w: 8, h: 220, d: 12, top: '#E8E4DE', front: '#D8D4CE', side: '#C8C4BE' },
-      { cx: 167, cy: 94, w: 8, h: 220, d: 12, top: '#E0DCD6', front: '#D0CCC6', side: '#C0BCB6' },
-      { cx: 179, cy: 88, w: 10, h: 220, d: 14, top: '#D8D4CE', front: '#C8C4BE', side: '#B8B4AE' },
-    ],
-    shift: [-70, 0],
-    leaderTo: [90, 200],
-  },
-  {
-    id: 'korobka', label: 'Коробка', dimensions: '40×74×2080 мм',
-    tip: 'Рама, в которую вставляется дверь. Крепится к стене проёма. Без неё дверь не установить.',
-    boxes: [
-      { cx: 210, cy: 72, w: 14, h: 240, d: 16, top: '#7B6B55', front: '#6B5B45', side: '#5B4B35' },
-      { cx: 210, cy: 72, w: 75, h: 14, d: 16, top: '#7B6B55', front: '#6B5B45', side: '#5B4B35' },
-      { cx: 275, cy: 110, w: 14, h: 200, d: 16, top: '#7B6B55', front: '#6B5B45', side: '#5B4B35' },
-    ],
-    shift: [-20, -15],
-    leaderTo: [195, 120],
-  },
-  {
-    id: 'nalichnik', label: 'Наличники', dimensions: '10×70×2150 мм',
-    tip: 'Декоративные планки, которые закрывают щель между коробкой и стеной. Придают двери законченный вид.',
-    boxes: [
-      { cx: 310, cy: 88, w: 6, h: 230, d: 10, top: '#F0ECE4', front: '#E8E4DC', side: '#D8D4CC' },
-      { cx: 320, cy: 82, w: 6, h: 230, d: 10, top: '#EDE9E1', front: '#E5E1D9', side: '#D5D1C9' },
-      { cx: 310, cy: 84, w: 25, h: 6, d: 10, top: '#F0ECE4', front: '#E8E4DC', side: '#D8D4CC' },
-    ],
-    shift: [15, -10],
-    leaderTo: [340, 130],
-  },
-  {
-    id: 'polotno', label: 'Дверное полотно', dimensions: '36×800×2000 мм',
-    tip: 'Сама дверь — то, что открывается и закрывается. Бывает глухая или со стеклом.',
-    boxes: [
-      { cx: 355, cy: 70, w: 50, h: 240, d: 10, top: '#F5F1EB', front: '#EDE9E3', side: '#E0DCD6' },
-    ],
-    shift: [30, 0],
-    leaderTo: [410, 190],
-    extras: 'panels',
-  },
-  {
-    id: 'stoevaya', label: 'Стоевая', dimensions: '40×74×2000 мм',
-    tip: 'Вертикальная часть каркаса полотна. Обеспечивает прочность двери.',
-    boxes: [
-      { cx: 425, cy: 80, w: 8, h: 220, d: 12, top: '#E0DACE', front: '#D0CAC0', side: '#C0BAB0' },
-    ],
-    shift: [50, 5],
-    leaderTo: [490, 180],
-  },
-  {
-    id: 'filyonka', label: 'Филёнка', dimensions: 'По модели',
-    tip: 'Вставка в полотно — может быть из МДФ, стекла или шпона. Определяет внешний вид двери.',
-    boxes: [
-      { cx: 440, cy: 290, w: 35, h: 28, d: 6, top: '#F8F4EE', front: '#F0ECE6', side: '#E8E4DE' },
-    ],
-    shift: [45, 25],
-    leaderTo: [500, 310],
-    extras: 'filyonka-inner',
-  },
+  { id: 'dobor', label: 'Доборный брус', dimensions: '15×100–200×2080 мм', tip: 'Нужен, если стена толще стандартной. Расширяет коробку, чтобы дверь закрывала весь проём.', num: 1 },
+  { id: 'korobka', label: 'Коробка', dimensions: '40×74×2080 мм', tip: 'Рама, в которую вставляется дверь. Крепится к стене проёма. Без неё дверь не установить.', num: 2 },
+  { id: 'nalichnik', label: 'Наличники', dimensions: '10×70×2150 мм', tip: 'Декоративные планки, которые закрывают щель между коробкой и стеной.', num: 3 },
+  { id: 'polotno', label: 'Дверное полотно', dimensions: '36×800×2000 мм', tip: 'Сама дверь — то, что открывается и закрывается. Бывает глухая или со стеклом.', num: 4 },
+  { id: 'stoevaya', label: 'Стоевая', dimensions: '40×74×2000 мм', tip: 'Вертикальная часть каркаса полотна. Обеспечивает прочность двери.', num: 5 },
+  { id: 'filyonka', label: 'Филёнка', dimensions: 'По модели', tip: 'Вставка в полотно — может быть из МДФ, стекла или шпона. Определяет дизайн двери.', num: 6 },
 ];
 
-interface DoorExplodedSVGProps {
+interface Props {
   accentColor?: string;
 }
 
-const DoorExplodedSVG = ({ accentColor = '#8B7355' }: DoorExplodedSVGProps) => {
+const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const [tooltipId, setTooltipId] = useState<string | null>(null);
 
-  const isActive = (id: string) => hoveredId === id;
-  const dimmed = (id: string) => hoveredId !== null && !isActive(id);
+  const active = (id: string) => hoveredId === id;
+  const faded = (id: string) => hoveredId !== null && hoveredId !== id;
 
-  const rx = 0.866;
-  const ry = 0.5;
+  // Shared transition
+  const tr = 'transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.6s ease, fill 0.6s ease';
 
-  const isoPolygons = (
-    cx: number, cy: number,
-    w: number, h: number, d: number,
-    fillTop: string, fillFront: string, fillSide: string,
-    active: boolean,
+  const gStyle = (id: string, shiftX: number, shiftY: number): React.CSSProperties => ({
+    transform: active(id) ? `translate(${shiftX}px, ${shiftY}px)` : 'translate(0,0)',
+    opacity: faded(id) ? 0.12 : 1,
+    transition: tr,
+    cursor: 'pointer',
+  });
+
+  const fill = (id: string, normal: string) => active(id) ? accentColor : normal;
+  const stroke = (id: string) => active(id) ? accentColor : '#888';
+
+  // Isometric helpers
+  const cos30 = 0.866;
+  const sin30 = 0.5;
+
+  // Draw a 3-face isometric box
+  const box = (
+    id: string, x: number, y: number, w: number, h: number, d: number,
+    cTop: string, cFront: string, cSide: string,
   ) => {
-    const topPts = `${cx},${cy} ${cx + w * rx},${cy + w * ry} ${cx + w * rx - d * rx},${cy + w * ry - d * ry} ${cx - d * rx},${cy - d * ry}`;
-    const frontPts = `${cx},${cy} ${cx + w * rx},${cy + w * ry} ${cx + w * rx},${cy + w * ry + h} ${cx},${cy + h}`;
-    const sidePts = `${cx},${cy} ${cx - d * rx},${cy - d * ry} ${cx - d * rx},${cy - d * ry + h} ${cx},${cy + h}`;
+    const t1 = `${x},${y}`;
+    const t2 = `${x + w * cos30},${y + w * sin30}`;
+    const t3 = `${x + w * cos30 - d * cos30},${y + w * sin30 - d * sin30}`;
+    const t4 = `${x - d * cos30},${y - d * sin30}`;
+
+    const f1 = t1;
+    const f2 = t2;
+    const f3 = `${x + w * cos30},${y + w * sin30 + h}`;
+    const f4 = `${x},${y + h}`;
+
+    const s1 = t1;
+    const s2 = t4;
+    const s3 = `${x - d * cos30},${y - d * sin30 + h}`;
+    const s4 = f4;
 
     return (
       <>
-        <polygon points={sidePts} fill={active ? accentColor : fillSide} stroke="#666" strokeWidth="0.5"
-          style={{ transition: 'fill 0.6s ease' }} />
-        <polygon points={frontPts} fill={active ? accentColor : fillFront} stroke="#666" strokeWidth="0.5"
-          style={{ transition: 'fill 0.6s ease' }} />
-        <polygon points={topPts} fill={active ? accentColor : fillTop} stroke="#666" strokeWidth="0.5"
-          style={{ transition: 'fill 0.6s ease' }} />
+        <polygon points={`${s1} ${s2} ${s3} ${s4}`} fill={fill(id, cSide)} stroke="#555" strokeWidth="0.6" style={{ transition: 'fill 0.6s ease' }} />
+        <polygon points={`${f1} ${f2} ${f3} ${f4}`} fill={fill(id, cFront)} stroke="#555" strokeWidth="0.6" style={{ transition: 'fill 0.6s ease' }} />
+        <polygon points={`${t1} ${t2} ${t3} ${t4}`} fill={fill(id, cTop)} stroke="#555" strokeWidth="0.6" style={{ transition: 'fill 0.6s ease' }} />
       </>
+    );
+  };
+
+  // Number badge on SVG
+  const badge = (id: string, num: number, cx: number, cy: number, shiftX: number, shiftY: number) => {
+    const ax = active(id) ? cx + shiftX : cx;
+    const ay = active(id) ? cy + shiftY : cy;
+    return (
+      <g style={{ transition: tr, transform: active(id) ? `translate(${shiftX}px, ${shiftY}px)` : 'translate(0,0)' }}>
+        <circle cx={cx} cy={cy} r="12" fill={active(id) ? accentColor : 'hsl(30,10%,15%)'} style={{ transition: 'fill 0.6s ease' }} />
+        <text x={cx} y={cy + 4.5} textAnchor="middle" fill="#fff" fontSize="11" fontWeight="700"
+          style={{ fontFamily: "'Oswald', sans-serif" }}>{num}</text>
+      </g>
     );
   };
 
   return (
     <div className="w-full">
-      <div className="flex flex-col lg:flex-row items-start gap-8">
-        {/* SVG */}
-        <div className="flex-1 w-full max-w-xl mx-auto lg:mx-0">
-          <svg viewBox="30 20 520 350" className="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+      {/* Full-width SVG schema */}
+      <div className="w-full mb-8">
+        <svg viewBox="0 0 900 520" className="w-full h-auto" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          
+          {/* ① Доборный брус — 3 планки, far left */}
+          <g style={gStyle('dobor', -60, 0)}
+            onMouseEnter={() => setHoveredId('dobor')}
+            onMouseLeave={() => setHoveredId(null)}>
+            {box('dobor', 80, 100, 14, 360, 18, '#E8E4DE', '#DAD6CE', '#CBC7BF')}
+            {box('dobor', 100, 90, 14, 360, 18, '#E2DED6', '#D4D0C8', '#C5C1B9')}
+            {box('dobor', 120, 80, 18, 360, 22, '#DCD8D0', '#CEC9C2', '#BFB9B3')}
+            {badge('dobor', 1, 95, 75, -60, 0)}
+          </g>
 
-            {parts.map((part) => {
-              const active = isActive(part.id);
-              const faded = dimmed(part.id);
-              const [dx, dy] = active ? part.shift : [0, 0];
+          {/* ② Коробка — П-frame */}
+          <g style={gStyle('korobka', -25, -20)}
+            onMouseEnter={() => setHoveredId('korobka')}
+            onMouseLeave={() => setHoveredId(null)}>
+            {/* Left jamb */}
+            {box('korobka', 185, 55, 22, 400, 24, '#7B6B55', '#6B5B45', '#5B4B35')}
+            {/* Header */}
+            {box('korobka', 185, 55, 130, 20, 24, '#7B6B55', '#6B5B45', '#5B4B35')}
+            {/* Right jamb */}
+            {box('korobka', 298, 120, 22, 330, 24, '#7B6B55', '#6B5B45', '#5B4B35')}
+            {badge('korobka', 2, 210, 42, -25, -20)}
+          </g>
 
+          {/* ③ Наличники */}
+          <g style={gStyle('nalichnik', 15, -15)}
+            onMouseEnter={() => setHoveredId('nalichnik')}
+            onMouseLeave={() => setHoveredId(null)}>
+            {box('nalichnik', 360, 75, 10, 380, 14, '#F2EEE6', '#EAE6DE', '#DBD7CF')}
+            {box('nalichnik', 378, 65, 10, 380, 14, '#EFEBE3', '#E7E3DB', '#D8D4CC')}
+            {/* Top trim */}
+            {box('nalichnik', 360, 68, 40, 8, 14, '#F2EEE6', '#EAE6DE', '#DBD7CF')}
+            {badge('nalichnik', 3, 385, 50, 15, -15)}
+          </g>
+
+          {/* ④ Дверное полотно */}
+          <g style={gStyle('polotno', 40, 0)}
+            onMouseEnter={() => setHoveredId('polotno')}
+            onMouseLeave={() => setHoveredId(null)}>
+            {box('polotno', 430, 50, 90, 400, 16, '#F7F3ED', '#EFEBe5', '#E3DFD9')}
+            {/* Panel grooves */}
+            {[40, 145, 250].map((oy, i) => {
+              const cx = 430, cy = 50;
+              const x1 = cx + 12 * cos30, y1 = cy + 12 * sin30 + oy;
+              const x2 = cx + 78 * cos30, y2 = cy + 78 * sin30 + oy;
               return (
-                <g
-                  key={part.id}
-                  onMouseEnter={() => setHoveredId(part.id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                  style={{
-                    transform: `translate(${dx}px, ${dy}px)`,
-                    opacity: faded ? 0.15 : 1,
-                    transition: 'transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {part.boxes.map((box, i) =>
-                    <g key={i}>
-                      {isoPolygons(box.cx, box.cy, box.w, box.h, box.d, box.top, box.front, box.side, active)}
-                    </g>
-                  )}
-
-                  {/* Panel grooves for polotno */}
-                  {part.extras === 'panels' && (() => {
-                    const cx = 355, baseY = 70;
-                    return [25, 90, 155].map((offy, i) => {
-                      const x1 = cx + 6 * rx, y1 = baseY + 6 * ry + offy;
-                      const x2 = cx + 44 * rx, y2 = baseY + 44 * ry + offy;
-                      const pts = `${x1},${y1} ${x2},${y2} ${x2},${y2 + 50} ${x1},${y1 + 50}`;
-                      return <polygon key={i} points={pts} fill="none" stroke={active ? '#fff' : '#CCC'} strokeWidth="0.5"
-                        style={{ transition: 'stroke 0.6s ease' }} />;
-                    });
-                  })()}
-
-                  {/* Handle for polotno */}
-                  {part.extras === 'panels' && (
-                    <rect x={355 + 45 * rx - 2} y={70 + 45 * ry + 100} width={4} height={14} rx={2}
-                      fill={active ? '#D4AF37' : '#B8A070'} style={{ transition: 'fill 0.6s ease' }} />
-                  )}
-
-                  {/* Filyonka inner */}
-                  {part.extras === 'filyonka-inner' && (() => {
-                    const cx = 440, cy = 290;
-                    const pts = `${cx + 5 * rx},${cy + 5 * ry + 4} ${cx + 30 * rx},${cy + 30 * ry + 4} ${cx + 30 * rx},${cy + 30 * ry + 20} ${cx + 5 * rx},${cy + 5 * ry + 20}`;
-                    return <polygon points={pts} fill="none" stroke={active ? '#fff' : '#D0D0D0'} strokeWidth="0.5"
-                      style={{ transition: 'stroke 0.6s ease' }} />;
-                  })()}
-
-                  {/* Leader line + label when active */}
-                  {active && (
-                    <g style={{ opacity: 1, transition: 'opacity 0.4s ease 0.2s' }}>
-                      {/* Dashed leader line from center of component to label point */}
-                      <line
-                        x1={part.leaderTo[0] + dx}
-                        y1={part.leaderTo[1] + dy}
-                        x2={part.leaderTo[0] + dx + (dx < 0 ? -30 : 30)}
-                        y2={part.leaderTo[1] + dy - 20}
-                        stroke={accentColor}
-                        strokeWidth="1"
-                        strokeDasharray="3,2"
-                      />
-                      <circle
-                        cx={part.leaderTo[0] + dx}
-                        cy={part.leaderTo[1] + dy}
-                        r="3"
-                        fill={accentColor}
-                      />
-                    </g>
-                  )}
-                </g>
+                <polygon key={i}
+                  points={`${x1},${y1} ${x2},${y2} ${x2},${y2 + 85} ${x1},${y1 + 85}`}
+                  fill="none" stroke={active('polotno') ? '#fff' : '#D0CCC6'} strokeWidth="0.8"
+                  style={{ transition: 'stroke 0.6s ease' }} />
               );
             })}
+            {/* Handle */}
+            <rect x={430 + 75 * cos30 - 3} y={50 + 75 * sin30 + 180} width={6} height={22} rx={3}
+              fill={active('polotno') ? '#D4AF37' : '#B8A070'} style={{ transition: 'fill 0.6s ease' }} />
+            {badge('polotno', 4, 500, 35, 40, 0)}
+          </g>
 
-            {/* Dimension line — height */}
-            <line x1="130" y1="100" x2="130" y2="320" stroke="#BBB" strokeWidth="0.4" strokeDasharray="2,2" />
-            <line x1="125" y1="100" x2="135" y2="100" stroke="#BBB" strokeWidth="0.4" />
-            <line x1="125" y1="320" x2="135" y2="320" stroke="#BBB" strokeWidth="0.4" />
-            <text x="120" y="215" fill="#AAA" fontSize="7" textAnchor="middle" transform="rotate(-90, 120, 215)"
-              style={{ fontFamily: "'Oswald', sans-serif" }}>2080 мм</text>
+          {/* ⑤ Стоевая */}
+          <g style={gStyle('stoevaya', 65, 10)}
+            onMouseEnter={() => setHoveredId('stoevaya')}
+            onMouseLeave={() => setHoveredId(null)}>
+            {box('stoevaya', 565, 65, 12, 370, 18, '#E0DACE', '#D2CCC0', '#C3BDB1')}
+            {/* Center line */}
+            <line x1={565 + 6 * cos30} y1={65 + 6 * sin30 + 20} x2={565 + 6 * cos30} y2={65 + 6 * sin30 + 340}
+              stroke={active('stoevaya') ? '#fff' : '#C0BCB0'} strokeWidth="0.5" style={{ transition: 'stroke 0.6s ease' }} />
+            {badge('stoevaya', 5, 575, 50, 65, 10)}
+          </g>
 
-          </svg>
-        </div>
+          {/* ⑥ Филёнка */}
+          <g style={gStyle('filyonka', 70, 30)}
+            onMouseEnter={() => setHoveredId('filyonka')}
+            onMouseLeave={() => setHoveredId(null)}>
+            {box('filyonka', 610, 340, 60, 50, 10, '#FAF6F0', '#F2EEE8', '#EAE6E0')}
+            {/* Inner panel line */}
+            {(() => {
+              const cx = 610, cy = 340;
+              const x1 = cx + 8 * cos30, y1 = cy + 8 * sin30 + 6;
+              const x2 = cx + 52 * cos30, y2 = cy + 52 * sin30 + 6;
+              return (
+                <polygon
+                  points={`${x1},${y1} ${x2},${y2} ${x2},${y2 + 34} ${x1},${y1 + 34}`}
+                  fill="none" stroke={active('filyonka') ? '#fff' : '#D8D4CE'} strokeWidth="0.6"
+                  style={{ transition: 'stroke 0.6s ease' }} />
+              );
+            })()}
+            {badge('filyonka', 6, 645, 330, 70, 30)}
+          </g>
 
-        {/* Table with tooltips */}
-        <div className="flex-1 w-full">
-          <h3
-            className="text-lg font-bold uppercase tracking-wider text-foreground mb-4"
-            style={{ fontFamily: "'Oswald', sans-serif" }}
+          {/* Dimension line — overall height */}
+          <g style={{ opacity: hoveredId ? 0.3 : 0.6, transition: 'opacity 0.5s ease' }}>
+            <line x1="55" y1="100" x2="55" y2="460" stroke="#999" strokeWidth="0.6" strokeDasharray="4,3" />
+            <line x1="48" y1="100" x2="62" y2="100" stroke="#999" strokeWidth="0.6" />
+            <line x1="48" y1="460" x2="62" y2="460" stroke="#999" strokeWidth="0.6" />
+            <text x="42" y="285" fill="#999" fontSize="11" textAnchor="middle" transform="rotate(-90, 42, 285)"
+              style={{ fontFamily: "'Oswald', sans-serif", letterSpacing: '0.05em' }}>2080 мм</text>
+          </g>
+
+        </svg>
+      </div>
+
+      {/* Components table below */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {parts.map((part) => (
+          <div
+            key={part.id}
+            onMouseEnter={() => setHoveredId(part.id)}
+            onMouseLeave={() => setHoveredId(null)}
+            className="rounded-xl border cursor-pointer overflow-hidden"
+            style={{
+              backgroundColor: active(part.id) ? 'hsl(30, 10%, 15%)' : 'hsl(38, 33%, 97%)',
+              borderColor: active(part.id) ? 'hsl(30, 10%, 25%)' : 'hsl(35, 15%, 88%)',
+              color: active(part.id) ? 'hsl(38, 33%, 97%)' : 'hsl(30, 10%, 15%)',
+              transition: 'background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease',
+            }}
           >
-            Из чего состоит дверной блок
-          </h3>
-          <div className="space-y-1">
-            {parts.map((part) => (
-              <div
-                key={part.id}
-                onMouseEnter={() => setHoveredId(part.id)}
-                onMouseLeave={() => setHoveredId(null)}
-                className="rounded-lg border border-transparent"
-                style={{
-                  backgroundColor: isActive(part.id) ? 'hsl(30, 10%, 15%)' : 'transparent',
-                  color: isActive(part.id) ? 'hsl(38, 33%, 97%)' : 'inherit',
-                  borderColor: isActive(part.id) ? 'hsl(30, 10%, 25%)' : 'transparent',
-                  transition: 'background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease',
-                }}
-              >
-                <div className="flex items-start justify-between px-4 py-3 cursor-pointer">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold" style={{ fontFamily: "'Oswald', sans-serif" }}>
-                        {part.label}
-                      </p>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setTooltipId(tooltipId === part.id ? null : part.id);
-                        }}
-                        className="shrink-0"
-                        aria-label="Подробнее"
-                      >
-                        <Info className="w-3.5 h-3.5" style={{
-                          color: isActive(part.id) ? 'hsl(38, 33%, 80%)' : 'hsl(30, 8%, 65%)',
-                          transition: 'color 0.5s ease',
-                        }} />
-                      </button>
-                    </div>
-                    <p
-                      className="text-xs mt-0.5"
-                      style={{
-                        color: isActive(part.id) ? 'hsl(38, 33%, 75%)' : 'hsl(30, 8%, 55%)',
-                        transition: 'color 0.5s ease',
-                      }}
-                    >
-                      {part.dimensions}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Tooltip / expanded info */}
-                <div
+            <div className="px-5 py-4">
+              <div className="flex items-center gap-3 mb-1">
+                <span
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                   style={{
-                    maxHeight: tooltipId === part.id || isActive(part.id) ? '80px' : '0',
-                    opacity: tooltipId === part.id || isActive(part.id) ? 1 : 0,
-                    overflow: 'hidden',
-                    transition: 'max-height 0.5s ease, opacity 0.4s ease',
+                    backgroundColor: active(part.id) ? accentColor : 'hsl(30, 10%, 15%)',
+                    color: '#fff',
+                    transition: 'background-color 0.5s ease',
+                    fontFamily: "'Oswald', sans-serif",
                   }}
                 >
-                  <p
-                    className="px-4 pb-3 text-xs leading-relaxed"
-                    style={{
-                      color: isActive(part.id) ? 'hsl(38, 33%, 70%)' : 'hsl(30, 8%, 50%)',
-                      transition: 'color 0.5s ease',
-                    }}
-                  >
-                    💡 {part.tip}
+                  {part.num}
+                </span>
+                <div>
+                  <p className="text-sm font-bold" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                    {part.label}
+                  </p>
+                  <p className="text-xs font-mono" style={{
+                    color: active(part.id) ? 'hsl(38, 33%, 70%)' : 'hsl(30, 8%, 55%)',
+                    transition: 'color 0.5s ease',
+                  }}>
+                    {part.dimensions}
                   </p>
                 </div>
               </div>
-            ))}
+              <p className="text-xs leading-relaxed mt-2" style={{
+                color: active(part.id) ? 'hsl(38, 33%, 70%)' : 'hsl(30, 8%, 50%)',
+                transition: 'color 0.5s ease',
+              }}>
+                💡 {part.tip}
+              </p>
+            </div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );
