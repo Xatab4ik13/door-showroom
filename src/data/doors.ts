@@ -8,6 +8,8 @@ import door07 from '@/assets/doors/door-07.jpg';
 import door08 from '@/assets/doors/door-08.jpg';
 import door09 from '@/assets/doors/door-09.jpg';
 import door10 from '@/assets/doors/door-10.jpg';
+import door11 from '@/assets/doors/door-11.jpg';
+import door12 from '@/assets/doors/door-12.jpg';
 
 export interface Door {
   id: string;
@@ -71,5 +73,15 @@ export const doors: Door[] = [
     id: '10', name: 'Linea', collection: 'Minimal', description: 'Чистая белая дверь с одной горизонтальной линией посередине.',
     image: door10, material: 'МДФ, эмаль', sizes: '600–900 × 2000 мм', finish: 'Эмаль матовая',
     colors: ['#FEFCF8', '#F5F0E8', '#ECE8E0'],
+  },
+  {
+    id: '11', name: 'Imperiale', collection: 'Heritage', description: 'Белая классическая дверь с двойными филёнками и бронзовой фурнитурой.',
+    image: door11, material: 'Массив, МДФ', sizes: '700–900 × 2100 мм', finish: 'Эмаль глянец',
+    colors: ['#F8F6F2', '#E8E6E2', '#D8D6D2'],
+  },
+  {
+    id: '12', name: 'Strato', collection: 'Light', description: 'Белая дверь с горизонтальными чёрными ламелями и современной фурнитурой.',
+    image: door12, material: 'МДФ, стекло', sizes: '600–900 × 2000 мм', finish: 'Эмаль матовая',
+    colors: ['#FEFCF8', '#F0EEE8', '#E0DED8'],
   },
 ];
