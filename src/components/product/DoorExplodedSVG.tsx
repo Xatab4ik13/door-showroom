@@ -22,58 +22,54 @@ interface Props {
 }
 
 /*
-  Isometric helper: converts (x, y, z) into 2D isometric coords.
-  Standard isometric: 
-    screenX = (x - z) * cos(30°)
-    screenY = (x + z) * sin(30°) - y
+  True isometric projection.
+  X = width (left-right on screen)
+  Y = height (up on screen)
+  Z = depth (into screen, used to spread parts apart)
 */
-const COS30 = Math.cos(Math.PI / 6); // ~0.866
-const SIN30 = 0.5;
+const S = 0.55; // scale
 
 function iso(x: number, y: number, z: number): [number, number] {
-  return [
-    300 + (x - z) * COS30 * 0.8,
-    350 + (x + z) * SIN30 * 0.8 - y * 0.85,
-  ];
+  const sx = 420 + (x - z) * 0.866 * S;
+  const sy = 500 + (x + z) * 0.5 * S - y * S;
+  return [sx, sy];
 }
 
-function isoPath(points: [number, number, number][]): string {
-  return points
-    .map((p, i) => {
-      const [sx, sy] = iso(p[0], p[1], p[2]);
-      return `${i === 0 ? 'M' : 'L'} ${sx.toFixed(1)},${sy.toFixed(1)}`;
-    })
-    .join(' ') + ' Z';
+function poly(pts: [number, number, number][]): string {
+  return pts.map((p, i) => `${i ? 'L' : 'M'}${iso(...p).map(v => v.toFixed(1)).join(',')}`).join(' ') + 'Z';
 }
 
-/* Each part is a 3D box defined by position + size, exploded along Z axis */
-interface BoxDef {
+/* A 3D box: front, top, right faces */
+interface Box {
   id: string;
-  // 3D position (x, y, z) — bottom-left-front corner
   x: number; y: number; z: number;
-  // Size
   w: number; h: number; d: number;
   dark?: boolean;
 }
 
-const boxes: BoxDef[] = [
-  // Dobor — far left (high Z = pushed back)
-  { id: 'dobor', x: -10, y: 0, z: 220, w: 15, h: 340, d: 40, dark: true },
-  // Korobka — two vertical posts
-  { id: 'korobka', x: -5, y: 0, z: 160, w: 12, h: 360, d: 50, dark: true },
-  { id: 'korobka', x: 55, y: 0, z: 160, w: 12, h: 360, d: 50, dark: true },
-  // Nalichnik — thin strip
-  { id: 'nalichnik', x: -8, y: 0, z: 110, w: 8, h: 370, d: 6 },
-  // Stoevaya — vertical stile
-  { id: 'stoevaya', x: 0, y: 10, z: 60, w: 22, h: 320, d: 22 },
-  // Filyonka — panel (shorter, positioned mid-height)
-  { id: 'filyonka', x: 5, y: 60, z: 10, w: 55, h: 180, d: 10 },
-  // Polotno — full door slab (rightmost, closest)
-  { id: 'polotno', x: -15, y: 0, z: -60, w: 90, h: 360, d: 20 },
-];
+// Parts spread along Z axis with BIG gaps so each is clearly separate
+const allBoxes: Box[] = [
+  // 1. Dobor — thin tall dark plank, furthest back
+  { id: 'dobor', x: 0, y: 0, z: 500, w: 100, h: 380, d: 15, dark: true },
 
-const LIGHT = { front: '#F0ECE6', side: '#DDD8D0', top: '#F8F5F0' };
-const DARK = { front: '#4A4038', side: '#332A22', top: '#5A5048' };
+  // 2. Korobka — U-shaped frame (3 pieces), next layer
+  { id: 'korobka', x: -5, y: 0, z: 380, w: 15, h: 400, d: 40, dark: true },   // left post
+  { id: 'korobka', x: 90, y: 0, z: 380, w: 15, h: 400, d: 40, dark: true },   // right post
+  { id: 'korobka', x: -5, y: 370, z: 380, w: 110, h: 30, d: 40, dark: true }, // top beam
+
+  // 3. Nalichnik — thin decorative trim
+  { id: 'nalichnik', x: -10, y: 0, z: 270, w: 8, h: 410, d: 5 },
+  { id: 'nalichnik', x: 102, y: 0, z: 270, w: 8, h: 410, d: 5 },
+
+  // 4. Stoevaya — vertical stile
+  { id: 'stoevaya', x: 5, y: 5, z: 170, w: 18, h: 350, d: 18 },
+
+  // 5. Filyonka — panel insert (shorter, mid)
+  { id: 'filyonka', x: 15, y: 40, z: 80, w: 70, h: 200, d: 8 },
+
+  // 6. Polotno — full door slab, closest
+  { id: 'polotno', x: -5, y: 0, z: -30, w: 110, h: 390, d: 18 },
+];
 
 const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -82,92 +78,60 @@ const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
     setActiveId(prev => (prev === id ? null : id));
   };
 
-  const activeColors = {
-    front: accentColor,
-    side: darken(accentColor, 25),
-    top: lighten(accentColor, 20),
-  };
-
-  // Track which ids we've already labeled (for duplicates like korobka)
-  const labeledIds = new Set<string>();
+  const seen = new Set<string>();
 
   return (
     <div className="w-full">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
 
-        {/* Exploded isometric SVG */}
         <div className="lg:col-span-7 flex justify-center">
-          <svg viewBox="40 -20 520 500" className="w-full max-w-xl">
-            {boxes.map((box, i) => {
+          <svg viewBox="100 170 530 420" className="w-full max-w-2xl">
+            {/* Render back-to-front (highest Z first) for proper layering */}
+            {[...allBoxes].sort((a, b) => b.z - a.z).map((box, i) => {
               const isActive = activeId === box.id;
-              const isOtherActive = activeId !== null && activeId !== box.id;
-              const base = box.dark ? DARK : LIGHT;
-              const colors = isActive ? activeColors : base;
+              const isOther = activeId !== null && !isActive;
 
-              const liftY = isActive ? 25 : 0;
+              const lift = isActive ? 30 : 0;
+              const bx = box.x, by = box.y + lift, bz = box.z;
+              const { w, h, d } = box;
 
-              // Front face: bottom-left to top-right of front plane
-              const front = isoPath([
-                [box.x, box.y + liftY, box.z],
-                [box.x + box.w, box.y + liftY, box.z],
-                [box.x + box.w, box.y + box.h + liftY, box.z],
-                [box.x, box.y + box.h + liftY, box.z],
+              const front = poly([
+                [bx, by, bz], [bx + w, by, bz],
+                [bx + w, by + h, bz], [bx, by + h, bz],
+              ]);
+              const top = poly([
+                [bx, by + h, bz], [bx + w, by + h, bz],
+                [bx + w, by + h, bz + d], [bx, by + h, bz + d],
+              ]);
+              const right = poly([
+                [bx + w, by, bz], [bx + w, by, bz + d],
+                [bx + w, by + h, bz + d], [bx + w, by + h, bz],
               ]);
 
-              // Top face
-              const top = isoPath([
-                [box.x, box.y + box.h + liftY, box.z],
-                [box.x + box.w, box.y + box.h + liftY, box.z],
-                [box.x + box.w, box.y + box.h + liftY, box.z + box.d],
-                [box.x, box.y + box.h + liftY, box.z + box.d],
-              ]);
-
-              // Right side face
-              const right = isoPath([
-                [box.x + box.w, box.y + liftY, box.z],
-                [box.x + box.w, box.y + liftY, box.z + box.d],
-                [box.x + box.w, box.y + box.h + liftY, box.z + box.d],
-                [box.x + box.w, box.y + box.h + liftY, box.z],
-              ]);
-
-              const isFirstOfId = !labeledIds.has(box.id);
-              if (isFirstOfId) labeledIds.add(box.id);
+              const fc = isActive
+                ? accentColor
+                : box.dark ? '#3D3229' : '#EDE9E3';
+              const tc = isActive
+                ? lighten(accentColor, 20)
+                : box.dark ? '#504538' : '#F5F1EB';
+              const rc = isActive
+                ? darken(accentColor, 20)
+                : box.dark ? '#2A2018' : '#D8D4CE';
+              const stroke = isActive
+                ? darken(accentColor, 30)
+                : box.dark ? '#1A1008' : '#C8C4BE';
 
               return (
                 <motion.g
                   key={i}
                   onClick={(e) => { e.stopPropagation(); handleClick(box.id); }}
                   className="cursor-pointer"
-                  animate={{ opacity: isOtherActive ? 0.25 : 1 }}
-                  transition={{ duration: 0.3 }}
+                  animate={{ opacity: isOther ? 0.2 : 1 }}
+                  transition={{ duration: 0.35 }}
                 >
-                  {/* Right side */}
-                  <motion.path
-                    d={right}
-                    animate={{ fill: colors.side }}
-                    transition={{ duration: 0.3 }}
-                    stroke={isActive ? darken(accentColor, 30) : 'rgba(0,0,0,0.08)'}
-                    strokeWidth={0.5}
-                    strokeLinejoin="round"
-                  />
-                  {/* Front */}
-                  <motion.path
-                    d={front}
-                    animate={{ fill: colors.front }}
-                    transition={{ duration: 0.3 }}
-                    stroke={isActive ? darken(accentColor, 30) : 'rgba(0,0,0,0.1)'}
-                    strokeWidth={0.5}
-                    strokeLinejoin="round"
-                  />
-                  {/* Top */}
-                  <motion.path
-                    d={top}
-                    animate={{ fill: colors.top }}
-                    transition={{ duration: 0.3 }}
-                    stroke={isActive ? darken(accentColor, 15) : 'rgba(0,0,0,0.06)'}
-                    strokeWidth={0.5}
-                    strokeLinejoin="round"
-                  />
+                  <path d={right} fill={rc} stroke={stroke} strokeWidth={0.5} strokeLinejoin="round" />
+                  <path d={front} fill={fc} stroke={stroke} strokeWidth={0.5} strokeLinejoin="round" />
+                  <path d={top} fill={tc} stroke={stroke} strokeWidth={0.5} strokeLinejoin="round" />
                 </motion.g>
               );
             })}
@@ -197,7 +161,6 @@ const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
                     {part.dimensions}
                   </p>
                 </div>
-
                 <AnimatePresence>
                   {isActive && (
                     <motion.div
@@ -222,7 +185,6 @@ const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
   );
 };
 
-/* ---- Color helpers ---- */
 function lighten(hex: string, pct: number): string {
   const [r, g, b] = hexToRgb(hex);
   return rgbToHex(
