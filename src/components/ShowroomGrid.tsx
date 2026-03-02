@@ -11,6 +11,7 @@ const gridDoors: Door[] = [
 
 const ShowroomGrid = () => {
   const [selectedDoor, setSelectedDoor] = useState<Door | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
@@ -39,7 +40,10 @@ const ShowroomGrid = () => {
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: Math.min(i * 0.05, 0.8) }}
               className="group cursor-pointer"
-              onClick={() => setSelectedDoor(door)}
+              onClick={() => {
+                setSelectedDoor(door);
+                setIsPreviewOpen(true);
+              }}
             >
               <div className="relative overflow-hidden mb-4">
                 <img
@@ -61,7 +65,12 @@ const ShowroomGrid = () => {
         </div>
       </section>
 
-      <DoorPreviewModal door={selectedDoor} onClose={() => setSelectedDoor(null)} />
+      <DoorPreviewModal
+        door={selectedDoor}
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        onClosed={() => setSelectedDoor(null)}
+      />
     </>
   );
 };
