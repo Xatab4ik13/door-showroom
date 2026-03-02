@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import ProductGallery from '@/components/product/ProductGallery';
 import ProductSpecs from '@/components/product/ProductSpecs';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
@@ -133,6 +134,7 @@ const Product = () => {
           <DoorExplodedSVG accentColor={product.colors[0]} />
         </section>
       </main>
+      <Footer />
     </div>
   );
 };
