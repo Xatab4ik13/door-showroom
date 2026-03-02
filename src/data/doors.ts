@@ -1,15 +1,13 @@
-import door01 from '@/assets/doors/door-01-minimal-white.png';
-import door02 from '@/assets/doors/door-02-classic-beige.png';
-import door03 from '@/assets/doors/door-03-arched-gray.png';
-import door04 from '@/assets/doors/door-04-fluted-terracotta.png';
-import door05 from '@/assets/doors/door-05-glass-sand.png';
-import door06 from '@/assets/doors/door-06-decorative-green.png';
-import door07 from '@/assets/doors/door-07-smooth-graphite.png';
-import door08 from '@/assets/doors/door-08-glasstrip-gray.png';
-import door09 from '@/assets/doors/door-09-grooved-cream.png';
-import door10 from '@/assets/doors/door-10-ornate-terracotta.png';
-import door11 from '@/assets/doors/door-11-flush-white.png';
-import door12 from '@/assets/doors/door-12-fluted-green.png';
+import door01 from '@/assets/doors/door-01.jpg';
+import door02 from '@/assets/doors/door-02.jpg';
+import door03 from '@/assets/doors/door-03.jpg';
+import door04 from '@/assets/doors/door-04.jpg';
+import door05 from '@/assets/doors/door-05.jpg';
+import door06 from '@/assets/doors/door-06.jpg';
+import door07 from '@/assets/doors/door-07.jpg';
+import door08 from '@/assets/doors/door-08.jpg';
+import door09 from '@/assets/doors/door-09.jpg';
+import door10 from '@/assets/doors/door-10.jpg';
 
 export interface Door {
   id: string;
@@ -25,63 +23,53 @@ export interface Door {
 
 export const doors: Door[] = [
   {
-    id: '1', name: 'Milano', collection: 'Minimal', description: 'Гладкая минималистичная дверь с чистыми линиями и утончённой геометрией филёнок.',
-    image: door01, material: 'МДФ, эмаль', sizes: '600–900 × 2000 мм', finish: 'Эмаль матовая',
-    colors: ['#F5F0E8', '#E8E0D4', '#D4CBC0'],
+    id: '1', name: 'Vetro', collection: 'Light', description: 'Светло-серая дверь с узкой стеклянной вставкой, пропускающей мягкий свет.',
+    image: door01, material: 'МДФ, стекло', sizes: '700–900 × 2000 мм', finish: 'Эмаль матовая',
+    colors: ['#D0CCC6', '#C0BCB6', '#E0DCD6'],
   },
   {
-    id: '2', name: 'Classico', collection: 'Heritage', description: 'Классическая филёнчатая дверь с изящными молдингами в тёплых бежевых тонах.',
-    image: door02, material: 'Массив ясеня', sizes: '700–900 × 2000 мм', finish: 'Шпон натуральный',
-    colors: ['#E8D5B8', '#D4C4A8', '#C0B090'],
+    id: '2', name: 'Diamante', collection: 'Heritage', description: 'Классическая двухфилёнчатая дверь в благородном сером оттенке с геометрическими фасками.',
+    image: door02, material: 'МДФ, эмаль', sizes: '700–900 × 2000 мм', finish: 'Эмаль сатин',
+    colors: ['#8A8A96', '#7A7A86', '#9A9AA6'],
   },
   {
-    id: '3', name: 'Arco', collection: 'Palazzo', description: 'Элегантная дверь с арочной фрезеровкой, вдохновлённая классической архитектурой.',
-    image: door03, material: 'МДФ, шпон', sizes: '800–900 × 2100 мм', finish: 'Эмаль светло-серая',
-    colors: ['#D8D4CE', '#C8C4BE', '#B8B4AE'],
-  },
-  {
-    id: '4', name: 'Rigato', collection: 'Moderno', description: 'Современная дверь с вертикальными канелюрами в нежном терракотово-розовом оттенке.',
-    image: door04, material: 'МДФ, эмаль', sizes: '600–900 × 2000 мм', finish: 'Эмаль сатин',
-    colors: ['#D4A08A', '#C89880', '#BC9078'],
-  },
-  {
-    id: '5', name: 'Vista', collection: 'Light', description: 'Дверь с матовой стеклянной вставкой, наполняющей пространство мягким светом.',
-    image: door05, material: 'МДФ, стекло', sizes: '700–900 × 2000 мм', finish: 'Шпон песочный',
-    colors: ['#E8D8B8', '#DCD0B0', '#D0C8A8'],
-  },
-  {
-    id: '6', name: 'Botanica', collection: 'Art', description: 'Декоративная дверь с изысканным орнаментальным рисунком в глубоком зелёном цвете.',
-    image: door06, material: 'Массив, резьба', sizes: '800–900 × 2100 мм', finish: 'Эмаль глянец',
-    colors: ['#2D4A3E', '#1E3A2E', '#3A5A4E'],
-  },
-  {
-    id: '7', name: 'Carbon', collection: 'Urban', description: 'Минималистичная дверь в тёмном графитовом цвете с бархатистой гладкой поверхностью.',
-    image: door07, material: 'МДФ, эмаль', sizes: '600–900 × 2000 мм', finish: 'Эмаль матовая',
-    colors: ['#4A4A48', '#3A3A38', '#5A5A58'],
-  },
-  {
-    id: '8', name: 'Lumiere', collection: 'Light', description: 'Изящная дверь с узкой вертикальной стеклянной полосой в светло-серых тонах.',
-    image: door08, material: 'МДФ, стекло', sizes: '700–900 × 2000 мм', finish: 'Эмаль перламутр',
-    colors: ['#E0DCD6', '#D0CCC6', '#C8C4BE'],
-  },
-  {
-    id: '9', name: 'Linea', collection: 'Minimal', description: 'Современная дверь с горизонтальными линиями-канавками в тёплом кремовом оттенке.',
-    image: door09, material: 'МДФ, шпон', sizes: '600–900 × 2000 мм', finish: 'Шпон натуральный',
-    colors: ['#F0E8D8', '#E8E0D0', '#E0D8C8'],
-  },
-  {
-    id: '10', name: 'Imperiale', collection: 'Palazzo', description: 'Роскошная орнаментальная дверь с резным порталом в тёплом терракотовом цвете.',
-    image: door10, material: 'Массив дуба', sizes: '900 × 2100 мм', finish: 'Патина золото',
-    colors: ['#C87850', '#B86840', '#D88860'],
-  },
-  {
-    id: '11', name: 'Puro', collection: 'Minimal', description: 'Абсолютно чистая белая дверь с лаконичными филёнками для светлых интерьеров.',
-    image: door11, material: 'МДФ, эмаль', sizes: '600–900 × 2000 мм', finish: 'Эмаль матовая',
+    id: '3', name: 'Bianco', collection: 'Minimal', description: 'Белоснежная дверь с диагональными филёнками и чистой геометрией.',
+    image: door03, material: 'МДФ, эмаль', sizes: '600–900 × 2000 мм', finish: 'Эмаль матовая',
     colors: ['#FEFCF8', '#F5F0E8', '#ECE8E0'],
   },
   {
-    id: '12', name: 'Foresta', collection: 'Art', description: 'Дверь с вертикальным рифлением в глубоком лесном зелёном цвете.',
-    image: door12, material: 'МДФ, эмаль', sizes: '700–900 × 2000 мм', finish: 'Эмаль сатин',
-    colors: ['#3A5A3E', '#2A4A2E', '#4A6A4E'],
+    id: '4', name: 'Nero', collection: 'Urban', description: 'Тёмная дверь с горизонтальными ламелями в текстуре чёрного дерева.',
+    image: door04, material: 'Экошпон', sizes: '600–900 × 2000 мм', finish: 'Экошпон матовый',
+    colors: ['#2A2A28', '#1A1A18', '#3A3A38'],
+  },
+  {
+    id: '5', name: 'Classico', collection: 'Palazzo', description: 'Элегантная серая дверь с классическими молдингами и глубокими филёнками.',
+    image: door05, material: 'МДФ, эмаль', sizes: '700–900 × 2100 мм', finish: 'Эмаль сатин',
+    colors: ['#A0A098', '#909088', '#B0B0A8'],
+  },
+  {
+    id: '6', name: 'Grafika', collection: 'Art', description: 'Современная серая дверь с геометрическим узором и чёрной стеклянной вставкой.',
+    image: door06, material: 'МДФ, стекло', sizes: '700–900 × 2000 мм', finish: 'Эмаль матовая',
+    colors: ['#C8C4BE', '#B8B4AE', '#D8D4CE'],
+  },
+  {
+    id: '7', name: 'Sabbia', collection: 'Minimal', description: 'Минималистичная дверь в песочном оттенке с тонкими чёрными контурами.',
+    image: door07, material: 'МДФ, эмаль', sizes: '600–900 × 2000 мм', finish: 'Эмаль матовая',
+    colors: ['#B8B0A0', '#A8A090', '#C8C0B0'],
+  },
+  {
+    id: '8', name: 'Rovere', collection: 'Nature', description: 'Дверь с натуральным шпоном дуба и вертикальными тёмными линиями.',
+    image: door08, material: 'Шпон дуба', sizes: '700–900 × 2000 мм', finish: 'Шпон натуральный',
+    colors: ['#A09070', '#908060', '#B0A080'],
+  },
+  {
+    id: '9', name: 'Invisible', collection: 'Urban', description: 'Скрытая дверь в светло-сером исполнении с тонкой чёрной кромкой.',
+    image: door09, material: 'МДФ, алюминий', sizes: '600–900 × 2400 мм', finish: 'Эмаль матовая',
+    colors: ['#D8D4CE', '#C8C4BE', '#E8E4DE'],
+  },
+  {
+    id: '10', name: 'Linea', collection: 'Minimal', description: 'Чистая белая дверь с одной горизонтальной линией посередине.',
+    image: door10, material: 'МДФ, эмаль', sizes: '600–900 × 2000 мм', finish: 'Эмаль матовая',
+    colors: ['#FEFCF8', '#F5F0E8', '#ECE8E0'],
   },
 ];
