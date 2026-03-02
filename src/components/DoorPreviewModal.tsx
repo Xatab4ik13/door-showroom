@@ -50,7 +50,7 @@ const DoorPreviewModal = ({ door, isOpen, onClose, onClosed }: Props) => {
             {/* Info */}
             <div className="p-6 md:p-10 flex flex-col justify-center">
               <span
-                className="inline-block self-start px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded bg-primary text-primary-foreground mb-3"
+                className="inline-block self-start px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded bg-[hsl(205,85%,45%)] text-white mb-3"
                 style={{ fontFamily: "'Oswald', sans-serif" }}
               >
                 {door.collection}
@@ -94,7 +94,7 @@ const DoorPreviewModal = ({ door, isOpen, onClose, onClosed }: Props) => {
               <Link
                 to={`/product/${door.id}`}
                 onClick={onClose}
-                className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-foreground text-background rounded-lg text-sm font-medium tracking-wide hover:opacity-90 transition-opacity"
+                className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-[hsl(205,85%,45%)] text-white rounded-lg text-sm font-medium tracking-wide hover:opacity-90 transition-opacity"
                 style={{ fontFamily: "'Oswald', sans-serif" }}
               >
                 Подробнее
