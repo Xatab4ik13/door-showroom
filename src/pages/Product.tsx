@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import Header from '@/components/Header';
@@ -12,6 +13,7 @@ const formatPrice = (price: number) =>
 
 const Product = () => {
   const { id } = useParams<{ id: string }>();
+  const [selectedColor, setSelectedColor] = useState(0);
   const product = catalogProducts.find((p) => p.id === id);
 
   if (!product) {
@@ -50,7 +52,7 @@ const Product = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
           {/* Gallery */}
           <div className="lg:col-span-4">
-            <ProductGallery product={product} />
+            <ProductGallery product={product} selectedColorIndex={selectedColor} />
           </div>
 
           {/* Product info */}
@@ -76,13 +78,24 @@ const Product = () => {
 
             {/* Color swatches */}
             <div className="mb-6">
-              <p className="text-sm text-muted-foreground mb-2">Доступные оттенки:</p>
+              <p
+                className="text-sm font-semibold uppercase tracking-wider text-foreground mb-2"
+                style={{ fontFamily: "'Oswald', sans-serif" }}
+              >
+                Выберите цвет
+              </p>
               <div className="flex gap-2">
-                {product.colors.map((c) => (
-                  <div
+                {product.colors.map((c, i) => (
+                  <button
                     key={c}
-                    className="w-8 h-8 rounded-full border-2 border-border"
+                    onClick={() => setSelectedColor(i)}
+                    className={`w-9 h-9 rounded-full border-2 transition-all duration-200 ${
+                      selectedColor === i
+                        ? 'border-foreground scale-110 shadow-md'
+                        : 'border-border hover:scale-105'
+                    }`}
                     style={{ backgroundColor: c }}
+                    aria-label={`Цвет ${i + 1}`}
                   />
                 ))}
               </div>
