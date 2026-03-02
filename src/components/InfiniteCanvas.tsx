@@ -144,7 +144,7 @@ const InfiniteCanvas = () => {
                   }}
                 >
                   <div
-                    className="w-full h-full overflow-hidden flex items-center justify-center relative cursor-pointer"
+                    className="w-full h-full overflow-hidden flex items-center justify-center cursor-pointer"
                     onClick={() => {
                       if (!hasDragged) setSelectedDoor(door);
                     }}
@@ -152,16 +152,9 @@ const InfiniteCanvas = () => {
                     <img
                       src={door.image}
                       alt={door.name}
-                      className="h-full w-auto object-contain transition-transform duration-500 group-hover:scale-[1.05]"
+                      className="h-full w-auto object-contain transition-all duration-700 ease-out group-hover:scale-[1.06] group-hover:brightness-110"
                       draggable={false}
                     />
-                    {/* Hover info */}
-                    <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors duration-400 flex items-end p-3 pointer-events-none">
-                      <div className="translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-400">
-                        <p className="text-xs font-medium text-card drop-shadow-md">{door.name}</p>
-                        <p className="text-[10px] text-card/80 drop-shadow-md">{door.collection}</p>
-                      </div>
-                    </div>
                   </div>
                 </div>
               ))}
