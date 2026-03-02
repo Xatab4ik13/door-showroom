@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import type { CatalogProduct } from '@/data/catalog';
 
 interface ProductCardProps {
@@ -26,6 +27,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
     : null;
 
   return (
+    <Link to={`/product/${product.id}`}>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -83,6 +85,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <p className="text-xs text-muted-foreground mt-1">{product.material} · {product.finish}</p>
       </div>
     </motion.div>
+    </Link>
   );
 };
 
