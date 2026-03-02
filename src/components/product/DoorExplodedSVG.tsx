@@ -1,66 +1,52 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-import layerDobor from '@/assets/parts/layer-dobor.png';
-import layerKorobka from '@/assets/parts/layer-korobka.png';
-import layerNalichnik from '@/assets/parts/layer-nalichnik.png';
-import layerStoevaya from '@/assets/parts/layer-stoevaya.png';
-import layerFilyonka from '@/assets/parts/layer-filyonka.png';
-import layerPolotno from '@/assets/parts/layer-polotno.png';
+import explodedView from '@/assets/door-exploded-view.jpg';
 
 interface DoorPart {
   id: string;
   label: string;
   dimensions: string;
   material: string;
-  image: string;
-  pos: { left: number; top: number; width: number; height: number };
+  /** Clickable zone as % of image */
+  zone: { left: number; top: number; width: number; height: number };
 }
 
 const parts: DoorPart[] = [
   {
     id: 'dobor', label: 'Доборный брус',
     dimensions: '15 × 100–200 × 2080 мм', material: 'МДФ, ламинат',
-    image: layerDobor,
-    pos: { left: 0, top: 2, width: 15, height: 90 },
+    zone: { left: 3, top: 8, width: 11, height: 78 },
   },
   {
     id: 'korobka', label: 'Коробка',
     dimensions: '40 × 74 × 2080 мм', material: 'МДФ, шпон или экошпон',
-    image: layerKorobka,
-    pos: { left: 16, top: 0, width: 18, height: 94 },
+    zone: { left: 18, top: 5, width: 14, height: 82 },
   },
   {
     id: 'nalichnik', label: 'Наличник',
     dimensions: '10 × 70 × 2150 мм', material: 'МДФ с покрытием',
-    image: layerNalichnik,
-    pos: { left: 35, top: 2, width: 10, height: 90 },
+    zone: { left: 35, top: 12, width: 8, height: 72 },
   },
   {
     id: 'stoevaya', label: 'Продольная стоевая',
     dimensions: '40 × 74 × 2000 мм', material: 'Массив сосны / МДФ',
-    image: layerStoevaya,
-    pos: { left: 46, top: 2, width: 10, height: 90 },
+    zone: { left: 46, top: 8, width: 8, height: 78 },
   },
   {
     id: 'filyonka', label: 'Филёнка',
     dimensions: 'По модели двери', material: 'МДФ, стекло или шпон',
-    image: layerFilyonka,
-    pos: { left: 57, top: 2, width: 16, height: 90 },
+    zone: { left: 57, top: 6, width: 14, height: 80 },
   },
   {
     id: 'polotno', label: 'Дверное полотно',
     dimensions: '36 × 800 × 2000 мм', material: 'МДФ каркас, сотовый наполнитель',
-    image: layerPolotno,
-    pos: { left: 74, top: 0, width: 26, height: 96 },
+    zone: { left: 74, top: 3, width: 22, height: 88 },
   },
 ];
 
 interface Props {
   accentColor?: string;
 }
-
-const LIFT = 30;
 
 const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -73,10 +59,16 @@ const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
 
   return (
     <div className="w-full">
-      <div
-        className="relative w-full rounded-xl overflow-visible"
-        style={{ aspectRatio: '16 / 9' }}
-      >
+      {/* Image with interactive overlay zones */}
+      <div className="relative w-full rounded-xl overflow-hidden">
+        <img
+          src={explodedView}
+          alt="Схема дверного блока"
+          className="w-full h-auto block"
+          draggable={false}
+        />
+
+        {/* Clickable zones */}
         {parts.map((part) => {
           const isActive = activeId === part.id;
           const isOther = activeId !== null && !isActive;
@@ -84,38 +76,62 @@ const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
           return (
             <motion.div
               key={part.id}
-              className="absolute cursor-pointer"
+              className="absolute cursor-pointer rounded-md"
               style={{
-                left: `${part.pos.left}%`,
-                top: `${part.pos.top}%`,
-                width: `${part.pos.width}%`,
-                height: `${part.pos.height}%`,
-                zIndex: isActive ? 20 : 1,
+                left: `${part.zone.left}%`,
+                top: `${part.zone.top}%`,
+                width: `${part.zone.width}%`,
+                height: `${part.zone.height}%`,
               }}
               animate={{
-                y: isActive ? -LIFT : 0,
-                scale: isActive ? 1.06 : 1,
-                opacity: isOther ? 0.35 : 1,
+                backgroundColor: isActive
+                  ? `${accentColor}20`
+                  : 'rgba(0,0,0,0)',
+                boxShadow: isActive
+                  ? `inset 0 0 0 2px ${accentColor}, 0 0 20px ${accentColor}30`
+                  : 'inset 0 0 0 0px transparent',
               }}
-              transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+              whileHover={{
+                backgroundColor: isActive ? `${accentColor}20` : `${accentColor}10`,
+                boxShadow: `inset 0 0 0 1px ${accentColor}60`,
+              }}
+              transition={{ duration: 0.25 }}
               onClick={() => handleClick(part.id)}
-              whileHover={!isActive ? { y: -8, scale: 1.03 } : undefined}
-            >
-              <img
-                src={part.image}
-                alt={part.label}
-                className="w-full h-full object-contain"
-                draggable={false}
-                style={{
-                  mixBlendMode: 'multiply',
-                  filter: isActive
-                    ? `drop-shadow(0 ${LIFT}px 20px rgba(0,0,0,0.35))`
-                    : 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
-                }}
-              />
-            </motion.div>
+            />
           );
         })}
+
+        {/* Dimming overlay with cutout for active zone */}
+        <AnimatePresence>
+          {activeId && (() => {
+            const p = parts.find(pp => pp.id === activeId);
+            if (!p) return null;
+            // SVG mask: white = visible (dimmed), black rect = transparent hole
+            const maskSvg = `url("data:image/svg+xml,${encodeURIComponent(
+              `<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100' preserveAspectRatio='none'>` +
+              `<rect width='100' height='100' fill='white'/>` +
+              `<rect x='${p.zone.left}' y='${p.zone.top}' width='${p.zone.width}' height='${p.zone.height}' fill='black' rx='1'/>` +
+              `</svg>`
+            )}")`;
+            return (
+              <motion.div
+                key="dim"
+                className="absolute inset-0 pointer-events-none"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  backgroundColor: 'rgba(0,0,0,0.3)',
+                  WebkitMaskImage: maskSvg,
+                  maskImage: maskSvg,
+                  WebkitMaskSize: '100% 100%',
+                  maskSize: '100% 100%',
+                }}
+              />
+            );
+          })()}
+        </AnimatePresence>
       </div>
 
       {/* Part selector buttons */}
