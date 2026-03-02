@@ -68,7 +68,7 @@ const ProductConfigurator = ({ product }: ProductConfiguratorProps) => {
               onClick={() => setSelectedSize(i)}
               className={`px-3 py-2 text-sm rounded-md border transition-colors ${
                 selectedSize === i
-                  ? 'border-primary bg-primary text-primary-foreground'
+                  ? 'border-[hsl(205,85%,45%)] bg-[hsl(205,85%,45%)] text-white'
                   : 'border-border bg-background text-foreground hover:bg-accent'
               }`}
             >
@@ -95,7 +95,7 @@ const ProductConfigurator = ({ product }: ProductConfiguratorProps) => {
               key={hw.label}
               className={`flex items-center justify-between px-3 py-2.5 rounded-md border cursor-pointer transition-colors ${
                 selectedHardware === i
-                  ? 'border-primary bg-primary/5'
+                  ? 'border-[hsl(205,85%,45%)] bg-[hsl(205,85%,45%)]/5'
                   : 'border-border hover:bg-accent'
               }`}
             >
@@ -105,7 +105,7 @@ const ProductConfigurator = ({ product }: ProductConfiguratorProps) => {
                   name="hardware"
                   checked={selectedHardware === i}
                   onChange={() => setSelectedHardware(i)}
-                  className="accent-primary"
+                  className="accent-[hsl(205,85%,45%)]"
                 />
                 <span className="text-sm">{hw.label}</span>
               </div>
@@ -131,7 +131,7 @@ const ProductConfigurator = ({ product }: ProductConfiguratorProps) => {
               key={extra.id}
               className={`flex items-center justify-between px-3 py-2.5 rounded-md border cursor-pointer transition-colors ${
                 selectedExtras.includes(extra.id)
-                  ? 'border-primary bg-primary/5'
+                  ? 'border-[hsl(205,85%,45%)] bg-[hsl(205,85%,45%)]/5'
                   : 'border-border hover:bg-accent'
               }`}
             >
@@ -140,7 +140,7 @@ const ProductConfigurator = ({ product }: ProductConfiguratorProps) => {
                   type="checkbox"
                   checked={selectedExtras.includes(extra.id)}
                   onChange={() => toggleExtra(extra.id)}
-                  className="accent-primary w-4 h-4"
+                  className="accent-[hsl(205,85%,45%)] w-4 h-4"
                 />
                 <span className="text-sm">{extra.label}</span>
               </div>
@@ -164,7 +164,7 @@ const ProductConfigurator = ({ product }: ProductConfiguratorProps) => {
           </div>
         </div>
         <button
-          className="w-full py-3 bg-primary text-primary-foreground rounded-md font-medium uppercase tracking-wider hover:opacity-90 transition-opacity"
+          className="w-full py-3 bg-[hsl(205,85%,45%)] text-white rounded-md font-medium uppercase tracking-wider hover:opacity-90 transition-opacity"
           style={{ fontFamily: "'Oswald', sans-serif" }}
         >
           Добавить в корзину

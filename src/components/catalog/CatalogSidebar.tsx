@@ -41,7 +41,7 @@ const CheckboxItem = ({ label, checked, onChange }: { label: string; checked: bo
       type="checkbox"
       checked={checked}
       onChange={onChange}
-      className="w-4 h-4 rounded border-border accent-primary"
+      className="w-4 h-4 rounded border-border accent-[hsl(205,85%,45%)]"
     />
     {label}
   </label>
@@ -109,23 +109,25 @@ const CatalogSidebar = ({
       {/* Filters */}
       <div className="space-y-4">
         <FilterSection title="Цена">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <input
-              type="number"
-              value={priceRange[0]}
-              onChange={(e) => onPriceRangeChange([Number(e.target.value), priceRange[1]])}
-              className="w-full px-2 py-1.5 text-sm border border-border rounded-md bg-background text-foreground"
+              type="text"
+              inputMode="numeric"
+              value={priceRange[0] || ''}
+              onChange={(e) => onPriceRangeChange([Number(e.target.value.replace(/\D/g, '')), priceRange[1]])}
+              className="w-full px-3 py-2 text-base font-bold border border-border rounded-md bg-background text-foreground"
+              style={{ fontFamily: "'Oswald', sans-serif" }}
               placeholder="от"
-              min={0}
             />
-            <span className="text-muted-foreground text-sm">—</span>
+            <span className="text-muted-foreground text-sm shrink-0">—</span>
             <input
-              type="number"
-              value={priceRange[1]}
-              onChange={(e) => onPriceRangeChange([priceRange[0], Number(e.target.value)])}
-              className="w-full px-2 py-1.5 text-sm border border-border rounded-md bg-background text-foreground"
+              type="text"
+              inputMode="numeric"
+              value={priceRange[1] || ''}
+              onChange={(e) => onPriceRangeChange([priceRange[0], Number(e.target.value.replace(/\D/g, ''))])}
+              className="w-full px-3 py-2 text-base font-bold border border-border rounded-md bg-background text-foreground"
+              style={{ fontFamily: "'Oswald', sans-serif" }}
               placeholder="до"
-              max={maxPrice}
             />
           </div>
         </FilterSection>
