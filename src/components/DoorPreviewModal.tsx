@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { X, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Door } from '@/data/doors';
@@ -8,17 +9,33 @@ interface Props {
 }
 
 const DoorPreviewModal = ({ door, onClose }: Props) => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (!door) {
+      setIsVisible(false);
+      return;
+    }
+
+    const frameId = requestAnimationFrame(() => setIsVisible(true));
+    return () => cancelAnimationFrame(frameId);
+  }, [door]);
+
   if (!door) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 animate-fade-in"
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 transition-opacity duration-300 ${
+        isVisible ? 'opacity-100' : 'opacity-0'
+      }`}
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-foreground/20" />
 
       <div
-        className="relative bg-card rounded-2xl border border-border shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row animate-scale-in"
+        className={`relative bg-card rounded-2xl border border-border shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row transition-opacity duration-300 ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close */}
@@ -31,18 +48,19 @@ const DoorPreviewModal = ({ door, onClose }: Props) => {
         </button>
 
         {/* Image */}
-        <div className="md:w-1/2 flex items-center justify-center bg-secondary/30 p-8 md:p-12 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none">
+        <div className="md:w-1/2 flex items-center justify-center bg-secondary/30 p-8 md:p-12 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none min-h-[420px] md:min-h-[640px]">
           <img
             src={door.image}
             alt={door.name}
-            className="max-h-[50vh] md:max-h-[70vh] w-auto object-contain"
+            className="max-h-full w-auto object-contain"
+            loading="eager"
           />
         </div>
 
         {/* Info */}
         <div className="md:w-1/2 p-6 md:p-10 flex flex-col justify-center">
           <span
-            className="inline-block self-start px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded bg-[hsl(205,85%,45%)] text-white mb-3"
+            className="inline-block self-start px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded bg-primary text-primary-foreground mb-3"
             style={{ fontFamily: "'Oswald', sans-serif" }}
           >
             {door.collection}
@@ -55,9 +73,7 @@ const DoorPreviewModal = ({ door, onClose }: Props) => {
             {door.name}
           </h3>
 
-          <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-            {door.description}
-          </p>
+          <p className="text-sm text-muted-foreground leading-relaxed mb-6">{door.description}</p>
 
           {/* Specs */}
           <div className="space-y-3 mb-6 text-sm">
