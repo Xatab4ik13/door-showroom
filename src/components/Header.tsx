@@ -2,7 +2,13 @@ import { useState } from 'react';
 import { ShoppingCart, User } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
-const navItems = ['Каталог', 'Доставка и оплата', 'О компании', 'Поставщикам', 'Контакты'];
+const navItems = [
+  { label: 'Каталог', href: '/catalog' },
+  { label: 'Доставка и оплата', href: '#' },
+  { label: 'О компании', href: '#' },
+  { label: 'Поставщикам', href: '#' },
+  { label: 'Контакты', href: '#' },
+];
 
 const Header = () => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
@@ -16,17 +22,17 @@ const Header = () => {
       <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
         {navItems.map((item) => (
           <a
-            key={item}
-            href="#"
+            key={item.label}
+            href={item.href}
             className="relative text-sm tracking-[0.12em] uppercase text-[hsl(215,50%,15%)] hover:text-[hsl(205,85%,45%)] transition-colors duration-300 py-1 group whitespace-nowrap"
             style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 500, textShadow: '0 0 8px rgba(255,255,255,0.9), 0 0 16px rgba(255,255,255,0.5)' }}
-            onMouseEnter={() => setActiveItem(item)}
+            onMouseEnter={() => setActiveItem(item.label)}
             onMouseLeave={() => setActiveItem(null)}
           >
-            {item}
+            {item.label}
             <span
               className={`absolute bottom-0 left-0 h-[2px] bg-[hsl(205,85%,45%)] transition-all duration-300 ${
-                activeItem === item ? 'w-full' : 'w-0'
+                activeItem === item.label ? 'w-full' : 'w-0'
               }`}
             />
           </a>
