@@ -13,7 +13,7 @@ const Header = () => {
     <>
       <header className="fixed top-0 left-0 right-0 z-40 px-6 md:px-12 py-5 flex items-center justify-between bg-background/70 backdrop-blur-md">
         <a href="/" className="flex items-center">
-          <img src={logo} alt="RUSDOORS" className="h-16 md:h-20 w-auto" />
+          <img src={logo} alt="RUSDOORS" className="h-12 md:h-[60px] w-auto" />
         </a>
 
         <nav className="hidden lg:flex items-center gap-10">
