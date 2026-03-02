@@ -111,6 +111,12 @@ const InfiniteCanvas = () => {
 
     draggingRef.current = false;
     setCursorGrabbing(false);
+
+    if (!hasDraggedRef.current) {
+      velocityRef.current = { x: 0, y: 0 };
+      return;
+    }
+
     const v = { ...velocityRef.current };
 
     const decay = () => {
@@ -158,6 +164,51 @@ const InfiniteCanvas = () => {
     return result;
   }, [tilesX, tilesY]);
 
+  const renderedTiles = useMemo(
+    () =>
+      tiles.map(({ tx, ty }) => (
+        <div
+          key={`${tx}-${ty}`}
+          className="absolute"
+          style={{
+            left: tx * TILE_W,
+            top: ty * TILE_H,
+            width: TILE_W,
+            height: TILE_H,
+          }}
+        >
+          {tileDoors.map(({ door, col, row }, i) => (
+            <div
+              key={i}
+              className="absolute group"
+              style={{
+                left: col * (CELL_W + GAP),
+                top: row * (CELL_H + GAP),
+                width: CELL_W,
+                height: CELL_H,
+              }}
+            >
+              <div
+                className="w-full h-full overflow-hidden flex items-center justify-center cursor-pointer"
+                onClick={() => {
+                  if (!hasDraggedRef.current) openPreview(door);
+                }}
+              >
+                <img
+                  src={door.image}
+                  alt={door.name}
+                  className="h-full w-auto object-contain transition-all duration-700 ease-out group-hover:scale-[1.06] group-hover:brightness-110"
+                  draggable={false}
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )),
+    [openPreview, tiles],
+  );
+
   return (
     <>
       <div
@@ -173,46 +224,7 @@ const InfiniteCanvas = () => {
           ref={innerRef}
           className="absolute top-0 left-0 will-change-transform"
         >
-          {tiles.map(({ tx, ty }) => (
-            <div
-              key={`${tx}-${ty}`}
-              className="absolute"
-              style={{
-                left: tx * TILE_W,
-                top: ty * TILE_H,
-                width: TILE_W,
-                height: TILE_H,
-              }}
-            >
-              {tileDoors.map(({ door, col, row }, i) => (
-                <div
-                  key={i}
-                  className="absolute group"
-                  style={{
-                    left: col * (CELL_W + GAP),
-                    top: row * (CELL_H + GAP),
-                    width: CELL_W,
-                    height: CELL_H,
-                  }}
-                >
-                  <div
-                    className="w-full h-full overflow-hidden flex items-center justify-center cursor-pointer"
-                    onClick={() => {
-                      if (!hasDraggedRef.current) openPreview(door);
-                    }}
-                  >
-                    <img
-                      src={door.image}
-                      alt={door.name}
-                      className="h-full w-auto object-contain transition-all duration-700 ease-out group-hover:scale-[1.06] group-hover:brightness-110"
-                      draggable={false}
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ))}
+          {renderedTiles}
         </div>
       </div>
 
