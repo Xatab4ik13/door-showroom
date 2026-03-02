@@ -7,21 +7,12 @@ interface DoorPart {
   label: string;
   dimensions: string;
   material: string;
+  /** Zone on the image (% based) used for clip-path extraction */
   zone: { left: number; top: number; width: number; height: number };
-  /** Where the callout anchor dot sits (% of image) */
+  /** Where the callout points to (% of image) */
   anchor: { x: number; y: number };
 }
 
-/*
- * Zone coordinates calibrated to the generated exploded-view render.
- * Left-to-right order matches the image:
- *  1. Доборный брус — dark wood slab, far left
- *  2. Коробка — black П-shaped frame
- *  3. Наличник — two thin silver/metal strips
- *  4. Продольная стоевая — brown wooden piece
- *  5. Филёнка — large glass panel
- *  6. Дверное полотно — dark wood slab, far right
- */
 const parts: DoorPart[] = [
   {
     id: 'dobor', label: 'Доборный брус',
@@ -65,16 +56,18 @@ interface Props {
   accentColor?: string;
 }
 
+const LIFT_PX = 24;
+
 const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-  const [imgRect, setImgRect] = useState<{ w: number; h: number; top: number } | null>(null);
+  const [imgSize, setImgSize] = useState<{ w: number; h: number } | null>(null);
 
   useEffect(() => {
     const measure = () => {
       const el = imgRef.current;
       if (!el) return;
-      setImgRect({ w: el.offsetWidth, h: el.offsetHeight, top: el.offsetTop });
+      setImgSize({ w: el.offsetWidth, h: el.offsetHeight });
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -90,76 +83,85 @@ const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
 
   return (
     <div className="w-full">
-      <div className="relative">
-        {/* Image */}
-        <img
+      <div className="relative overflow-visible">
+        {/* Base image — dims when a part is active */}
+        <motion.img
           ref={imgRef}
           src={explodedView}
           alt="Изометрическая проекция дверного блока в разобранном виде"
           className="w-full h-auto rounded-xl"
+          animate={{
+            filter: activeId ? 'brightness(0.5)' : 'brightness(1)',
+          }}
+          transition={{ duration: 0.35 }}
         />
 
-        {/* Clickable hotspot zones — positioned relative to image */}
-        {imgRect && parts.map((part) => {
-          const isActive = activeId === part.id;
-          return (
-            <motion.button
-              key={part.id}
-              onClick={() => handleClick(part.id)}
-              className="absolute rounded-md cursor-pointer"
-              style={{
-                left: `${part.zone.left}%`,
-                top: `${part.zone.top}%`,
-                width: `${part.zone.width}%`,
-                height: `${part.zone.height}%`,
-              }}
-              animate={{
-                y: isActive ? -16 : 0,
-                backgroundColor: isActive ? `${accentColor}18` : 'rgba(0,0,0,0)',
-                boxShadow: isActive
-                  ? `0 10px 30px -6px ${accentColor}30`
-                  : '0 0 0 0 transparent',
-              }}
-              whileHover={{
-                backgroundColor: `${accentColor}0d`,
-                y: isActive ? -16 : -3,
-              }}
-              transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-              aria-label={part.label}
-            >
-              <div
-                className="absolute inset-0 rounded-md pointer-events-none transition-colors"
-                style={{
-                  border: isActive ? `2px solid ${accentColor}` : '2px solid transparent',
-                }}
-              />
-            </motion.button>
-          );
-        })}
+        {/* Invisible click zones (always present) */}
+        {imgSize && parts.map((part) => (
+          <button
+            key={part.id}
+            onClick={() => handleClick(part.id)}
+            className="absolute cursor-pointer z-10"
+            style={{
+              left: `${part.zone.left}%`,
+              top: `${part.zone.top}%`,
+              width: `${part.zone.width}%`,
+              height: `${part.zone.height}%`,
+              background: 'transparent',
+              border: 'none',
+            }}
+            aria-label={part.label}
+          />
+        ))}
 
-        {/* Callout tooltip — rendered outside the image overflow */}
+        {/* Lifted "cut-out" of the active part — a clipped copy of the image */}
+        <AnimatePresence>
+          {activePart && imgSize && (
+            <motion.div
+              key={activePart.id}
+              initial={{ y: 0, opacity: 0 }}
+              animate={{ y: -LIFT_PX, opacity: 1 }}
+              exit={{ y: 0, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                clipPath: `inset(${activePart.zone.top}% ${100 - activePart.zone.left - activePart.zone.width}% ${100 - activePart.zone.top - activePart.zone.height}% ${activePart.zone.left}%)`,
+                filter: `drop-shadow(0 ${LIFT_PX}px 20px rgba(0,0,0,0.35))`,
+              }}
+            >
+              <img
+                src={explodedView}
+                alt=""
+                className="w-full h-auto rounded-xl"
+                aria-hidden
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Callout card with arrow */}
         <AnimatePresence mode="wait">
-          {activePart && imgRect && (() => {
-            const anchorXpx = (activePart.anchor.x / 100) * imgRect.w;
-            const anchorYpx = (activePart.anchor.y / 100) * imgRect.h;
+          {activePart && imgSize && (() => {
+            const anchorXpx = (activePart.anchor.x / 100) * imgSize.w;
+            const anchorYpx = (activePart.anchor.y / 100) * imgSize.h;
 
             return (
               <motion.div
-                key={activePart.id}
-                initial={{ opacity: 0, y: 10 }}
+                key={`callout-${activePart.id}`}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.25 }}
-                className="absolute pointer-events-none z-10"
+                exit={{ opacity: 0, y: 8 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+                className="absolute pointer-events-none z-20"
                 style={{
                   left: anchorXpx,
-                  top: anchorYpx - 16, // offset for the lift
+                  top: anchorYpx - LIFT_PX,
                   transform: 'translate(-50%, -100%)',
                 }}
               >
-                {/* Card */}
+                {/* Info card */}
                 <div
-                  className="pointer-events-auto rounded-lg px-4 py-3 shadow-lg border min-w-[180px] max-w-[250px] text-left mb-1"
+                  className="pointer-events-auto rounded-lg px-4 py-3 shadow-xl border min-w-[180px] max-w-[250px] text-left mb-1"
                   style={{
                     backgroundColor: 'hsl(var(--card))',
                     borderColor: accentColor,
@@ -179,22 +181,18 @@ const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
                   </p>
                 </div>
 
-                {/* Arrow: dashed line + dot */}
+                {/* Dashed arrow line + dot */}
                 <div className="flex flex-col items-center">
                   <div
                     style={{
                       width: 2,
-                      height: 32,
+                      height: 28,
                       background: `repeating-linear-gradient(to bottom, ${accentColor} 0px, ${accentColor} 4px, transparent 4px, transparent 7px)`,
                     }}
                   />
                   <div
                     className="rounded-full"
-                    style={{
-                      width: 8,
-                      height: 8,
-                      backgroundColor: accentColor,
-                    }}
+                    style={{ width: 8, height: 8, backgroundColor: accentColor }}
                   />
                 </div>
               </motion.div>
