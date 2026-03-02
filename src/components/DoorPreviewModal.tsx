@@ -14,23 +14,22 @@ const DoorPreviewModal = ({ door, isOpen, onClose, onClosed }: Props) => {
   return (
     <AnimatePresence mode="wait" onExitComplete={onClosed}>
       {isOpen && door && (
-        <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8"
-          onClick={onClose}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.25, ease: 'easeOut' }}
-        >
-          <div className="absolute inset-0 bg-foreground/20" />
-
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8" onClick={onClose}>
           <motion.div
-            className="relative bg-card rounded-2xl border border-border shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row"
-            onClick={(e) => e.stopPropagation()}
+            className="absolute inset-0 bg-foreground/20"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          />
+
+          <motion.div
+            className="relative bg-card rounded-2xl border border-border shadow-2xl w-[min(1100px,calc(100vw-2rem))] max-h-[90vh] overflow-y-auto grid grid-cols-1 md:grid-cols-2"
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
           >
             {/* Close */}
             <button
@@ -42,12 +41,14 @@ const DoorPreviewModal = ({ door, isOpen, onClose, onClosed }: Props) => {
             </button>
 
             {/* Image */}
-            <div className="md:w-1/2 flex items-center justify-center bg-secondary/30 p-8 md:p-12 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none min-h-[420px] md:min-h-[640px]">
-              <img src={door.image} alt={door.name} className="max-h-full w-auto object-contain" loading="eager" />
+            <div className="flex items-center justify-center bg-secondary/30 p-8 md:p-12 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none min-h-[420px] md:min-h-[640px]">
+              <div className="w-full max-w-[420px] aspect-[3/5]">
+                <img src={door.image} alt={door.name} width={900} height={1500} className="w-full h-full object-contain" loading="eager" />
+              </div>
             </div>
 
             {/* Info */}
-            <div className="md:w-1/2 p-6 md:p-10 flex flex-col justify-center">
+            <div className="p-6 md:p-10 flex flex-col justify-center">
               <span
                 className="inline-block self-start px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded bg-primary text-primary-foreground mb-3"
                 style={{ fontFamily: "'Oswald', sans-serif" }}
@@ -101,7 +102,7 @@ const DoorPreviewModal = ({ door, isOpen, onClose, onClosed }: Props) => {
               </Link>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );
