@@ -115,7 +115,7 @@ const Product = () => {
             Схема дверного блока
           </h2>
           <p className="text-muted-foreground text-sm mb-8">
-            Нажмите «Разобрать» и наведите на деталь
+            Нажмите на деталь для подробной информации
           </p>
           <DoorExplodedSVG accentColor={product.colors[0]} />
         </section>
