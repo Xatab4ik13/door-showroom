@@ -1,0 +1,27 @@
+name: Fix package-lock.json
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fix-lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Regenerate package-lock.json
+        run: |
+          rm -f package-lock.json
+          npm install
+
+      - name: Commit updated lockfile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "fix: regenerate package-lock.json" || echo "No changes"
+          git push
