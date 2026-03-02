@@ -12,13 +12,13 @@ const DoorPreviewModal = ({ door, onClose }: Props) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 animate-fade-in"
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-foreground/20" />
 
       <div
-        className="relative bg-card rounded-2xl border border-border shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row animate-in zoom-in-95 fade-in duration-200"
+        className="relative bg-card rounded-2xl border border-border shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close */}
