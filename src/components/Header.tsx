@@ -23,7 +23,7 @@ const Header = () => {
               key={item}
               href="#"
               className="relative text-sm tracking-[0.12em] uppercase text-[hsl(215,50%,15%)] hover:text-[hsl(205,85%,45%)] transition-colors duration-300 py-1 group"
-              style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 500 }}
+              style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 500, textShadow: '0 0 8px rgba(255,255,255,0.9), 0 0 16px rgba(255,255,255,0.5)' }}
               onMouseEnter={() => setActiveItem(item)}
               onMouseLeave={() => setActiveItem(null)}
             >
@@ -39,7 +39,7 @@ const Header = () => {
 
         <button
           onClick={() => setMenuOpen(true)}
-          className="p-2 text-[hsl(215,50%,15%)] hover:text-[hsl(205,85%,45%)] transition-colors"
+          className="p-2 text-[hsl(215,50%,15%)] hover:text-[hsl(205,85%,45%)] transition-colors drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]"
           aria-label="Открыть меню"
         >
           <Menu className="w-6 h-6" strokeWidth={1.5} />
