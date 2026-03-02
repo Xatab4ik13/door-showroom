@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Check } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductGallery from '@/components/product/ProductGallery';
@@ -15,6 +16,8 @@ const formatPrice = (price: number) =>
 const Product = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedColor, setSelectedColor] = useState(0);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const { addItem } = useCart();
   const product = catalogProducts.find((p) => p.id === id);
 
   if (!product) {
@@ -104,6 +107,33 @@ const Product = () => {
 
             {/* Specs */}
             <ProductSpecs product={product} />
+
+            {/* Add to cart */}
+            <button
+              onClick={() => {
+                addItem(product);
+                setAddedToCart(true);
+                setTimeout(() => setAddedToCart(false), 2000);
+              }}
+              className={`mt-6 w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-medium uppercase tracking-wider transition-all ${
+                addedToCart
+                  ? 'bg-green-600 text-white'
+                  : 'bg-[hsl(205,85%,45%)] text-white hover:opacity-90'
+              }`}
+              style={{ fontFamily: "'Oswald', sans-serif" }}
+            >
+              {addedToCart ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  Добавлено
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-4 h-4" />
+                  В корзину — {formatPrice(product.price)}
+                </>
+              )}
+            </button>
           </div>
 
           {/* Configurator */}
