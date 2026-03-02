@@ -7,8 +7,10 @@ interface DoorPart {
   label: string;
   dimensions: string;
   material: string;
-  /** Zone on the image (% based) used for clip-path extraction */
+  /** Zone used for clicks (% based) */
   zone: { left: number; top: number; width: number; height: number };
+  /** Exact cut-out shape of the part on the full image */
+  clipPath: string;
   /** Where the callout points to (% of image) */
   anchor: { x: number; y: number };
 }
@@ -17,38 +19,44 @@ const parts: DoorPart[] = [
   {
     id: 'dobor', label: 'Доборный брус',
     dimensions: '15 × 100–200 × 2080 мм', material: 'МДФ, ламинат',
-    zone: { left: 6, top: 14, width: 16, height: 76 },
-    anchor: { x: 14, y: 30 },
+    zone: { left: 7, top: 20, width: 14, height: 64 },
+    clipPath: 'polygon(12% 35%, 20% 42%, 20% 77%, 12% 70%)',
+    anchor: { x: 16, y: 44 },
   },
   {
     id: 'korobka', label: 'Коробка',
     dimensions: '40 × 74 × 2080 мм', material: 'МДФ, шпон или экошпон',
-    zone: { left: 24, top: 6, width: 20, height: 86 },
-    anchor: { x: 34, y: 22 },
+    zone: { left: 29, top: 18, width: 14, height: 70 },
+    clipPath: 'polygon(33% 27%, 37% 23%, 41.5% 27%, 41.5% 80%, 37% 84%, 33% 80%)',
+    anchor: { x: 38, y: 38 },
   },
   {
     id: 'nalichnik', label: 'Наличник',
     dimensions: '10 × 70 × 2150 мм', material: 'МДФ с покрытием',
-    zone: { left: 45, top: 8, width: 7, height: 82 },
-    anchor: { x: 48, y: 25 },
+    zone: { left: 39, top: 24, width: 8, height: 55 },
+    clipPath: 'polygon(40% 41%, 44% 38%, 44% 70%, 40% 73%)',
+    anchor: { x: 42, y: 45 },
   },
   {
     id: 'stoevaya', label: 'Продольная стоевая',
     dimensions: '40 × 74 × 2000 мм', material: 'Массив сосны / МДФ',
-    zone: { left: 53, top: 6, width: 9, height: 84 },
-    anchor: { x: 57, y: 22 },
+    zone: { left: 53.5, top: 20, width: 5, height: 60 },
+    clipPath: 'polygon(54.5% 34%, 57% 32%, 57% 73%, 54.5% 75%)',
+    anchor: { x: 56, y: 42 },
   },
   {
     id: 'filyonka', label: 'Филёнка',
     dimensions: 'По модели двери', material: 'МДФ, стекло или шпон',
-    zone: { left: 58, top: 4, width: 15, height: 86 },
-    anchor: { x: 65, y: 20 },
+    zone: { left: 59, top: 16, width: 11, height: 66 },
+    clipPath: 'polygon(60% 30%, 68% 24%, 68% 71%, 60% 77%)',
+    anchor: { x: 64, y: 40 },
   },
   {
     id: 'polotno', label: 'Дверное полотно',
     dimensions: '36 × 800 × 2000 мм', material: 'МДФ каркас, сотовый наполнитель',
-    zone: { left: 74, top: 3, width: 20, height: 88 },
-    anchor: { x: 84, y: 18 },
+    zone: { left: 74, top: 12, width: 11, height: 68 },
+    clipPath: 'polygon(74.5% 24%, 83.5% 18%, 83.5% 70%, 74.5% 76%)',
+    anchor: { x: 79, y: 34 },
   },
 ];
 
@@ -85,16 +93,19 @@ const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
     <div className="w-full">
       <div className="relative overflow-visible">
         {/* Base image — dims when a part is active */}
-        <motion.img
-          ref={imgRef}
-          src={explodedView}
-          alt="Изометрическая проекция дверного блока в разобранном виде"
-          className="w-full h-auto rounded-xl"
+        <motion.div
           animate={{
-            filter: activeId ? 'brightness(0.5)' : 'brightness(1)',
+            filter: activeId ? 'brightness(0.72)' : 'brightness(1)',
           }}
           transition={{ duration: 0.35 }}
-        />
+        >
+          <img
+            ref={imgRef}
+            src={explodedView}
+            alt="Изометрическая проекция дверного блока в разобранном виде"
+            className="w-full h-auto rounded-xl"
+          />
+        </motion.div>
 
         {/* Invisible click zones (always present) */}
         {imgSize && parts.map((part) => (
@@ -119,20 +130,21 @@ const DoorExplodedSVG = ({ accentColor = '#8B7355' }: Props) => {
           {activePart && imgSize && (
             <motion.div
               key={activePart.id}
-              initial={{ y: 0, opacity: 0 }}
-              animate={{ y: -LIFT_PX, opacity: 1 }}
-              exit={{ y: 0, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+              initial={{ y: 0, opacity: 0, scale: 1 }}
+              animate={{ y: -LIFT_PX, opacity: 1, scale: 1.03 }}
+              exit={{ y: 0, opacity: 0, scale: 1 }}
+              transition={{ type: 'spring', stiffness: 280, damping: 22 }}
               className="absolute inset-0 pointer-events-none"
               style={{
-                clipPath: `inset(${activePart.zone.top}% ${100 - activePart.zone.left - activePart.zone.width}% ${100 - activePart.zone.top - activePart.zone.height}% ${activePart.zone.left}%)`,
-                filter: `drop-shadow(0 ${LIFT_PX}px 20px rgba(0,0,0,0.35))`,
+                clipPath: activePart.clipPath,
+                transformOrigin: `${activePart.anchor.x}% ${activePart.anchor.y}%`,
+                filter: `drop-shadow(0 ${LIFT_PX}px 22px rgba(0,0,0,0.35))`,
               }}
             >
               <img
                 src={explodedView}
                 alt=""
-                className="w-full h-auto rounded-xl"
+                className="w-full h-auto"
                 aria-hidden
               />
             </motion.div>
