@@ -1,5 +1,4 @@
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import InfiniteCanvas from '@/components/InfiniteCanvas';
 
 const Index = () => {
@@ -7,7 +6,6 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <InfiniteCanvas />
-      <Footer />
     </div>
   );
 };
