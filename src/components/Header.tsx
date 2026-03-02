@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import logo from '@/assets/logo.png';
 import door06 from '@/assets/doors/door-06.jpg';
 
 const navItems = ['Каталог', 'Коллекции', 'Дизайнерам', 'Вдохновение', 'Контакты'];
@@ -11,8 +12,8 @@ const Header = () => {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-40 px-6 md:px-12 py-5 flex items-center justify-between bg-background/70 backdrop-blur-md">
-        <a href="/" className="font-serif text-2xl tracking-[0.3em] font-light text-foreground">
-          RUSDOORS
+        <a href="/" className="flex items-center">
+          <img src={logo} alt="RUSDOORS" className="h-8 md:h-10 w-auto" />
         </a>
 
         <nav className="hidden lg:flex items-center gap-10">
