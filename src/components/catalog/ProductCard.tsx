@@ -35,11 +35,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
       className="group bg-card rounded-lg overflow-hidden border border-border hover:shadow-lg transition-shadow duration-300 cursor-pointer"
     >
       {/* Image */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-secondary">
+      <div className="relative aspect-[2/3] overflow-hidden bg-secondary flex items-center justify-center p-4">
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
         />
         {/* Tags */}
