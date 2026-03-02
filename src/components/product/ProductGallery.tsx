@@ -7,11 +7,11 @@ interface ProductGalleryProps {
 const ProductGallery = ({ product }: ProductGalleryProps) => {
   return (
     <div className="w-full">
-      <div className="aspect-[3/4] rounded-lg overflow-hidden bg-secondary">
+      <div className="rounded-lg overflow-hidden bg-secondary flex items-center justify-center p-6 min-h-[500px]">
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover"
+          className="max-h-[70vh] w-auto object-contain"
         />
       </div>
       {/* Thumbnail strip — can be expanded later with more images */}
