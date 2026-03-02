@@ -151,7 +151,7 @@ const Header = () => {
                     <Link
                       to={item.href}
                       onClick={() => setMenuOpen(false)}
-                      className="group flex items-center justify-between py-4 border-b border-border"
+                      className="group flex items-center py-4 border-b border-border"
                     >
                       <span
                         className="text-2xl sm:text-3xl font-bold uppercase tracking-wider text-foreground group-hover:text-[hsl(205,85%,45%)] transition-colors duration-300"
@@ -159,7 +159,6 @@ const Header = () => {
                       >
                         {item.label}
                       </span>
-                      <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-[hsl(205,85%,45%)] group-hover:translate-x-1 transition-all duration-300" />
                     </Link>
                   </motion.div>
                 ))}
