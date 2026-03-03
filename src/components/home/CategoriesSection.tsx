@@ -3,11 +3,15 @@ import { motion } from 'framer-motion';
 import catMezhkomnatnye from '@/assets/doors/cat-mezhkomnatnye.png';
 import catVhodnye from '@/assets/doors/cat-vhodnye.png';
 import catPeregorodki from '@/assets/doors/cat-peregorodki.png';
+import catFurnitura from '@/assets/doors/cat-furnitura.png';
+import catSpecialnye from '@/assets/doors/cat-specialnye.png';
 
 const categoryItems = [
   { key: 'mezhkomnatnye', label: 'Межкомнатные двери', image: catMezhkomnatnye, scale: 1 },
   { key: 'vhodnye', label: 'Входные двери', image: catVhodnye, scale: 1 },
   { key: 'peregorodki', label: 'Перегородки', image: catPeregorodki, scale: 1.18 },
+  { key: 'specialnye', label: 'Специальные двери', image: catSpecialnye, scale: 1 },
+  { key: 'furnitura', label: 'Фурнитура', image: catFurnitura, scale: 0.55 },
 ];
 
 const CategoriesSection = () => {
@@ -20,7 +24,7 @@ const CategoriesSection = () => {
         Категории
       </h2>
 
-      <div className="flex gap-8 md:gap-12 lg:gap-16 justify-center items-end pb-6">
+      <div className="flex flex-wrap gap-8 md:gap-12 lg:gap-16 justify-center items-end pb-6">
         {categoryItems.map((cat, i) => (
           <motion.div
             key={cat.key}
