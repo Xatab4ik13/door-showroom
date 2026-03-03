@@ -40,11 +40,11 @@ const CategoriesSection = () => {
               to={`/catalog?category=${cat.key}`}
               className="group block text-center"
             >
-              <div className="h-[280px] md:h-[360px] lg:h-[400px] flex items-end justify-center mb-4">
+              <div className="h-[280px] md:h-[360px] lg:h-[400px] flex items-end justify-center mb-4 overflow-visible">
                 <img
                   src={cat.image}
                   alt={cat.label}
-                  className="max-h-full w-auto object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.15)] transition-transform duration-500 group-hover:scale-105"
+                  className="h-full w-auto object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.15)] transition-transform duration-500 group-hover:scale-105"
                   draggable={false}
                 />
               </div>
