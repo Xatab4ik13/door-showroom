@@ -1,16 +1,22 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Send, ArrowRight, CheckCircle2 } from 'lucide-react';
-import maxIcon from '@/assets/icons/max-messenger.png';
 
 type ContactMethod = 'phone' | 'telegram' | 'max';
 
-type MethodDef = { key: ContactMethod; label: string; icon?: typeof Phone; img?: string };
+const MaxIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M21 12a9 9 0 0 1-9 9c-1.5 0-3-.4-4.2-1L3 21l1-4.8A9 9 0 1 1 21 12Z" />
+    <circle cx="12" cy="12" r="3.5" />
+  </svg>
+);
+
+type MethodDef = { key: ContactMethod; label: string; icon?: typeof Phone; customIcon?: React.FC<{ className?: string }> };
 
 const methods: MethodDef[] = [
   { key: 'phone', label: 'Телефон', icon: Phone },
   { key: 'telegram', label: 'Telegram', icon: Send },
-  { key: 'max', label: 'Max', img: maxIcon },
+  { key: 'max', label: 'Max', customIcon: MaxIcon },
 ];
 
 const ConsultationSection = () => {
@@ -89,21 +95,8 @@ const ConsultationSection = () => {
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    {m.img ? (
-                      <span
-                        className="w-5 h-5 block"
-                        style={{
-                          WebkitMaskImage: `url(${m.img})`,
-                          maskImage: `url(${m.img})`,
-                          WebkitMaskSize: 'contain',
-                          maskSize: 'contain',
-                          WebkitMaskRepeat: 'no-repeat',
-                          maskRepeat: 'no-repeat',
-                          WebkitMaskPosition: 'center',
-                          maskPosition: 'center',
-                          backgroundColor: 'currentColor',
-                        }}
-                      />
+                    {m.customIcon ? (
+                      <m.customIcon className="w-5 h-5" />
                     ) : (
                       m.icon && <m.icon className="w-5 h-5" strokeWidth={1.5} />
                     )}
