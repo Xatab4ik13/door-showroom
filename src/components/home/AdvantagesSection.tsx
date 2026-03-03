@@ -11,7 +11,7 @@ const advantages = [
 
 const AdvantagesSection = () => {
   return (
-    <section className="py-10 md:py-14 px-4 md:px-8 lg:px-12 bg-secondary/50 border-y border-border/50 relative overflow-hidden">
+    <section className="py-10 md:py-14 px-4 md:px-8 lg:px-12 bg-background relative overflow-hidden">
 
       <div className="max-w-[1600px] mx-auto">
         <div className="flex flex-wrap justify-center md:justify-between items-start gap-6 md:gap-4">
