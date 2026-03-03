@@ -22,20 +22,7 @@ const CategoriesSection = () => {
           className="text-3xl md:text-4xl font-bold uppercase tracking-wide text-foreground mb-10 md:mb-14"
           style={{ fontFamily: "'Oswald', sans-serif" }}
         >
-          КАТЕ
-          <span className="inline-block relative align-baseline" style={{ width: '0.65em', height: '1em' }}>
-            <svg
-              viewBox="0 0 22 32"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="absolute bottom-0 left-0 h-[1em] w-auto"
-              style={{ transform: 'perspective(180px) rotateY(-18deg)', transformOrigin: 'left bottom' }}
-            >
-              <rect x="1" y="0" width="19" height="31" rx="1.5" fill="hsl(205, 85%, 45%)" />
-              <circle cx="15.5" cy="16" r="1.8" fill="hsl(215, 50%, 15%)" />
-            </svg>
-          </span>
-          ОРИИ
+          КАТЕ<span className="text-[hsl(205,85%,45%)]">Г</span>ОРИИ
         </h2>
 
         <div className="flex gap-4 md:gap-6 lg:gap-8 justify-center items-end pb-6">
