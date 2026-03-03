@@ -24,10 +24,11 @@ const CategoriesSection = () => {
         Категории
       </h2>
 
-      <div className="flex flex-wrap gap-8 md:gap-12 lg:gap-16 justify-center items-end pb-6">
+      <div className="flex gap-4 md:gap-6 lg:gap-8 justify-center items-end pb-6">
         {categoryItems.map((cat, i) => (
           <motion.div
             key={cat.key}
+            className="flex-1 min-w-0 max-w-[240px]"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-50px' }}
@@ -37,7 +38,7 @@ const CategoriesSection = () => {
               to={`/catalog?category=${cat.key}`}
               className="group block text-center"
             >
-              <div className="h-[280px] md:h-[360px] lg:h-[400px] flex items-end justify-center mb-4">
+              <div className="h-[180px] md:h-[240px] lg:h-[280px] flex items-end justify-center mb-4">
                 <img
                   src={cat.image}
                   alt={cat.label}
