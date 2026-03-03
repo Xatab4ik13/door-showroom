@@ -1,8 +1,93 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { categories, materials, finishes, catalogProducts } from '@/data/catalog';
+
+/* ── Dual Range Slider ── */
+interface SliderProps {
+  min: number;
+  max: number;
+  step: number;
+  value: [number, number];
+  onChange: (v: [number, number]) => void;
+}
+
+const DualRangeSlider = ({ min, max, step, value, onChange }: SliderProps) => {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const dragging = useRef<'min' | 'max' | null>(null);
+
+  const pct = (v: number) => ((v - min) / (max - min)) * 100;
+  const snap = (v: number) => Math.round(v / step) * step;
+
+  const getValueFromX = useCallback((clientX: number) => {
+    const rect = trackRef.current?.getBoundingClientRect();
+    if (!rect) return min;
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    return snap(min + ratio * (max - min));
+  }, [min, max, step]);
+
+  const handlePointerDown = (thumb: 'min' | 'max') => (e: React.PointerEvent) => {
+    e.preventDefault();
+    dragging.current = thumb;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!dragging.current) return;
+    const raw = getValueFromX(e.clientX);
+    if (dragging.current === 'min') {
+      onChange([Math.min(raw, value[1] - step), value[1]]);
+    } else {
+      onChange([value[0], Math.max(raw, value[0] + step)]);
+    }
+  };
+
+  const handlePointerUp = () => {
+    dragging.current = null;
+  };
+
+  const handleTrackClick = (e: React.MouseEvent) => {
+    const raw = getValueFromX(e.clientX);
+    const distMin = Math.abs(raw - value[0]);
+    const distMax = Math.abs(raw - value[1]);
+    if (distMin <= distMax) {
+      onChange([Math.min(raw, value[1] - step), value[1]]);
+    } else {
+      onChange([value[0], Math.max(raw, value[0] + step)]);
+    }
+  };
+
+  return (
+    <div
+      ref={trackRef}
+      className="relative h-8 flex items-center cursor-pointer select-none touch-none"
+      onClick={handleTrackClick}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+    >
+      {/* Track bg */}
+      <div className="absolute left-0 right-0 h-1.5 bg-border rounded-full" />
+      {/* Active range */}
+      <div
+        className="absolute h-1.5 bg-[hsl(205,85%,45%)] rounded-full"
+        style={{ left: `${pct(value[0])}%`, right: `${100 - pct(value[1])}%` }}
+      />
+      {/* Min thumb */}
+      <div
+        className="absolute w-5 h-5 -translate-x-1/2 rounded-full bg-[hsl(205,85%,45%)] border-[3px] border-white shadow-md z-10 cursor-grab active:cursor-grabbing active:scale-125 hover:scale-110 transition-transform duration-100"
+        style={{ left: `${pct(value[0])}%` }}
+        onPointerDown={handlePointerDown('min')}
+      />
+      {/* Max thumb */}
+      <div
+        className="absolute w-5 h-5 -translate-x-1/2 rounded-full bg-[hsl(205,85%,45%)] border-[3px] border-white shadow-md z-10 cursor-grab active:cursor-grabbing active:scale-125 hover:scale-110 transition-transform duration-100"
+        style={{ left: `${pct(value[1])}%` }}
+        onPointerDown={handlePointerDown('max')}
+      />
+    </div>
+  );
+};
 
 const DoorCalculator = () => {
   const navigate = useNavigate();
@@ -144,38 +229,13 @@ const DoorCalculator = () => {
                 </span>
                 <span className="text-sm text-muted-foreground" style={{ fontFamily: "'Oswald', sans-serif" }}>₽</span>
               </div>
-              <div className="relative h-6 flex items-center">
-                {/* Track background */}
-                <div className="absolute left-0 right-0 h-1.5 bg-border rounded-full" />
-                {/* Active range */}
-                <div
-                  className="absolute h-1.5 bg-[hsl(205,85%,45%)] rounded-full transition-all duration-150 ease-out"
-                  style={{
-                    left: `${((priceRange[0] - minPrice) / (maxPrice - minPrice)) * 100}%`,
-                    right: `${100 - ((priceRange[1] - minPrice) / (maxPrice - minPrice)) * 100}%`,
-                  }}
-                />
-                {/* Min thumb */}
-                <input
-                  type="range"
-                  min={minPrice}
-                  max={maxPrice}
-                  step={100}
-                  value={priceRange[0]}
-                  onChange={(e) => setPriceRange([Math.min(Number(e.target.value), priceRange[1] - 500), priceRange[1]])}
-                  className="absolute w-full appearance-none bg-transparent pointer-events-none z-20 h-6 slider-thumb-left"
-                />
-                {/* Max thumb */}
-                <input
-                  type="range"
-                  min={minPrice}
-                  max={maxPrice}
-                  step={100}
-                  value={priceRange[1]}
-                  onChange={(e) => setPriceRange([priceRange[0], Math.max(Number(e.target.value), priceRange[0] + 500)])}
-                  className="absolute w-full appearance-none bg-transparent pointer-events-none z-20 h-6 slider-thumb-right"
-                />
-              </div>
+              <DualRangeSlider
+                min={minPrice}
+                max={maxPrice}
+                step={100}
+                value={priceRange}
+                onChange={setPriceRange}
+              />
             </div>
           </div>
 
