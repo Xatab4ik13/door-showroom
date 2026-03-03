@@ -5,6 +5,7 @@ import CategoriesSection from '@/components/home/CategoriesSection';
 import PopularProducts from '@/components/home/PopularProducts';
 import AdvantagesSection from '@/components/home/AdvantagesSection';
 import DoorCalculator from '@/components/home/DoorCalculator';
+import ConsultationSection from '@/components/home/ConsultationSection';
 
 const Index = () => {
   return (
@@ -16,6 +17,7 @@ const Index = () => {
         <PopularProducts />
         <AdvantagesSection />
         <DoorCalculator />
+        <ConsultationSection />
       </main>
       <Footer />
     </div>
