@@ -19,7 +19,7 @@ const CategoriesSection = () => {
     <section
       className="py-16 md:py-24 px-4 md:px-8 lg:px-12 relative overflow-hidden"
       style={{
-        background: 'linear-gradient(160deg, hsl(0 0% 100%) 0%, hsl(205 40% 97%) 30%, hsl(205 50% 94%) 60%, hsl(205 30% 97%) 80%, hsl(0 0% 100%) 100%)',
+        background: 'linear-gradient(160deg, hsl(205 60% 95%) 0%, hsl(205 70% 90%) 35%, hsl(205 50% 93%) 65%, hsl(205 60% 95%) 100%)',
       }}
     >
       <div className="max-w-[1600px] mx-auto">
