@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import banner01 from '@/assets/banners/banner-01.jpg';
-import banner02 from '@/assets/banners/banner-02.jpg';
 import banner03 from '@/assets/banners/banner-03.jpg';
 
 const slides = [
@@ -12,13 +11,6 @@ const slides = [
     title: 'Премиальные двери',
     subtitle: 'для вашего интерьера',
     cta: 'Смотреть каталог',
-    href: '/catalog',
-  },
-  {
-    image: banner02,
-    title: 'Входные двери',
-    subtitle: 'надёжность и стиль',
-    cta: 'Подробнее',
     href: '/catalog',
   },
   {
@@ -42,25 +34,22 @@ const HeroBanner = () => {
   }, [next]);
 
   return (
-    <section className="relative w-full h-[60vh] md:h-[75vh] lg:h-[85vh] overflow-hidden">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={current}
-          initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute inset-0"
+    <section className="relative w-full h-screen overflow-hidden">
+      {/* All slides stacked — crossfade via CSS transition */}
+      {slides.map((slide, i) => (
+        <div
+          key={i}
+          className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+          style={{ opacity: i === current ? 1 : 0 }}
         >
           <img
-            src={slides[current].image}
-            alt={slides[current].title}
+            src={slide.image}
+            alt={slide.title}
             className="w-full h-full object-cover"
           />
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-        </motion.div>
-      </AnimatePresence>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/10" />
+        </div>
+      ))}
 
       {/* Content */}
       <div className="absolute inset-0 flex items-end pb-16 md:pb-24 px-6 md:px-12 lg:px-16">
@@ -70,7 +59,7 @@ const HeroBanner = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
             className="max-w-xl"
           >
             <h1
