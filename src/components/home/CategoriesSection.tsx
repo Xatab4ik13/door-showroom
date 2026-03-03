@@ -1,16 +1,16 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import catMezhkomnatnye from '@/assets/doors/cat-mezhkomnatnye.png';
-import door04 from '@/assets/doors/door-04.jpg';
-import door06 from '@/assets/doors/door-06.jpg';
+import catVhodnye from '@/assets/doors/cat-vhodnye.png';
+import catPeregorodki from '@/assets/doors/cat-peregorodki.png';
 import door09 from '@/assets/doors/door-09.jpg';
 import door11 from '@/assets/doors/door-11.jpg';
 import door12 from '@/assets/doors/door-12.jpg';
 
 const categoryItems = [
   { key: 'mezhkomnatnye', label: 'Межкомнатные двери', image: catMezhkomnatnye },
-  { key: 'vhodnye', label: 'Входные двери', image: door04 },
-  { key: 'peregorodki', label: 'Перегородки', image: door06 },
+  { key: 'vhodnye', label: 'Входные двери', image: catVhodnye },
+  { key: 'peregorodki', label: 'Перегородки', image: catPeregorodki },
   { key: 'specialnye', label: 'Специальные двери', image: door09 },
   { key: 'furnitura', label: 'Фурнитура', image: door11 },
   { key: 'sistemy-otkryvaniya', label: 'Системы открывания', image: door12 },
