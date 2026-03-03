@@ -14,6 +14,17 @@ const AdvantagesSection = () => {
     <section className="py-10 md:py-14 px-4 md:px-8 lg:px-12 bg-background relative overflow-hidden">
 
       <div className="max-w-[1600px] mx-auto">
+        <div className="text-center mb-10 md:mb-14">
+          <h2
+            className="text-3xl md:text-4xl font-bold uppercase tracking-wide text-foreground"
+            style={{ fontFamily: "'Oswald', sans-serif" }}
+          >
+            ПР<span className="text-[hsl(205,85%,45%)]">Е</span>ИМУЩЕСТ<span className="text-[hsl(205,85%,45%)]">В</span>А
+          </h2>
+          <p className="text-sm md:text-base text-muted-foreground mt-2" style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 300 }}>
+            Несколько причин почему стоит выбрать нас
+          </p>
+        </div>
         <div className="flex flex-wrap justify-center md:justify-between items-start gap-6 md:gap-4">
           {advantages.map((item, i) => (
             <motion.div
