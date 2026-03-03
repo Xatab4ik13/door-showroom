@@ -39,11 +39,13 @@ const CategoriesSection = () => {
               className="group block text-center"
             >
               <div className="h-[180px] md:h-[240px] lg:h-[280px] flex items-end justify-center mb-4">
-                <img
+                <motion.img
                   src={cat.image}
                   alt={cat.label}
-                  className="h-full w-auto object-contain origin-center drop-shadow-[0_8px_20px_rgba(0,0,0,0.15)] transition-transform duration-500 group-hover:scale-[1.08]"
-                  style={{ transform: `scale(${cat.scale})` }}
+                  className="h-full w-auto object-contain origin-center drop-shadow-[0_8px_20px_rgba(0,0,0,0.15)]"
+                  initial={{ scale: cat.scale }}
+                  whileHover={{ scale: cat.scale * 1.08 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 />
               </div>
 
