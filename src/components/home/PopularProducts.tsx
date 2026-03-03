@@ -15,7 +15,7 @@ const PopularProducts = () => {
             className="text-3xl md:text-4xl font-bold uppercase tracking-wide text-foreground"
             style={{ fontFamily: "'Oswald', sans-serif" }}
           >
-            Популярные товары
+            ПОПУ<span className="text-[hsl(205,85%,45%)]">Л</span>ЯРНЫЕ ТОВ<span className="text-[hsl(205,85%,45%)]">А</span>РЫ
           </h2>
           <Link
             to="/catalog?tag=popular"
