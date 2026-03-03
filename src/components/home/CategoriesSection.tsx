@@ -26,7 +26,7 @@ const CategoriesSection = () => {
         Категории
       </h2>
 
-      <div className="flex gap-4 md:gap-6 overflow-x-auto pb-4 scrollbar-hide">
+      <div className="flex gap-8 md:gap-12 lg:gap-16 overflow-x-auto pb-6 scrollbar-hide">
         {categoryItems.map((cat, i) => (
           <motion.div
             key={cat.key}
@@ -34,23 +34,21 @@ const CategoriesSection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-50px' }}
             transition={{ duration: 0.5, delay: i * 0.08 }}
-            className="flex-shrink-0 w-[140px] md:w-[180px] lg:w-[200px]"
+            className="flex-shrink-0 w-[180px] md:w-[220px] lg:w-[240px]"
           >
             <Link
               to={`/catalog?category=${cat.key}`}
               className="group block text-center"
             >
-              {/* Floating door image — no border, just shadow */}
-              <div className="h-[200px] md:h-[260px] lg:h-[300px] flex items-end justify-center mb-3">
+              <div className="h-[280px] md:h-[360px] lg:h-[400px] flex items-end justify-center mb-4">
                 <img
                   src={cat.image}
                   alt={cat.label}
-                  className="max-h-full w-auto object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.15)] transition-all duration-500 group-hover:scale-105 group-hover:drop-shadow-[0_12px_30px_rgba(0,0,0,0.25)]"
+                  className="max-h-full w-auto object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.15)] transition-transform duration-500 group-hover:scale-105"
                   draggable={false}
                 />
               </div>
 
-              {/* Label */}
               <span
                 className="text-xs md:text-sm font-medium uppercase tracking-[0.1em] text-foreground"
                 style={{ fontFamily: "'Oswald', sans-serif" }}
