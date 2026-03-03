@@ -90,7 +90,20 @@ const ConsultationSection = () => {
                     whileTap={{ scale: 0.97 }}
                   >
                     {m.img ? (
-                      <img src={m.img} alt={m.label} className="w-5 h-5 rounded-sm brightness-0 invert opacity-60 group-data-[active=true]:opacity-100 group-data-[active=true]:brightness-100 group-data-[active=true]:invert-0" />
+                      <span
+                        className="w-5 h-5 block"
+                        style={{
+                          WebkitMaskImage: `url(${m.img})`,
+                          maskImage: `url(${m.img})`,
+                          WebkitMaskSize: 'contain',
+                          maskSize: 'contain',
+                          WebkitMaskRepeat: 'no-repeat',
+                          maskRepeat: 'no-repeat',
+                          WebkitMaskPosition: 'center',
+                          maskPosition: 'center',
+                          backgroundColor: 'currentColor',
+                        }}
+                      />
                     ) : (
                       m.icon && <m.icon className="w-5 h-5" strokeWidth={1.5} />
                     )}
