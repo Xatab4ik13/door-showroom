@@ -144,15 +144,18 @@ const DoorCalculator = () => {
                 </span>
                 <span className="text-sm text-muted-foreground" style={{ fontFamily: "'Oswald', sans-serif" }}>₽</span>
               </div>
-              <div className="relative h-1.5">
-                <div className="absolute inset-0 bg-border rounded-full" />
+              <div className="relative h-6 flex items-center">
+                {/* Track background */}
+                <div className="absolute left-0 right-0 h-1.5 bg-border rounded-full" />
+                {/* Active range */}
                 <div
-                  className="absolute top-0 h-full bg-[hsl(205,85%,45%)] rounded-full"
+                  className="absolute h-1.5 bg-[hsl(205,85%,45%)] rounded-full transition-all duration-150 ease-out"
                   style={{
                     left: `${((priceRange[0] - minPrice) / (maxPrice - minPrice)) * 100}%`,
                     right: `${100 - ((priceRange[1] - minPrice) / (maxPrice - minPrice)) * 100}%`,
                   }}
                 />
+                {/* Min thumb */}
                 <input
                   type="range"
                   min={minPrice}
@@ -160,8 +163,9 @@ const DoorCalculator = () => {
                   step={100}
                   value={priceRange[0]}
                   onChange={(e) => setPriceRange([Math.min(Number(e.target.value), priceRange[1] - 500), priceRange[1]])}
-                  className="absolute inset-0 w-full opacity-0 cursor-pointer z-10"
+                  className="absolute w-full appearance-none bg-transparent pointer-events-none z-20 h-6 slider-thumb-left"
                 />
+                {/* Max thumb */}
                 <input
                   type="range"
                   min={minPrice}
@@ -169,7 +173,7 @@ const DoorCalculator = () => {
                   step={100}
                   value={priceRange[1]}
                   onChange={(e) => setPriceRange([priceRange[0], Math.max(Number(e.target.value), priceRange[0] + 500)])}
-                  className="absolute inset-0 w-full opacity-0 cursor-pointer z-10"
+                  className="absolute w-full appearance-none bg-transparent pointer-events-none z-20 h-6 slider-thumb-right"
                 />
               </div>
             </div>
