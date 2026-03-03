@@ -11,9 +11,7 @@ const advantages = [
 
 const AdvantagesSection = () => {
   return (
-    <section className="py-10 md:py-14 px-4 md:px-8 lg:px-12 bg-[hsl(215,50%,12%)] relative overflow-hidden">
-      {/* Subtle accent line top */}
-      <div className="absolute top-0 left-0 right-0 h-[3px] bg-[hsl(205,85%,45%)]" />
+    <section className="py-10 md:py-14 px-4 md:px-8 lg:px-12 bg-secondary/50 border-y border-border/50 relative overflow-hidden">
 
       <div className="max-w-[1600px] mx-auto">
         <div className="flex flex-wrap justify-center md:justify-between items-start gap-6 md:gap-4">
@@ -33,18 +31,18 @@ const AdvantagesSection = () => {
                 transition={{ type: 'spring', stiffness: 400, damping: 15 }}
               >
                 {/* Background shape */}
-                <div className="absolute inset-0 rounded-lg bg-[hsl(205,85%,45%)] opacity-15 rotate-3 group-hover:rotate-6 group-hover:opacity-25 transition-all duration-500" />
-                <div className="absolute inset-0.5 rounded-lg border border-[hsl(205,85%,45%)]/30 -rotate-2 group-hover:rotate-0 transition-all duration-500" />
+                <div className="absolute inset-0 rounded-lg bg-[hsl(205,85%,45%)]/10 rotate-3 group-hover:rotate-6 group-hover:bg-[hsl(205,85%,45%)]/20 transition-all duration-500" />
+                <div className="absolute inset-0.5 rounded-lg border border-[hsl(205,85%,45%)]/20 -rotate-2 group-hover:rotate-0 transition-all duration-500" />
                 
                 <item.icon
-                  className="relative z-10 w-7 h-7 md:w-8 md:h-8 text-[hsl(205,85%,45%)] group-hover:text-white transition-colors duration-300"
+                  className="relative z-10 w-7 h-7 md:w-8 md:h-8 text-[hsl(205,85%,45%)] group-hover:text-[hsl(205,85%,35%)] transition-colors duration-300"
                   strokeWidth={1.5}
                 />
               </motion.div>
 
               {/* Title */}
               <span
-                className="text-xs md:text-sm font-bold uppercase tracking-[0.1em] text-white/90 leading-tight"
+                className="text-xs md:text-sm font-bold uppercase tracking-[0.1em] text-foreground leading-tight"
                 style={{ fontFamily: "'Oswald', sans-serif" }}
               >
                 {item.title}
@@ -52,7 +50,7 @@ const AdvantagesSection = () => {
 
               {/* Description */}
               <span
-                className="text-[10px] md:text-xs text-white/40 mt-1 tracking-wide"
+                className="text-[10px] md:text-xs text-muted-foreground mt-1 tracking-wide"
                 style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 300 }}
               >
                 {item.desc}
@@ -61,9 +59,6 @@ const AdvantagesSection = () => {
           ))}
         </div>
       </div>
-
-      {/* Subtle accent line bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[hsl(205,85%,45%)]" />
     </section>
   );
 };
