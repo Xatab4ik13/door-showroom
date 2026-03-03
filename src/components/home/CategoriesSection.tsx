@@ -25,11 +25,11 @@ const CategoriesSection = () => {
           КАТЕ<span className="text-[hsl(205,85%,45%)]">Г</span>ОРИИ
         </h2>
 
-        <div className="flex gap-4 md:gap-6 lg:gap-8 justify-center items-end pb-6">
+        <div className="flex gap-4 md:gap-6 lg:gap-8 md:justify-center items-end pb-6 overflow-x-auto md:overflow-visible scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
           {categoryItems.map((cat, i) => (
             <motion.div
               key={cat.key}
-              className="flex-1 min-w-0 max-w-[240px]"
+              className="shrink-0 w-[130px] md:w-auto md:flex-1 md:min-w-0 md:max-w-[240px]"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
@@ -39,7 +39,7 @@ const CategoriesSection = () => {
                 to={`/catalog?category=${cat.key}`}
                 className="group block text-center"
               >
-                <div className="h-[180px] md:h-[240px] lg:h-[280px] flex items-end justify-center mb-4">
+                <div className="h-[140px] md:h-[240px] lg:h-[280px] flex items-end justify-center mb-3 md:mb-4">
                   <motion.img
                     src={cat.image}
                     alt={cat.label}
@@ -51,7 +51,7 @@ const CategoriesSection = () => {
                 </div>
 
                 <span
-                  className="text-xs md:text-sm font-medium uppercase tracking-[0.1em] text-foreground"
+                  className="text-[10px] md:text-sm font-medium uppercase tracking-[0.08em] md:tracking-[0.1em] text-foreground leading-tight block"
                   style={{ fontFamily: "'Oswald', sans-serif" }}
                 >
                   {cat.label}
