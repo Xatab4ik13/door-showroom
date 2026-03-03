@@ -16,15 +16,7 @@ const categoryItems = [
 
 const CategoriesSection = () => {
   return (
-    <section
-      className="py-16 md:py-24 px-4 md:px-8 lg:px-12 relative overflow-hidden"
-      style={{
-        background: `
-          radial-gradient(ellipse 80% 60% at 50% 50%, hsl(205 60% 88% / 0.6) 0%, transparent 70%),
-          linear-gradient(160deg, hsl(205 50% 94%) 0%, hsl(205 60% 88%) 40%, hsl(205 55% 90%) 70%, hsl(205 45% 94%) 100%)
-        `,
-      }}
-    >
+    <section className="py-16 md:py-24 px-4 md:px-8 lg:px-12 relative overflow-hidden bg-background">
       <div className="max-w-[1600px] mx-auto">
         <h2
           className="text-3xl md:text-4xl font-bold uppercase tracking-wide text-foreground mb-10 md:mb-14"
