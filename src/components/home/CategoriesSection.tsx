@@ -9,7 +9,7 @@ import catSpecialnye from '@/assets/doors/cat-specialnye.png';
 const categoryItems = [
   { key: 'mezhkomnatnye', label: 'Межкомнатные двери', image: catMezhkomnatnye, scale: 1 },
   { key: 'vhodnye', label: 'Входные двери', image: catVhodnye, scale: 1 },
-  { key: 'peregorodki', label: 'Перегородки', image: catPeregorodki, scale: 1.18 },
+  { key: 'peregorodki', label: 'Перегородки', image: catPeregorodki, scale: 1.35 },
   { key: 'specialnye', label: 'Специальные двери', image: catSpecialnye, scale: 1 },
   { key: 'furnitura', label: 'Фурнитура', image: catFurnitura, scale: 0.55 },
 ];
@@ -42,7 +42,7 @@ const CategoriesSection = () => {
                 <img
                   src={cat.image}
                   alt={cat.label}
-                  className="h-full w-auto object-contain origin-center drop-shadow-[0_8px_20px_rgba(0,0,0,0.15)] transition-transform duration-500"
+                  className="h-full w-auto object-contain origin-center drop-shadow-[0_8px_20px_rgba(0,0,0,0.15)] transition-transform duration-500 group-hover:scale-[1.08]"
                   style={{ transform: `scale(${cat.scale})` }}
                 />
               </div>
