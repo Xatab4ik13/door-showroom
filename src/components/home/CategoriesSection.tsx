@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import door01 from '@/assets/doors/door-01.jpg';
+import catMezhkomnatnye from '@/assets/doors/cat-mezhkomnatnye.png';
 import door04 from '@/assets/doors/door-04.jpg';
 import door06 from '@/assets/doors/door-06.jpg';
 import door09 from '@/assets/doors/door-09.jpg';
@@ -8,7 +8,7 @@ import door11 from '@/assets/doors/door-11.jpg';
 import door12 from '@/assets/doors/door-12.jpg';
 
 const categoryItems = [
-  { key: 'mezhkomnatnye', label: 'Межкомнатные двери', image: door01 },
+  { key: 'mezhkomnatnye', label: 'Межкомнатные двери', image: catMezhkomnatnye },
   { key: 'vhodnye', label: 'Входные двери', image: door04 },
   { key: 'peregorodki', label: 'Перегородки', image: door06 },
   { key: 'specialnye', label: 'Специальные двери', image: door09 },
@@ -26,7 +26,7 @@ const CategoriesSection = () => {
         Категории
       </h2>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+      <div className="flex gap-4 md:gap-6 overflow-x-auto pb-4 scrollbar-hide">
         {categoryItems.map((cat, i) => (
           <motion.div
             key={cat.key}
@@ -34,30 +34,29 @@ const CategoriesSection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-50px' }}
             transition={{ duration: 0.5, delay: i * 0.08 }}
+            className="flex-shrink-0 w-[140px] md:w-[180px] lg:w-[200px]"
           >
             <Link
               to={`/catalog?category=${cat.key}`}
-              className="group block relative bg-card border border-border rounded-sm overflow-hidden hover:border-foreground/30 transition-colors duration-300"
+              className="group block text-center"
             >
-              {/* Door image container */}
-              <div className="aspect-[3/4] flex items-center justify-center p-6 md:p-8">
+              {/* Floating door image — no border, just shadow */}
+              <div className="h-[200px] md:h-[260px] lg:h-[300px] flex items-end justify-center mb-3">
                 <img
                   src={cat.image}
                   alt={cat.label}
-                  className="h-full w-auto object-contain drop-shadow-md transition-transform duration-500 group-hover:scale-105"
+                  className="max-h-full w-auto object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.15)] transition-all duration-500 group-hover:scale-105 group-hover:drop-shadow-[0_12px_30px_rgba(0,0,0,0.25)]"
                   draggable={false}
                 />
               </div>
 
               {/* Label */}
-              <div className="px-4 pb-4 md:px-5 md:pb-5">
-                <span
-                  className="text-sm md:text-base font-medium uppercase tracking-[0.1em] text-foreground"
-                  style={{ fontFamily: "'Oswald', sans-serif" }}
-                >
-                  {cat.label}
-                </span>
-              </div>
+              <span
+                className="text-xs md:text-sm font-medium uppercase tracking-[0.1em] text-foreground"
+                style={{ fontFamily: "'Oswald', sans-serif" }}
+              >
+                {cat.label}
+              </span>
             </Link>
           </motion.div>
         ))}
