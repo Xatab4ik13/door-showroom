@@ -49,7 +49,7 @@ const Header = () => {
           <img
             src={logo}
             alt="RUSDOORS"
-            className="h-[115px] md:h-[120px] w-auto -my-8"
+            className="h-[130px] md:h-[140px] w-auto -my-10"
           />
         </Link>
 
@@ -59,7 +59,7 @@ const Header = () => {
             <Link
               key={item.label}
               to={item.href}
-              className="relative text-sm tracking-[0.12em] uppercase text-[hsl(215,50%,15%)] hover:text-[hsl(205,85%,45%)] transition-colors duration-300 py-1 group whitespace-nowrap"
+              className="relative text-[15px] tracking-[0.12em] uppercase text-[hsl(215,50%,15%)] hover:text-[hsl(205,85%,45%)] transition-colors duration-300 py-1 group whitespace-nowrap"
               style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 500, textShadow: '0 0 8px rgba(255,255,255,0.9), 0 0 16px rgba(255,255,255,0.5)' }}
               onMouseEnter={() => setActiveItem(item.label)}
               onMouseLeave={() => setActiveItem(null)}
@@ -81,7 +81,7 @@ const Header = () => {
             className="relative p-2 text-[hsl(215,50%,15%)] hover:text-[hsl(205,85%,45%)] transition-colors drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]"
             aria-label="Корзина"
           >
-            <ShoppingCart className="w-6 h-6" strokeWidth={1.5} />
+            <ShoppingCart className="w-7 h-7" strokeWidth={1.5} />
             {totalItems > 0 && (
               <span
                 className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-[hsl(205,85%,45%)] text-white text-[10px] font-bold rounded-full flex items-center justify-center"
@@ -96,7 +96,7 @@ const Header = () => {
             className="p-2 text-[hsl(215,50%,15%)] hover:text-[hsl(205,85%,45%)] transition-colors drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]"
             aria-label="Личный кабинет"
           >
-            <User className="w-6 h-6" strokeWidth={1.5} />
+            <User className="w-7 h-7" strokeWidth={1.5} />
           </Link>
         </div>
 
