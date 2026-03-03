@@ -1,71 +1,69 @@
 import { motion } from 'framer-motion';
+import { Ruler, Truck, ShieldCheck, Wrench, CreditCard } from 'lucide-react';
 
 const advantages = [
-  { num: '01', title: 'Бесплатный замер', desc: 'Выезд мастера в удобное для вас время' },
-  { num: '02', title: 'Доставка за 24ч', desc: 'Быстрая доставка по Москве и области' },
-  { num: '03', title: 'Гарантия 5 лет', desc: 'Полная гарантия на все изделия и монтаж' },
-  { num: '04', title: 'Монтаж под ключ', desc: 'Профессиональная установка от наших мастеров' },
-  { num: '05', title: 'Оплата частями', desc: 'Сплит-оплата — разбейте сумму на несколько платежей без переплат' },
+  { icon: Ruler, title: 'Бесплатный замер', desc: 'Выезд мастера' },
+  { icon: Truck, title: 'Доставка 24ч', desc: 'По Москве и МО' },
+  { icon: ShieldCheck, title: 'Гарантия 5 лет', desc: 'На изделия и монтаж' },
+  { icon: Wrench, title: 'Монтаж под ключ', desc: 'Профессиональный' },
+  { icon: CreditCard, title: 'Оплата частями', desc: 'Сплит без переплат' },
 ];
 
 const AdvantagesSection = () => {
   return (
-    <section className="relative overflow-hidden">
-      {/* Accent top stripe */}
-      <div className="h-1 bg-[hsl(205,85%,45%)]" />
+    <section className="py-10 md:py-14 px-4 md:px-8 lg:px-12 bg-[hsl(215,50%,12%)] relative overflow-hidden">
+      {/* Subtle accent line top */}
+      <div className="absolute top-0 left-0 right-0 h-[3px] bg-[hsl(205,85%,45%)]" />
 
-      <div className="bg-foreground text-background py-14 md:py-20 px-4 md:px-8 lg:px-12">
-        <div className="max-w-[1600px] mx-auto">
-          <h2
-            className="text-3xl md:text-4xl font-bold uppercase tracking-wide mb-12 md:mb-16"
-            style={{ fontFamily: "'Oswald', sans-serif" }}
-          >
-            ПР<span className="text-[hsl(205,85%,45%)]">Е</span>ИМУЩЕСТ<span className="text-[hsl(205,85%,45%)]">В</span>А
-          </h2>
-
-          <div className="space-y-0">
-            {advantages.map((item, i) => (
+      <div className="max-w-[1600px] mx-auto">
+        <div className="flex flex-wrap justify-center md:justify-between items-start gap-6 md:gap-4">
+          {advantages.map((item, i) => (
+            <motion.div
+              key={item.title}
+              className="flex flex-col items-center text-center w-[140px] md:w-auto md:flex-1 group"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-30px' }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+            >
+              {/* Icon container — geometric, logo-like */}
               <motion.div
-                key={item.num}
-                className="group border-t border-background/15 py-6 md:py-8 flex items-start md:items-center gap-6 md:gap-10"
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: '-30px' }}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
+                className="relative w-14 h-14 md:w-16 md:h-16 flex items-center justify-center mb-3"
+                whileHover={{ scale: 1.1 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 15 }}
               >
-                {/* Number */}
-                <span
-                  className="text-[hsl(205,85%,45%)] text-2xl md:text-3xl font-bold tracking-wider shrink-0 w-12 md:w-16"
-                  style={{ fontFamily: "'Oswald', sans-serif" }}
-                >
-                  {item.num}
-                </span>
-
-                {/* Title */}
-                <h3
-                  className="text-lg md:text-2xl font-bold uppercase tracking-wide flex-1 min-w-0 group-hover:text-[hsl(205,85%,45%)] transition-colors duration-300"
-                  style={{ fontFamily: "'Oswald', sans-serif" }}
-                >
-                  {item.title}
-                </h3>
-
-                {/* Description */}
-                <p
-                  className="hidden md:block text-sm text-background/60 max-w-[320px] leading-relaxed"
-                  style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 300 }}
-                >
-                  {item.desc}
-                </p>
+                {/* Background shape */}
+                <div className="absolute inset-0 rounded-lg bg-[hsl(205,85%,45%)] opacity-15 rotate-3 group-hover:rotate-6 group-hover:opacity-25 transition-all duration-500" />
+                <div className="absolute inset-0.5 rounded-lg border border-[hsl(205,85%,45%)]/30 -rotate-2 group-hover:rotate-0 transition-all duration-500" />
+                
+                <item.icon
+                  className="relative z-10 w-7 h-7 md:w-8 md:h-8 text-[hsl(205,85%,45%)] group-hover:text-white transition-colors duration-300"
+                  strokeWidth={1.5}
+                />
               </motion.div>
-            ))}
-            {/* Bottom border */}
-            <div className="border-t border-background/15" />
-          </div>
+
+              {/* Title */}
+              <span
+                className="text-xs md:text-sm font-bold uppercase tracking-[0.1em] text-white/90 leading-tight"
+                style={{ fontFamily: "'Oswald', sans-serif" }}
+              >
+                {item.title}
+              </span>
+
+              {/* Description */}
+              <span
+                className="text-[10px] md:text-xs text-white/40 mt-1 tracking-wide"
+                style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 300 }}
+              >
+                {item.desc}
+              </span>
+            </motion.div>
+          ))}
         </div>
       </div>
 
-      {/* Accent bottom stripe */}
-      <div className="h-1 bg-[hsl(205,85%,45%)]" />
+      {/* Subtle accent line bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[hsl(205,85%,45%)]" />
     </section>
   );
 };
