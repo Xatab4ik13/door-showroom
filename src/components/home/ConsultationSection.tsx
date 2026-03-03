@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Phone, Send, MessageCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Phone, Send, ArrowRight, CheckCircle2 } from 'lucide-react';
+import maxIcon from '@/assets/icons/max-messenger.png';
 
 type ContactMethod = 'phone' | 'telegram' | 'max';
 
-const methods: { key: ContactMethod; label: string; icon: typeof Phone }[] = [
+type MethodDef = { key: ContactMethod; label: string; icon?: typeof Phone; img?: string };
+
+const methods: MethodDef[] = [
   { key: 'phone', label: 'Телефон', icon: Phone },
   { key: 'telegram', label: 'Telegram', icon: Send },
-  { key: 'max', label: 'Max', icon: MessageCircle },
+  { key: 'max', label: 'Max', img: maxIcon },
 ];
 
 const ConsultationSection = () => {
@@ -77,15 +80,20 @@ const ConsultationSection = () => {
                     key={m.key}
                     type="button"
                     onClick={() => setMethod(m.key)}
-                    className={`flex flex-col items-center gap-1.5 px-5 py-3 rounded-xl border transition-all duration-300 ${
+                    className={`group flex flex-col items-center gap-1.5 px-5 py-3 rounded-xl border transition-all duration-300 ${
                       isActive
                         ? 'border-[hsl(205,85%,45%)] bg-[hsl(205,85%,45%)]/10 text-[hsl(205,85%,45%)]'
                         : 'border-white/10 text-white/40 hover:border-white/25 hover:text-white/60'
                     }`}
+                    data-active={isActive}
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    <m.icon className="w-5 h-5" strokeWidth={1.5} />
+                    {m.img ? (
+                      <img src={m.img} alt={m.label} className="w-5 h-5 rounded-sm brightness-0 invert opacity-60 group-data-[active=true]:opacity-100 group-data-[active=true]:brightness-100 group-data-[active=true]:invert-0" />
+                    ) : (
+                      m.icon && <m.icon className="w-5 h-5" strokeWidth={1.5} />
+                    )}
                     <span
                       className="text-[11px] font-medium uppercase tracking-wider"
                       style={{ fontFamily: "'Oswald', sans-serif" }}
