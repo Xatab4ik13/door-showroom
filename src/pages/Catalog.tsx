@@ -4,12 +4,13 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CatalogSidebar from '@/components/catalog/CatalogSidebar';
 import ProductCard from '@/components/catalog/ProductCard';
-import { catalogProducts, type Category, type Tag } from '@/data/catalog';
+import { catalogProducts, categories, type Category, type Tag } from '@/data/catalog';
 
 const MAX_PRICE = Math.max(...catalogProducts.map((p) => p.oldPrice ?? p.price));
 
 const Catalog = () => {
   const [category, setCategory] = useState<Category | 'all'>('all');
+  const [subcategory, setSubcategory] = useState<string | null>(null);
   const [tag, setTag] = useState<Tag | 'all'>('all');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, MAX_PRICE]);
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
@@ -17,9 +18,29 @@ const Catalog = () => {
   const [selectedManufacturers, setSelectedManufacturers] = useState<string[]>([]);
   const [mobileFilters, setMobileFilters] = useState(false);
 
+  // Collect all child keys for a subcategory that has children
+  const activeSubKeys = useMemo(() => {
+    if (!subcategory) return null;
+    const catDef = categories.find(c => c.key === category);
+    if (!catDef?.subcategories) return null;
+    const subDef = catDef.subcategories.find(s => s.key === subcategory);
+    if (subDef?.children) {
+      return subDef.children.map(c => c.key);
+    }
+    return null;
+  }, [category, subcategory]);
+
   const filtered = useMemo(() => {
     return catalogProducts.filter((p) => {
       if (category !== 'all' && p.category !== category) return false;
+      if (subcategory) {
+        if (activeSubKeys) {
+          // Parent sub selected — match any child
+          if (!activeSubKeys.includes(p.subcategory ?? '')) return false;
+        } else {
+          if (p.subcategory !== subcategory) return false;
+        }
+      }
       if (tag !== 'all' && !p.tags.includes(tag)) return false;
       if (p.price < priceRange[0] || p.price > priceRange[1]) return false;
       if (selectedMaterials.length && !selectedMaterials.includes(p.material)) return false;
@@ -27,10 +48,38 @@ const Catalog = () => {
       if (selectedManufacturers.length && !selectedManufacturers.includes(p.manufacturer)) return false;
       return true;
     });
-  }, [category, tag, priceRange, selectedMaterials, selectedFinishes, selectedManufacturers]);
+  }, [category, subcategory, activeSubKeys, tag, priceRange, selectedMaterials, selectedFinishes, selectedManufacturers]);
+
+  // Build title
+  const pageTitle = useMemo(() => {
+    if (category === 'all') return 'Каталог';
+    const catDef = categories.find(c => c.key === category);
+    if (!catDef) return 'Каталог';
+    if (subcategory && catDef.subcategories) {
+      const subDef = catDef.subcategories.find(s => s.key === subcategory);
+      if (subDef) {
+        // Check if it's a child-level selection
+        if (!subDef.children) {
+          // Could be a child key — search children
+          for (const s of catDef.subcategories) {
+            const child = s.children?.find(c => c.key === subcategory);
+            if (child) return `${catDef.label} — ${s.label} — ${child.label}`;
+          }
+        }
+        return `${catDef.label} — ${subDef.label}`;
+      }
+      // Check if subcategory is a child key
+      for (const s of catDef.subcategories) {
+        const child = s.children?.find(c => c.key === subcategory);
+        if (child) return `${catDef.label} — ${s.label} — ${child.label}`;
+      }
+    }
+    return catDef.label;
+  }, [category, subcategory]);
 
   const sidebarProps = {
     selectedCategory: category, onCategoryChange: setCategory,
+    selectedSubcategory: subcategory, onSubcategoryChange: setSubcategory,
     selectedTag: tag, onTagChange: setTag,
     priceRange, onPriceRangeChange: setPriceRange,
     selectedMaterials, onMaterialsChange: setSelectedMaterials,
@@ -50,7 +99,7 @@ const Catalog = () => {
             className="text-3xl md:text-4xl font-bold uppercase tracking-wide text-foreground"
             style={{ fontFamily: "'Oswald', sans-serif" }}
           >
-            Каталог
+            {pageTitle}
           </h1>
           <button
             className="lg:hidden flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-md text-sm"

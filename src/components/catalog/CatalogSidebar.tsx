@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { categories, tagFilters, manufacturers, materials, finishes, type Category, type Tag } from '@/data/catalog';
 
 interface CatalogSidebarProps {
   selectedCategory: Category | 'all';
   onCategoryChange: (cat: Category | 'all') => void;
+  selectedSubcategory: string | null;
+  onSubcategoryChange: (sub: string | null) => void;
   selectedTag: Tag | 'all';
   onTagChange: (tag: Tag | 'all') => void;
   priceRange: [number, number];
@@ -49,6 +52,7 @@ const CheckboxItem = ({ label, checked, onChange }: { label: string; checked: bo
 
 const CatalogSidebar = ({
   selectedCategory, onCategoryChange,
+  selectedSubcategory, onSubcategoryChange,
   selectedTag, onTagChange,
   priceRange, onPriceRangeChange,
   selectedMaterials, onMaterialsChange,
@@ -56,6 +60,46 @@ const CatalogSidebar = ({
   selectedManufacturers, onManufacturersChange,
   maxPrice,
 }: CatalogSidebarProps) => {
+
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [expandedSubs, setExpandedSubs] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (key: string) => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const toggleSubExpand = (key: string) => {
+    setExpandedSubs(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const handleCategoryClick = (key: Category | 'all') => {
+    onCategoryChange(key);
+    onSubcategoryChange(null);
+    if (key !== 'all') {
+      setExpandedCategories(prev => {
+        const next = new Set(prev);
+        next.add(key);
+        return next;
+      });
+    }
+  };
+
+  const handleSubcategoryClick = (catKey: Category | 'all', subKey: string) => {
+    if (catKey !== 'all') {
+      onCategoryChange(catKey);
+    }
+    onSubcategoryChange(subKey);
+  };
 
   const toggleItem = (arr: string[], item: string, setter: (v: string[]) => void) => {
     setter(arr.includes(item) ? arr.filter(i => i !== item) : [...arr, item]);
@@ -71,20 +115,128 @@ const CatalogSidebar = ({
         >
           Категории
         </h3>
-        <div className="space-y-1">
-          {categories.map((cat) => (
-            <button
-              key={cat.key}
-              onClick={() => onCategoryChange(cat.key)}
-              className={`block w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                selectedCategory === cat.key
-                  ? 'bg-[hsl(205,85%,45%)] text-white font-medium'
-                  : 'text-muted-foreground hover:text-[hsl(205,85%,45%)] hover:bg-accent'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
+        <div className="space-y-0.5">
+          {categories.map((cat) => {
+            const isActive = selectedCategory === cat.key;
+            const hasSubs = cat.subcategories && cat.subcategories.length > 0;
+            const isExpanded = expandedCategories.has(cat.key);
+
+            return (
+              <div key={cat.key}>
+                {/* Category button */}
+                <div className="flex items-center">
+                  <button
+                    onClick={() => handleCategoryClick(cat.key)}
+                    className={`flex-1 text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                      isActive && !selectedSubcategory
+                        ? 'bg-[hsl(205,85%,45%)] text-white font-medium'
+                        : isActive
+                        ? 'bg-[hsl(205,85%,45%)]/10 text-[hsl(205,85%,45%)] font-medium'
+                        : 'text-muted-foreground hover:text-[hsl(205,85%,45%)] hover:bg-accent'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                  {hasSubs && (
+                    <button
+                      onClick={() => toggleExpand(cat.key)}
+                      className="p-2 text-muted-foreground hover:text-[hsl(205,85%,45%)] transition-colors"
+                    >
+                      <motion.div
+                        animate={{ rotate: isExpanded ? 90 : 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </motion.div>
+                    </button>
+                  )}
+                </div>
+
+                {/* Subcategories */}
+                <AnimatePresence>
+                  {hasSubs && isExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: 'easeInOut' }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pl-4 border-l-2 border-border ml-4 mt-1 mb-2 space-y-0.5">
+                        {cat.subcategories!.map((sub) => {
+                          const isSubActive = selectedSubcategory === sub.key;
+                          const hasChildren = sub.children && sub.children.length > 0;
+                          const isSubExpanded = expandedSubs.has(sub.key);
+
+                          return (
+                            <div key={sub.key}>
+                              <div className="flex items-center">
+                                <button
+                                  onClick={() => handleSubcategoryClick(cat.key, sub.key)}
+                                  className={`flex-1 text-left px-3 py-1.5 rounded-md text-[13px] transition-colors ${
+                                    isSubActive
+                                      ? 'text-[hsl(205,85%,45%)] font-medium bg-[hsl(205,85%,45%)]/10'
+                                      : 'text-muted-foreground hover:text-[hsl(205,85%,45%)] hover:bg-accent'
+                                  }`}
+                                >
+                                  {sub.label}
+                                </button>
+                                {hasChildren && (
+                                  <button
+                                    onClick={() => toggleSubExpand(sub.key)}
+                                    className="p-1.5 text-muted-foreground hover:text-[hsl(205,85%,45%)] transition-colors"
+                                  >
+                                    <motion.div
+                                      animate={{ rotate: isSubExpanded ? 90 : 0 }}
+                                      transition={{ duration: 0.2 }}
+                                    >
+                                      <ChevronRight className="w-3 h-3" />
+                                    </motion.div>
+                                  </button>
+                                )}
+                              </div>
+
+                              {/* Third level children */}
+                              <AnimatePresence>
+                                {hasChildren && isSubExpanded && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    transition={{ duration: 0.2, ease: 'easeInOut' }}
+                                    className="overflow-hidden"
+                                  >
+                                    <div className="pl-3 border-l border-border/50 ml-3 mt-0.5 mb-1 space-y-0.5">
+                                      {sub.children!.map((child) => {
+                                        const isChildActive = selectedSubcategory === child.key;
+                                        return (
+                                          <button
+                                            key={child.key}
+                                            onClick={() => handleSubcategoryClick(cat.key, child.key)}
+                                            className={`block w-full text-left px-2.5 py-1 rounded text-xs transition-colors ${
+                                              isChildActive
+                                                ? 'text-[hsl(205,85%,45%)] font-medium bg-[hsl(205,85%,45%)]/10'
+                                                : 'text-muted-foreground hover:text-[hsl(205,85%,45%)]'
+                                            }`}
+                                          >
+                                            {child.label}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
         </div>
       </div>
 
