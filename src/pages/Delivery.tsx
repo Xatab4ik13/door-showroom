@@ -190,8 +190,7 @@ const Delivery = () => {
           </div>
         </section>
       </main>
-      <Footer />
-    </div>
+    </>
   );
 };
 
