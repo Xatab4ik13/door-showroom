@@ -77,8 +77,7 @@ const News = () => {
   const rest = filtered.filter(n => n.id !== featured?.id);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <>
 
       {/* Hero */}
       <section className="pt-32 md:pt-40 pb-12 md:pb-16 px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
