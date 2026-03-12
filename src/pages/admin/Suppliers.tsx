@@ -1,7 +1,6 @@
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 const demoSuppliers = [
   { id: '1', name: 'Profil Doors', products: 48, format: 'Excel', lastUpdate: '11.03.2026', active: true },
@@ -15,34 +14,56 @@ const demoSuppliers = [
 const Suppliers = () => (
   <div className="space-y-6">
     <div className="flex items-center justify-between">
-      <h1 className="text-2xl font-semibold text-foreground">Поставщики</h1>
-      <Button className="gap-2">
+      <h1
+        className="text-3xl tracking-wider uppercase text-foreground"
+        style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 500 }}
+      >
+        Поставщики
+      </h1>
+      <Button className="gap-2 bg-[hsl(205,85%,45%)] hover:bg-[hsl(205,85%,40%)] text-white">
         <Plus className="w-4 h-4" />
-        Добавить поставщика
+        <span style={{ fontFamily: "'Manrope', sans-serif" }}>Добавить поставщика</span>
       </Button>
     </div>
 
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {demoSuppliers.map((s) => (
-        <Card key={s.id} className="border-border cursor-pointer hover:shadow-md transition-shadow">
-          <CardContent className="p-5 space-y-3">
+        <Card key={s.id} className="border-border bg-card cursor-pointer hover:shadow-md hover:border-[hsl(205,85%,45%)]/30 transition-all">
+          <CardContent className="p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-foreground">{s.name}</h3>
-              <Badge variant={s.active ? 'default' : 'secondary'}>
-                {s.active ? 'Активен' : 'Неактивен'}
-              </Badge>
+              <h3
+                className="font-semibold text-foreground uppercase tracking-wider"
+                style={{ fontFamily: "'Oswald', sans-serif" }}
+              >
+                {s.name}
+              </h3>
+              <div className="flex items-center gap-1.5">
+                <div className={`w-2 h-2 rounded-full ${s.active ? 'bg-emerald-500' : 'bg-muted-foreground/40'}`} />
+                <span
+                  className="text-[11px] text-muted-foreground"
+                  style={{ fontFamily: "'Manrope', sans-serif" }}
+                >
+                  {s.active ? 'Активен' : 'Неактивен'}
+                </span>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="grid grid-cols-2 gap-3 text-sm" style={{ fontFamily: "'Manrope', sans-serif" }}>
               <div>
-                <p className="text-muted-foreground">Товаров</p>
-                <p className="font-medium">{s.products}</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                  Товаров
+                </p>
+                <p className="font-semibold text-foreground text-lg" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                  {s.products}
+                </p>
               </div>
               <div>
-                <p className="text-muted-foreground">Формат</p>
-                <p className="font-medium">{s.format}</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                  Формат
+                </p>
+                <p className="font-medium text-foreground text-sm">{s.format}</p>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground" style={{ fontFamily: "'Manrope', sans-serif" }}>
               Обновлено: {s.lastUpdate}
             </p>
           </CardContent>

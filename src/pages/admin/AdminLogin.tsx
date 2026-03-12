@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Lock, LogIn } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 const AdminLogin = () => {
   const { loginAdmin, isAdminAuthenticated } = useAdminAuth();
@@ -34,32 +35,52 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30">
+    <div className="min-h-screen flex items-center justify-center bg-background">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm bg-card border border-border rounded-2xl p-8 shadow-lg space-y-6"
+        className="w-full max-w-sm border border-border rounded-2xl p-8 space-y-8 bg-card"
       >
-        <div className="flex flex-col items-center gap-2">
-          <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-            <Lock className="w-6 h-6 text-primary-foreground" />
+        <div className="flex flex-col items-center gap-4">
+          <img src={logo} alt="RUSDOORS" className="h-16 w-auto" />
+          <div className="text-center">
+            <h1
+              className="text-2xl tracking-wider uppercase text-foreground"
+              style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 500 }}
+            >
+              Панель управления
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1" style={{ fontFamily: "'Manrope', sans-serif" }}>
+              Войдите для доступа к системе
+            </p>
           </div>
-          <h1 className="text-xl font-semibold text-foreground">Панель управления</h1>
-          <p className="text-sm text-muted-foreground">Войдите для доступа к админке</p>
         </div>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="login">Логин</Label>
+            <Label
+              htmlFor="login"
+              className="text-xs uppercase tracking-wider text-muted-foreground"
+              style={{ fontFamily: "'Oswald', sans-serif" }}
+            >
+              Логин
+            </Label>
             <Input
               id="login"
               value={login}
               onChange={(e) => setLogin(e.target.value)}
               placeholder="admin"
               autoComplete="username"
+              className="bg-background border-border focus-visible:ring-[hsl(205,85%,45%)]"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Пароль</Label>
+            <Label
+              htmlFor="password"
+              className="text-xs uppercase tracking-wider text-muted-foreground"
+              style={{ fontFamily: "'Oswald', sans-serif" }}
+            >
+              Пароль
+            </Label>
             <Input
               id="password"
               type="password"
@@ -67,6 +88,7 @@ const AdminLogin = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               autoComplete="current-password"
+              className="bg-background border-border focus-visible:ring-[hsl(205,85%,45%)]"
             />
           </div>
         </div>
@@ -75,12 +97,16 @@ const AdminLogin = () => {
           <p className="text-sm text-destructive text-center">{error}</p>
         )}
 
-        <Button type="submit" className="w-full gap-2">
+        <Button
+          type="submit"
+          className="w-full gap-2 bg-[hsl(205,85%,45%)] hover:bg-[hsl(205,85%,40%)] text-white uppercase tracking-wider"
+          style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 500 }}
+        >
           <LogIn className="w-4 h-4" />
           Войти
         </Button>
 
-        <p className="text-xs text-muted-foreground text-center">
+        <p className="text-xs text-muted-foreground text-center" style={{ fontFamily: "'Manrope', sans-serif" }}>
           Демо: admin / admin123 или manager / manager123
         </p>
       </form>

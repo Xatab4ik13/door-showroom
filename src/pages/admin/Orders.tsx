@@ -1,5 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 
 type OrderStatus = 'pending' | 'confirmed' | 'paid' | 'shipping' | 'completed';
 
@@ -14,12 +13,12 @@ interface Order {
   status: OrderStatus;
 }
 
-const statusConfig: Record<OrderStatus, { label: string; color: string }> = {
-  pending: { label: 'Заявка', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-  confirmed: { label: 'Подтверждён', color: 'bg-amber-100 text-amber-700 border-amber-200' },
-  paid: { label: 'Оплачен', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-  shipping: { label: 'Доставка', color: 'bg-purple-100 text-purple-700 border-purple-200' },
-  completed: { label: 'Завершён', color: 'bg-green-100 text-green-700 border-green-200' },
+const statusConfig: Record<OrderStatus, { label: string; color: string; dot: string }> = {
+  pending: { label: 'Заявка', color: 'bg-[hsl(205,85%,45%)]/10 text-[hsl(205,85%,45%)] border-[hsl(205,85%,45%)]/20', dot: 'bg-[hsl(205,85%,45%)]' },
+  confirmed: { label: 'Подтверждён', color: 'bg-amber-50 text-amber-600 border-amber-200', dot: 'bg-amber-500' },
+  paid: { label: 'Оплачен', color: 'bg-emerald-50 text-emerald-600 border-emerald-200', dot: 'bg-emerald-500' },
+  shipping: { label: 'Доставка', color: 'bg-violet-50 text-violet-600 border-violet-200', dot: 'bg-violet-500' },
+  completed: { label: 'Завершён', color: 'bg-muted text-foreground border-border', dot: 'bg-foreground' },
 };
 
 const demoOrders: Order[] = [
@@ -36,8 +35,15 @@ const Orders = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-foreground">Заказы</h1>
-        <p className="text-sm text-muted-foreground">{demoOrders.length} заказов</p>
+        <h1
+          className="text-3xl tracking-wider uppercase text-foreground"
+          style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 500 }}
+        >
+          Заказы
+        </h1>
+        <p className="text-sm text-muted-foreground" style={{ fontFamily: "'Manrope', sans-serif" }}>
+          {demoOrders.length} заказов
+        </p>
       </div>
 
       {/* Kanban */}
@@ -48,25 +54,41 @@ const Orders = () => {
           return (
             <div key={status} className="space-y-3">
               <div className="flex items-center gap-2">
-                <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${cfg.color}`}>
+                <div className={`w-2 h-2 rounded-full ${cfg.dot}`} />
+                <span
+                  className="text-xs uppercase tracking-[0.15em] text-muted-foreground"
+                  style={{ fontFamily: "'Oswald', sans-serif" }}
+                >
                   {cfg.label}
                 </span>
-                <span className="text-xs text-muted-foreground">{orders.length}</span>
+                <span className="text-xs text-muted-foreground/60">{orders.length}</span>
               </div>
               <div className="space-y-3 min-h-[200px]">
                 {orders.map((order) => (
-                  <Card key={order.id} className="border-border cursor-pointer hover:shadow-md transition-shadow">
-                    <CardContent className="p-4 space-y-2">
+                  <Card key={order.id} className="border-border bg-card cursor-pointer hover:shadow-md hover:border-[hsl(205,85%,45%)]/30 transition-all">
+                    <CardContent className="p-4 space-y-2.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold">{order.id}</span>
-                        <span className="text-xs text-muted-foreground">{order.date}</span>
+                        <span
+                          className="text-sm font-semibold text-[hsl(205,85%,45%)]"
+                          style={{ fontFamily: "'Oswald', sans-serif" }}
+                        >
+                          {order.id}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground">{order.date}</span>
                       </div>
-                      <p className="text-sm font-medium">{order.client}</p>
+                      <p className="text-sm font-medium text-foreground" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                        {order.client}
+                      </p>
                       <p className="text-xs text-muted-foreground">{order.phone}</p>
                       <p className="text-xs text-muted-foreground">{order.items}</p>
-                      <div className="flex items-center justify-between pt-1">
-                        <span className="text-xs text-muted-foreground">{order.supplier}</span>
-                        <span className="text-sm font-bold">{order.total}</span>
+                      <div className="flex items-center justify-between pt-1 border-t border-border/50">
+                        <span className="text-[11px] text-muted-foreground">{order.supplier}</span>
+                        <span
+                          className="text-sm font-bold text-foreground"
+                          style={{ fontFamily: "'Oswald', sans-serif" }}
+                        >
+                          {order.total}
+                        </span>
                       </div>
                     </CardContent>
                   </Card>
