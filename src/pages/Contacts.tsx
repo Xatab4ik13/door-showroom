@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import maxMessenger from '@/assets/icons/max-messenger.png';
+import maxMessengerIcon from '@/assets/icons/max-messenger.png';
 
 const phoneNumbers = [
   { label: 'Основной', number: '+7 (495) 123-45-67' },
@@ -12,13 +12,15 @@ const phoneNumbers = [
 
 const messengers = [
   {
-    name: 'WhatsApp',
-    icon: MessageCircle,
-    color: 'hsl(142, 70%, 45%)',
-    link: 'https://wa.me/74951234567',
+    name: 'MAX',
+    iconType: 'image' as const,
+    imageSrc: maxMessengerIcon,
+    color: 'hsl(270, 60%, 55%)',
+    link: 'https://max.ru/rusdoors',
   },
   {
     name: 'Telegram',
+    iconType: 'lucide' as const,
     icon: Send,
     color: 'hsl(200, 80%, 50%)',
     link: 'https://t.me/rusdoors',
