@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, ShoppingBag, Check, Clock, CreditCard, Truck, PackageCheck, Shield } from 'lucide-react';
 import { z } from 'zod';
 import { useCart } from '@/contexts/CartContext';
-import { useCart } from '@/contexts/CartContext';
 
 const checkoutSchema = z.object({
   name: z.string().trim().min(2, 'Укажите ФИО').max(100),
