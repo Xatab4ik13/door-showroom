@@ -1,7 +1,5 @@
 import { motion } from 'framer-motion';
 import { Ruler, Wrench, Sparkles, CheckCircle2, Building2, Calendar, ShieldCheck, Award } from 'lucide-react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -26,8 +24,7 @@ const features = [
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <>
       <main>
         {/* Hero */}
         <section className="pt-32 md:pt-40 pb-16 md:pb-24 px-4 md:px-8 lg:px-12">
@@ -231,8 +228,7 @@ const About = () => {
           </div>
         </section>
       </main>
-      <Footer />
-    </div>
+    </>
   );
 };
 

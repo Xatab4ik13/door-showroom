@@ -1,7 +1,5 @@
 import { useState, useMemo } from 'react';
 import { Filter, X } from 'lucide-react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import CatalogSidebar from '@/components/catalog/CatalogSidebar';
 import ProductCard from '@/components/catalog/ProductCard';
 import { catalogProducts, categories, type Category, type Tag } from '@/data/catalog';
@@ -89,10 +87,7 @@ const Catalog = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
+    <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
         {/* Page title */}
         <div className="mb-8 flex items-center justify-between">
           <h1
@@ -157,10 +152,8 @@ const Catalog = () => {
                 <p className="text-sm mt-1">Попробуйте изменить фильтры</p>
               </div>
             )}
-          </div>
         </div>
-      </main>
-      <Footer />
+      </div>
     </div>
   );
 };

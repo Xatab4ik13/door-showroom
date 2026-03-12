@@ -1,5 +1,3 @@
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import HeroBanner from '@/components/home/HeroBanner';
 import CategoriesSection from '@/components/home/CategoriesSection';
 import PopularProducts from '@/components/home/PopularProducts';
@@ -9,18 +7,14 @@ import ConsultationSection from '@/components/home/ConsultationSection';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main>
-        <HeroBanner />
-        <CategoriesSection />
-        <PopularProducts />
-        <AdvantagesSection />
-        <DoorCalculator />
-        <ConsultationSection />
-      </main>
-      <Footer />
-    </div>
+    <>
+      <HeroBanner />
+      <CategoriesSection />
+      <PopularProducts />
+      <AdvantagesSection />
+      <DoorCalculator />
+      <ConsultationSection />
+    </>
   );
 };
 

@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Package, MapPin, LogOut, Plus, Trash2, ArrowLeft } from 'lucide-react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { useAuth, type Address } from '@/contexts/AuthContext';
 
 const statusLabels: Record<string, string> = {
@@ -54,9 +52,7 @@ const Account = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1200px] mx-auto">
+    <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1200px] mx-auto">
         <button
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
@@ -276,10 +272,8 @@ const Account = () => {
                 ))}
               </div>
             )}
-          </div>
         </div>
-      </main>
-      <Footer />
+      </div>
     </div>
   );
 };

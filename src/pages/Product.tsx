@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ShoppingCart, Check } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import ProductGallery from '@/components/product/ProductGallery';
 import ProductSpecs from '@/components/product/ProductSpecs';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
@@ -22,14 +20,11 @@ const Product = () => {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="pt-28 px-6 text-center">
-          <p className="text-lg text-muted-foreground">Товар не найден</p>
-          <Link to="/catalog" className="text-primary underline mt-4 inline-block">
-            Вернуться в каталог
-          </Link>
-        </main>
+      <div className="pt-28 px-6 text-center">
+        <p className="text-lg text-muted-foreground">Товар не найден</p>
+        <Link to="/catalog" className="text-primary underline mt-4 inline-block">
+          Вернуться в каталог
+        </Link>
       </div>
     );
   }
@@ -39,10 +34,7 @@ const Product = () => {
     : null;
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto">
+    <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto">
         {/* Breadcrumb */}
         <Link
           to="/catalog"
@@ -163,9 +155,7 @@ const Product = () => {
           </p>
           <DoorExplodedSVG accentColor={product.colors[0]} />
         </section>
-      </main>
-      <Footer />
-    </div>
+      </div>
   );
 };
 

@@ -1,8 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Minus, Plus, Trash2, ArrowLeft, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { useCart } from '@/contexts/CartContext';
 
 const formatPrice = (price: number) =>
@@ -13,34 +11,28 @@ const Cart = () => {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto text-center">
-          <ShoppingBag className="w-16 h-16 mx-auto text-muted-foreground/40 mb-4" strokeWidth={1} />
-          <h1
-            className="text-2xl md:text-3xl font-bold uppercase tracking-wide text-foreground mb-2"
-            style={{ fontFamily: "'Oswald', sans-serif" }}
-          >
-            Корзина пуста
-          </h1>
-          <p className="text-muted-foreground mb-6">Добавьте товары из каталога</p>
-          <Link
-            to="/catalog"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[hsl(205,85%,45%)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
-            style={{ fontFamily: "'Oswald', sans-serif" }}
-          >
-            Перейти в каталог
-          </Link>
-        </main>
-        <Footer />
+      <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto text-center">
+        <ShoppingBag className="w-16 h-16 mx-auto text-muted-foreground/40 mb-4" strokeWidth={1} />
+        <h1
+          className="text-2xl md:text-3xl font-bold uppercase tracking-wide text-foreground mb-2"
+          style={{ fontFamily: "'Oswald', sans-serif" }}
+        >
+          Корзина пуста
+        </h1>
+        <p className="text-muted-foreground mb-6">Добавьте товары из каталога</p>
+        <Link
+          to="/catalog"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[hsl(205,85%,45%)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+          style={{ fontFamily: "'Oswald', sans-serif" }}
+        >
+          Перейти в каталог
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto">
+    <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto">
         <Link
           to="/catalog"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
@@ -171,8 +163,6 @@ const Cart = () => {
             </div>
           </div>
         </div>
-      </main>
-      <Footer />
     </div>
   );
 };

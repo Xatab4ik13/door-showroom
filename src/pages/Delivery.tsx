@@ -1,7 +1,5 @@
 import { motion } from 'framer-motion';
 import { Truck, CreditCard, Clock, ShieldCheck, CheckCircle2 } from 'lucide-react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -28,8 +26,7 @@ const whyUs = [
 
 const Delivery = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <>
       <main>
         {/* Hero */}
         <section className="pt-32 md:pt-40 pb-16 md:pb-24 px-4 md:px-8 lg:px-12">
@@ -193,8 +190,7 @@ const Delivery = () => {
           </div>
         </section>
       </main>
-      <Footer />
-    </div>
+    </>
   );
 };
 

@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Phone, ArrowRight, ArrowLeft } from 'lucide-react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
@@ -31,9 +29,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-md mx-auto">
+    <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-md mx-auto">
         <button
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
@@ -113,8 +109,6 @@ const Login = () => {
             </p>
           </div>
         )}
-      </main>
-      <Footer />
     </div>
   );
 };

@@ -1,7 +1,5 @@
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send } from 'lucide-react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import maxMessengerIcon from '@/assets/icons/max-messenger.png';
 
 const phoneNumbers = [
@@ -29,8 +27,7 @@ const messengers = [
 
 const Contacts = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <>
 
       {/* Hero */}
       <section className="pt-32 md:pt-40 pb-16 md:pb-20 px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
@@ -281,8 +278,7 @@ const Contacts = () => {
         </div>
       </section>
 
-      <Footer />
-    </div>
+    </>
   );
 };
 
