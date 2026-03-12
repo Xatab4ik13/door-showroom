@@ -154,10 +154,8 @@ const Catalog = () => {
                 <p className="text-sm mt-1">Попробуйте изменить фильтры</p>
               </div>
             )}
-          </div>
         </div>
-      </main>
-      <Footer />
+      </div>
     </div>
   );
 };
