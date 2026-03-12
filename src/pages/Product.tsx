@@ -35,10 +35,7 @@ const Product = () => {
     : null;
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto">
+    <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto">
         {/* Breadcrumb */}
         <Link
           to="/catalog"
