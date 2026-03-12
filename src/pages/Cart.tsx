@@ -1,8 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Minus, Plus, Trash2, ArrowLeft, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { useCart } from '@/contexts/CartContext';
 
 const formatPrice = (price: number) =>
