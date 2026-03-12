@@ -133,7 +133,11 @@ const Contacts = () => {
                       className="w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
                       style={{ backgroundColor: `${m.color}15` }}
                     >
-                      <m.icon className="w-6 h-6" style={{ color: m.color }} />
+                      {m.iconType === 'image' ? (
+                        <img src={m.imageSrc} alt={m.name} className="w-7 h-7 object-contain" />
+                      ) : (
+                        m.icon && <m.icon className="w-6 h-6" style={{ color: m.color }} />
+                      )}
                     </div>
                     <div>
                       <span
