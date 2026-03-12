@@ -16,6 +16,7 @@ import Delivery from "./pages/Delivery";
 import About from "./pages/About";
 import News from "./pages/News";
 import Contacts from "./pages/Contacts";
+import Checkout from "./pages/Checkout";
 import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/about" element={<About />} />
               <Route path="/news" element={<News />} />
               <Route path="/contacts" element={<Contacts />} />
+              <Route path="/checkout" element={<Checkout />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
