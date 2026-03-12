@@ -15,8 +15,8 @@ const footerLinks = [
   {
     title: 'Компания',
     links: [
-      { label: 'О компании', to: '/' },
-      { label: 'Доставка и оплата', to: '/' },
+      { label: 'О компании', to: '/about' },
+      { label: 'Доставка и оплата', to: '/delivery' },
       { label: 'Поставщикам', to: '/' },
       { label: 'Контакты', to: '/' },
     ],
