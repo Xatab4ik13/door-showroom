@@ -199,7 +199,7 @@ const Contacts = () => {
                 г. Москва, ул. Примерная, д. 1
               </p>
               <p className="text-muted-foreground text-sm mt-2" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                Шоурум и офис продаж. Удобная парковка, вход со стороны двора.
+                Офис продаж
               </p>
             </motion.div>
 
