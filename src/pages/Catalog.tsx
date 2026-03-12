@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Filter, X } from 'lucide-react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import CatalogSidebar from '@/components/catalog/CatalogSidebar';
+import ProductCard from '@/components/catalog/ProductCard';
 import CatalogSidebar from '@/components/catalog/CatalogSidebar';
 import ProductCard from '@/components/catalog/ProductCard';
 import { catalogProducts, categories, type Category, type Tag } from '@/data/catalog';
