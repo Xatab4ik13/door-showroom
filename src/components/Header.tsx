@@ -44,12 +44,13 @@ const Header = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-40 px-4 md:px-6 lg:px-12 py-4 flex items-center justify-between bg-transparent backdrop-blur-[2px]">
-        <Link to="/" className="flex items-center">
+      <header className="fixed top-0 left-0 right-0 z-40 px-4 md:px-6 lg:px-12 py-4 flex items-center justify-between bg-background/80 backdrop-blur-md">
+        <Link to="/" className="flex items-center h-[50px] md:h-[56px]">
           <img
             src={logo}
             alt="RUSDOORS"
-            className="h-[130px] md:h-[140px] w-auto -my-10"
+            className="h-[130px] md:h-[140px] w-auto"
+            style={{ marginTop: '-40px', marginBottom: '-40px' }}
           />
         </Link>
 
