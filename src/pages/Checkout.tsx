@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ShoppingBag, Check, Clock, CreditCard, Truck, PackageCheck, Shield } from 'lucide-react';
 import { z } from 'zod';
-import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useCart } from '@/contexts/CartContext';
 
