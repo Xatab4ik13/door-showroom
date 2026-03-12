@@ -2,8 +2,6 @@ import { useState, useMemo } from 'react';
 import { Filter, X } from 'lucide-react';
 import CatalogSidebar from '@/components/catalog/CatalogSidebar';
 import ProductCard from '@/components/catalog/ProductCard';
-import CatalogSidebar from '@/components/catalog/CatalogSidebar';
-import ProductCard from '@/components/catalog/ProductCard';
 import { catalogProducts, categories, type Category, type Tag } from '@/data/catalog';
 
 const MAX_PRICE = Math.max(...catalogProducts.map((p) => p.oldPrice ?? p.price));
