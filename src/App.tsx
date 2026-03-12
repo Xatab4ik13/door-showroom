@@ -14,6 +14,8 @@ import Account from "./pages/Account";
 import NotFound from "./pages/NotFound";
 import Delivery from "./pages/Delivery";
 import About from "./pages/About";
+import News from "./pages/News";
+import Contacts from "./pages/Contacts";
 import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -36,6 +38,8 @@ const App = () => (
               <Route path="/account" element={<Account />} />
               <Route path="/delivery" element={<Delivery />} />
               <Route path="/about" element={<About />} />
+              <Route path="/news" element={<News />} />
+              <Route path="/contacts" element={<Contacts />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
