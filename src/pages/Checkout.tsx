@@ -405,8 +405,6 @@ const Checkout = () => {
             </div>
           </motion.div>
         </div>
-      </main>
-      <Footer />
     </div>
   );
 };
