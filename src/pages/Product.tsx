@@ -156,9 +156,7 @@ const Product = () => {
           </p>
           <DoorExplodedSVG accentColor={product.colors[0]} />
         </section>
-      </main>
-      <Footer />
-    </div>
+      </div>
   );
 };
 
