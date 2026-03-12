@@ -1,7 +1,5 @@
 import { motion } from 'framer-motion';
 import { Ruler, Wrench, Sparkles, CheckCircle2, Building2, Calendar, ShieldCheck, Award } from 'lucide-react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
