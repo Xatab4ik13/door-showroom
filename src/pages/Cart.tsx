@@ -163,8 +163,7 @@ const Cart = () => {
             </div>
           </div>
         </div>
-      </main>
-      <Footer />
+      </div>
     </div>
   );
 };
