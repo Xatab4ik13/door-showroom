@@ -109,7 +109,7 @@ const Login = () => {
               Для демо: код <span className="font-bold text-foreground">1234</span>
             </p>
           </div>
-      </div>
+        )}
     </div>
   );
 };
