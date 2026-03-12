@@ -1,7 +1,5 @@
 import { motion } from 'framer-motion';
 import { Truck, CreditCard, Clock, ShieldCheck, CheckCircle2 } from 'lucide-react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
