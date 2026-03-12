@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Package, MapPin, LogOut, Plus, Trash2, ArrowLeft } from 'lucide-react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import { useAuth, type Address } from '@/contexts/AuthContext';
 import { useAuth, type Address } from '@/contexts/AuthContext';
 
 const statusLabels: Record<string, string> = {
