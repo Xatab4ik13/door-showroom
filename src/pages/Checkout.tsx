@@ -217,8 +217,8 @@ const Checkout = () => {
                   Продолжить покупки
                 </Link>
               </motion.div>
+            )}
           </motion.div>
-      </div>
       </div>
     );
   }
