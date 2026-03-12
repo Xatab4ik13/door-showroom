@@ -89,10 +89,7 @@ const Catalog = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
+    <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
         {/* Page title */}
         <div className="mb-8 flex items-center justify-between">
           <h1
