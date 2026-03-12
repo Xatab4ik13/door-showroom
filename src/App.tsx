@@ -16,6 +16,7 @@ import Delivery from "./pages/Delivery";
 import About from "./pages/About";
 import News from "./pages/News";
 import Contacts from "./pages/Contacts";
+import Checkout from "./pages/Checkout";
 import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
