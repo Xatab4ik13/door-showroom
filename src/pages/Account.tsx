@@ -53,9 +53,7 @@ const Account = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1200px] mx-auto">
+    <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1200px] mx-auto">
         <button
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
