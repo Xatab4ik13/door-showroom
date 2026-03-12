@@ -72,19 +72,15 @@ const Checkout = () => {
 
   if (items.length === 0 && !submitted) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto text-center">
-          <ShoppingBag className="w-16 h-16 mx-auto text-muted-foreground/40 mb-4" strokeWidth={1} />
-          <h1 className="text-2xl md:text-3xl font-bold uppercase tracking-wide text-foreground mb-2" style={{ fontFamily: "'Oswald', sans-serif" }}>
-            Корзина пуста
-          </h1>
-          <p className="text-muted-foreground mb-6">Добавьте товары для оформления заказа</p>
-          <Link to="/catalog" className="inline-flex items-center gap-2 px-6 py-3 bg-[hsl(205,85%,45%)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity" style={{ fontFamily: "'Oswald', sans-serif" }}>
-            Перейти в каталог
-          </Link>
-        </main>
-        <Footer />
+      <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto text-center">
+        <ShoppingBag className="w-16 h-16 mx-auto text-muted-foreground/40 mb-4" strokeWidth={1} />
+        <h1 className="text-2xl md:text-3xl font-bold uppercase tracking-wide text-foreground mb-2" style={{ fontFamily: "'Oswald', sans-serif" }}>
+          Корзина пуста
+        </h1>
+        <p className="text-muted-foreground mb-6">Добавьте товары для оформления заказа</p>
+        <Link to="/catalog" className="inline-flex items-center gap-2 px-6 py-3 bg-[hsl(205,85%,45%)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity" style={{ fontFamily: "'Oswald', sans-serif" }}>
+          Перейти в каталог
+        </Link>
       </div>
     );
   }
