@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import maxMessenger from '@/assets/icons/max-messenger.png';
+import maxMessengerIcon from '@/assets/icons/max-messenger.png';
 
 const phoneNumbers = [
   { label: 'Основной', number: '+7 (495) 123-45-67' },
@@ -12,13 +12,15 @@ const phoneNumbers = [
 
 const messengers = [
   {
-    name: 'WhatsApp',
-    icon: MessageCircle,
-    color: 'hsl(142, 70%, 45%)',
-    link: 'https://wa.me/74951234567',
+    name: 'MAX',
+    iconType: 'image' as const,
+    imageSrc: maxMessengerIcon,
+    color: 'hsl(270, 60%, 55%)',
+    link: 'https://max.ru/rusdoors',
   },
   {
     name: 'Telegram',
+    iconType: 'lucide' as const,
     icon: Send,
     color: 'hsl(200, 80%, 50%)',
     link: 'https://t.me/rusdoors',
@@ -131,7 +133,11 @@ const Contacts = () => {
                       className="w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
                       style={{ backgroundColor: `${m.color}15` }}
                     >
-                      <m.icon className="w-6 h-6" style={{ color: m.color }} />
+                      {m.iconType === 'image' ? (
+                        <img src={m.imageSrc} alt={m.name} className="w-7 h-7 object-contain" />
+                      ) : (
+                        m.icon && <m.icon className="w-6 h-6" style={{ color: m.color }} />
+                      )}
                     </div>
                     <div>
                       <span
