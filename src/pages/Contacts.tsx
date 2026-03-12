@@ -1,7 +1,5 @@
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send } from 'lucide-react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import maxMessengerIcon from '@/assets/icons/max-messenger.png';
 
 const phoneNumbers = [
