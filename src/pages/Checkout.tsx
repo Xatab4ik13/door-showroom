@@ -88,9 +88,7 @@ const Checkout = () => {
   // Order submitted — show status tracker
   if (submitted) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="pt-28 pb-20 px-4 md:px-8 lg:px-12 max-w-[900px] mx-auto">
+      <div className="pt-28 pb-20 px-4 md:px-8 lg:px-12 max-w-[900px] mx-auto">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             {/* Success header */}
             <div className="text-center mb-12">
