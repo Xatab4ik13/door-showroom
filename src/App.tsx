@@ -12,6 +12,8 @@ import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Account from "./pages/Account";
 import NotFound from "./pages/NotFound";
+import Delivery from "./pages/Delivery";
+import About from "./pages/About";
 import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
