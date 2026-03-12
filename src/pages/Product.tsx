@@ -21,14 +21,11 @@ const Product = () => {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="pt-28 px-6 text-center">
-          <p className="text-lg text-muted-foreground">Товар не найден</p>
-          <Link to="/catalog" className="text-primary underline mt-4 inline-block">
-            Вернуться в каталог
-          </Link>
-        </main>
+      <div className="pt-28 px-6 text-center">
+        <p className="text-lg text-muted-foreground">Товар не найден</p>
+        <Link to="/catalog" className="text-primary underline mt-4 inline-block">
+          Вернуться в каталог
+        </Link>
       </div>
     );
   }
