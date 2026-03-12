@@ -252,8 +252,7 @@ const News = () => {
         </div>
       </section>
 
-      <Footer />
-    </div>
+    </>
   );
 };
 
