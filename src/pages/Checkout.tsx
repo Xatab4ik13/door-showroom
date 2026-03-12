@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ShoppingBag, Check, Clock, CreditCard, Truck, PackageCheck, Shield } from 'lucide-react';
 import { z } from 'zod';
-import Footer from '@/components/Footer';
+import { useCart } from '@/contexts/CartContext';
 import { useCart } from '@/contexts/CartContext';
 
 const checkoutSchema = z.object({
