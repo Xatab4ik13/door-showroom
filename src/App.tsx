@@ -57,6 +57,8 @@ const App = () => (
                   <Route path="/news" element={<News />} />
                   <Route path="/contacts" element={<Contacts />} />
                   <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/terms" element={<Terms />} />
                 </Route>
 
                 {/* Admin panel */}
