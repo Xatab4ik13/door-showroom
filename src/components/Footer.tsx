@@ -102,10 +102,10 @@ const Footer = () => {
             © {new Date().getFullYear()} RusDoors. Все права защищены.
           </p>
           <div className="flex gap-6">
-            <Link to="/" className="text-xs text-muted-foreground hover:text-[hsl(205,85%,45%)] transition-colors">
+            <Link to="/privacy" className="text-xs text-muted-foreground hover:text-[hsl(205,85%,45%)] transition-colors">
               Политика конфиденциальности
             </Link>
-            <Link to="/" className="text-xs text-muted-foreground hover:text-[hsl(205,85%,45%)] transition-colors">
+            <Link to="/terms" className="text-xs text-muted-foreground hover:text-[hsl(205,85%,45%)] transition-colors">
               Пользовательское соглашение
             </Link>
           </div>

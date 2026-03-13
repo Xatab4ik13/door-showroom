@@ -20,6 +20,8 @@ import About from "./pages/About";
 import News from "./pages/News";
 import Contacts from "./pages/Contacts";
 import Checkout from "./pages/Checkout";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import AdminLogin from "./pages/admin/AdminLogin";
 import Dashboard from "./pages/admin/Dashboard";
 import Orders from "./pages/admin/Orders";
