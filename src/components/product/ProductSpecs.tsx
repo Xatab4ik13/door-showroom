@@ -8,9 +8,11 @@ interface ProductSpecsProps {
 // Internal/technical fields to hide from customers
 const hiddenKeys = new Set([
   'source_url', 'supplier_url', 'xml_url', 'import_url', 'sync_id',
-  'url', 'id', 'slug', 'group', 'source_sku',
+  'url', 'id', 'slug', 'source_sku',
   'условия оплаты',
-  '_sizes', '_accessories', // internal structured data
+  '_sizes', '_accessories',
+  // Useless technical fields
+  'вид номенклатуры', 'группа', 'group', 'упаковка',
 ]);
 
 // Nice display names for known Russian param keys
@@ -23,12 +25,8 @@ const labelMap: Record<string, string> = {
   'тип покрытия': 'Тип покрытия',
   'толщина': 'Толщина',
   'стиль': 'Стиль',
-  'упаковка': 'Упаковка',
-  'вид номенклатуры': 'Вид номенклатуры',
   'серия': 'Серия',
   'размер': 'Размер',
-  'группа товаров': 'Группа товаров',
-  'группа': 'Группа',
   'материал': 'Материал',
   'покрытие': 'Покрытие',
   'производитель': 'Производитель',
@@ -49,52 +47,57 @@ const keyOrder: Record<string, number> = {
   'тип полотна': 6,
   'тип покрытия': 7,
   'толщина': 8,
-  'стиль': 9,
-  'группа': 10,
-  'вид номенклатуры': 11,
-  'упаковка': 12,
-  'страна': 13,
+  'материал': 9,
+  'стиль': 10,
+  'страна': 11,
 };
 
 const ProductSpecs = ({ product, apiSpecs }: ProductSpecsProps) => {
   const specRows: { label: string; value: string; order: number }[] = [];
+  // Track seen labels (lowercase) to prevent duplicates
+  const seenLabels = new Set<string>();
+
+  const addRow = (label: string, value: string, order: number) => {
+    const key = label.toLowerCase();
+    if (seenLabels.has(key)) return;
+    seenLabels.add(key);
+    specRows.push({ label, value, order });
+  };
 
   if (apiSpecs && Object.keys(apiSpecs).length > 0) {
     for (const [key, val] of Object.entries(apiSpecs)) {
-      if (!val || hiddenKeys.has(key) || hiddenKeys.has(key.toLowerCase())) continue;
-      if (key.startsWith('_')) continue; // skip internal prefixed keys
-      const label = labelMap[key.toLowerCase()] || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
-      const order = keyOrder[key.toLowerCase()] || 50;
-      specRows.push({ label, value: val, order });
+      if (!val || hiddenKeys.has(key.toLowerCase())) continue;
+      if (key.startsWith('_')) continue;
+      const lowerKey = key.toLowerCase();
+      const label = labelMap[lowerKey] || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+      const order = keyOrder[lowerKey] || 50;
+      addRow(label, val, order);
     }
 
-    // Add base fields if not already in specs
-    const specLabels = new Set(specRows.map(r => r.label.toLowerCase()));
-
-    if (product.manufacturer && product.manufacturer !== 'Не указан' && !specLabels.has('производитель')) {
-      specRows.push({ label: 'Производитель', value: product.manufacturer, order: 2 });
+    // Add base fields if not already present
+    if (product.manufacturer && product.manufacturer !== 'Не указан') {
+      addRow('Производитель', product.manufacturer, 2);
     }
-    if (product.material && product.material !== 'Не указан' && !specLabels.has('материал')) {
-      specRows.push({ label: 'Материал', value: product.material, order: 15 });
+    if (product.material && product.material !== 'Не указан') {
+      addRow('Материал', product.material, 9);
     }
-    if (product.finish && product.finish !== 'Не указан' && !specLabels.has('покрытие') && !specLabels.has('цвет')) {
-      specRows.push({ label: 'Покрытие', value: product.finish, order: 16 });
+    if (product.finish && product.finish !== 'Не указан') {
+      addRow('Покрытие', product.finish, 16);
     }
   } else {
     if (product.manufacturer && product.manufacturer !== 'Не указан') {
-      specRows.push({ label: 'Производитель', value: product.manufacturer, order: 2 });
+      addRow('Производитель', product.manufacturer, 2);
     }
     if (product.material && product.material !== 'Не указан') {
-      specRows.push({ label: 'Материал', value: product.material, order: 15 });
+      addRow('Материал', product.material, 9);
     }
     if (product.finish && product.finish !== 'Не указан') {
-      specRows.push({ label: 'Покрытие', value: product.finish, order: 16 });
+      addRow('Покрытие', product.finish, 16);
     }
   }
 
   if (specRows.length === 0) return null;
 
-  // Sort by priority order
   specRows.sort((a, b) => a.order - b.order);
 
   return (

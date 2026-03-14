@@ -11,6 +11,10 @@ interface Accessory {
   default_qty: number;
 }
 
+interface CleanAccessory extends Accessory {
+  displayName: string;
+}
+
 interface ProductConfiguratorProps {
   product: CatalogProduct;
   apiSpecs?: Record<string, string | null> | null;
@@ -18,6 +22,37 @@ interface ProductConfiguratorProps {
 
 const formatPrice = (price: number) =>
   new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(price);
+
+/**
+ * Extract a friendly category name from the raw accessory name.
+ * E.g. "Коробка прямая сендвич Лайт nanotex, клен айс 70*30*2070..." → "Коробка"
+ */
+function getAccessoryDisplayName(raw: string): string {
+  const lowerName = raw.toLowerCase();
+  
+  const categories: [string, string][] = [
+    ['коробка', 'Коробка'],
+    ['наличник', 'Наличник'],
+    ['добор', 'Добор'],
+    ['притворн', 'Притворная планка'],
+    ['порог', 'Порог'],
+    ['петл', 'Петли'],
+    ['ручк', 'Ручка'],
+    ['замо', 'Замок'],
+    ['уплотнител', 'Уплотнитель'],
+    ['стекл', 'Стекло'],
+    ['капитель', 'Капитель'],
+    ['планка', 'Планка'],
+  ];
+
+  for (const [keyword, label] of categories) {
+    if (lowerName.includes(keyword)) return label;
+  }
+
+  // Fallback: take first 2 words
+  const words = raw.split(/[\s,]+/).slice(0, 2).join(' ');
+  return words || raw;
+}
 
 const ProductConfigurator = ({ product, apiSpecs }: ProductConfiguratorProps) => {
   const [addedToCart, setAddedToCart] = useState(false);
@@ -31,15 +66,27 @@ const ProductConfigurator = ({ product, apiSpecs }: ProductConfiguratorProps) =>
     } catch { return []; }
   }, [apiSpecs]);
 
-  // Parse accessories from specs
-  const accessories: Accessory[] = useMemo(() => {
+  // Parse accessories from specs, clean names, filter out the door itself
+  const accessories: CleanAccessory[] = useMemo(() => {
     if (!apiSpecs?._accessories) return [];
     try {
-      const parsed = JSON.parse(apiSpecs._accessories);
-      // Filter out the door itself (first item is usually the polotno)
-      return parsed.filter((a: Accessory) => a.article !== product.id?.replace('dvercom-', ''));
+      const parsed: Accessory[] = JSON.parse(apiSpecs._accessories);
+      const productSku = product.id?.replace('dvercom-', '') || '';
+      
+      return parsed
+        .filter((a) => {
+          // Filter out the door panel itself
+          if (a.article === productSku) return false;
+          // Filter out items with same price as the door (likely the polotno duplicate)
+          if (a.price === product.price && a.default_qty === 1) return false;
+          return true;
+        })
+        .map((a) => ({
+          ...a,
+          displayName: getAccessoryDisplayName(a.name),
+        }));
     } catch { return []; }
-  }, [apiSpecs, product.id]);
+  }, [apiSpecs, product.id, product.price]);
 
   const [selectedSize, setSelectedSize] = useState(
     sizes.length > 0 ? (sizes.find(s => s.includes('200') && s.includes('70')) || sizes[0]) : ''
@@ -122,35 +169,36 @@ const ProductConfigurator = ({ product, apiSpecs }: ProductConfiguratorProps) =>
       {/* Accessories */}
       {accessories.length > 0 && (
         <div className="border-t border-border pt-3 space-y-3">
+          <h4
+            className="text-sm font-bold uppercase tracking-wider text-foreground"
+            style={{ fontFamily: "'Oswald', sans-serif" }}
+          >
+            Комплектующие
+          </h4>
           {accessories.map(acc => (
-            <div key={acc.article} className="space-y-1">
-              <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium text-foreground">{acc.name.split(' (')[0]}</span>
-                  <span className="ml-2 text-sm font-bold text-primary">{formatPrice(acc.price)}</span>
-                  <span className="text-xs text-muted-foreground ml-1">шт.</span>
-                </div>
-                <div className="flex items-center gap-2 ml-2">
-                  <button
-                    onClick={() => setAccQty(acc.article, (accessoryQtys[acc.article] || 0) - 1)}
-                    className="w-8 h-8 rounded border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent transition-colors"
-                  >
-                    <Minus className="w-3 h-3" />
-                  </button>
-                  <span className="text-sm font-bold text-foreground w-6 text-center">
-                    {accessoryQtys[acc.article] || 0}
-                  </span>
-                  <button
-                    onClick={() => setAccQty(acc.article, (accessoryQtys[acc.article] || 0) + 1)}
-                    className="w-8 h-8 rounded border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent transition-colors"
-                  >
-                    <Plus className="w-3 h-3" />
-                  </button>
-                </div>
+            <div key={acc.article} className="flex items-center justify-between py-1">
+              <div className="flex-1 min-w-0">
+                <span className="text-sm font-medium text-foreground">{acc.displayName}</span>
+                <span className="ml-2 text-sm text-primary font-bold">{formatPrice(acc.price)}</span>
+                <span className="text-xs text-muted-foreground ml-0.5">/шт</span>
               </div>
-              {acc.description && acc.description !== acc.name && (
-                <p className="text-xs text-muted-foreground truncate">{acc.description}</p>
-              )}
+              <div className="flex items-center gap-2 ml-2">
+                <button
+                  onClick={() => setAccQty(acc.article, (accessoryQtys[acc.article] || 0) - 1)}
+                  className="w-8 h-8 rounded border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent transition-colors"
+                >
+                  <Minus className="w-3 h-3" />
+                </button>
+                <span className="text-sm font-bold text-foreground w-6 text-center">
+                  {accessoryQtys[acc.article] || 0}
+                </span>
+                <button
+                  onClick={() => setAccQty(acc.article, (accessoryQtys[acc.article] || 0) + 1)}
+                  className="w-8 h-8 rounded border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -197,7 +245,7 @@ const ProductConfigurator = ({ product, apiSpecs }: ProductConfiguratorProps) =>
           ) : (
             <>
               <ShoppingCart className="w-4 h-4" />
-              {hasConfigurator ? 'В корзину (комплект)' : 'В корзину'}
+              В корзину
             </>
           )}
         </button>
