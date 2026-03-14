@@ -5,6 +5,7 @@ import { parseStringPromise } from 'xml2js';
 import { pool } from '../db/pool.js';
 import { requireAuth } from '../middleware/auth.js';
 import { syncDverCom } from '../services/dvercom-sync.js';
+import { scrapeAllProducts } from '../services/dvercom-scraper.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
