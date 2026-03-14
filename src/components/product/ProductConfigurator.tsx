@@ -1,156 +1,83 @@
-import { useState, useMemo } from 'react';
-import { ShoppingCart, Check } from 'lucide-react';
+import { useState } from 'react';
+import { ShoppingCart, Check, Minus, Plus } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import type { CatalogProduct } from '@/data/catalog';
 
 interface ProductConfiguratorProps {
   product: CatalogProduct;
+  apiSpecs?: Record<string, string | null> | null;
 }
-
-const sizes = [
-  { label: '600×2000', priceAdd: 0 },
-  { label: '700×2000', priceAdd: 500 },
-  { label: '800×2000', priceAdd: 800 },
-  { label: '900×2000', priceAdd: 1200 },
-];
-
-const hardwareOptions = [
-  { label: 'Без фурнитуры', priceAdd: 0 },
-  { label: 'Ручки (комплект)', priceAdd: 2500 },
-  { label: 'Ручки + замок', priceAdd: 4200 },
-  { label: 'Премиум фурнитура', priceAdd: 8500 },
-];
-
-const extras = [
-  { id: 'box', label: 'Дверная коробка', price: 3200 },
-  { id: 'casings', label: 'Наличники (комплект)', price: 1800 },
-  { id: 'threshold', label: 'Порог', price: 900 },
-  { id: 'dobor', label: 'Доборы', price: 2400 },
-];
 
 const formatPrice = (price: number) =>
   new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(price);
 
-const ProductConfigurator = ({ product }: ProductConfiguratorProps) => {
-  const [selectedSize, setSelectedSize] = useState(1);
-  const [selectedHardware, setSelectedHardware] = useState(0);
-  const [selectedExtras, setSelectedExtras] = useState<string[]>(['box', 'casings']);
+const ProductConfigurator = ({ product, apiSpecs }: ProductConfiguratorProps) => {
+  const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
   const { addItem } = useCart();
 
-  const totalPrice = useMemo(() => {
-    let total = product.price;
-    total += sizes[selectedSize].priceAdd;
-    total += hardwareOptions[selectedHardware].priceAdd;
-    selectedExtras.forEach((id) => {
-      const extra = extras.find((e) => e.id === id);
-      if (extra) total += extra.price;
-    });
-    return total;
-  }, [product.price, selectedSize, selectedHardware, selectedExtras]);
+  const totalPrice = product.price * quantity;
 
-  const toggleExtra = (id: string) => {
-    setSelectedExtras((prev) =>
-      prev.includes(id) ? prev.filter((e) => e !== id) : [...prev, id]
-    );
-  };
+  // Extract key info from API specs for the configurator summary
+  const summaryFields: { label: string; value: string }[] = [];
+  if (product.manufacturer && product.manufacturer !== 'Не указан') {
+    summaryFields.push({ label: 'Производитель', value: product.manufacturer });
+  }
+  if (product.material && product.material !== 'Не указан') {
+    summaryFields.push({ label: 'Материал', value: product.material });
+  }
+  if (product.finish && product.finish !== 'Не указан') {
+    summaryFields.push({ label: 'Покрытие / Цвет', value: product.finish });
+  }
+  if (apiSpecs) {
+    if (apiSpecs['Размер'] || apiSpecs['размер']) {
+      summaryFields.push({ label: 'Размер', value: (apiSpecs['Размер'] || apiSpecs['размер'])! });
+    }
+    if (apiSpecs['Серия'] || apiSpecs['серия']) {
+      summaryFields.push({ label: 'Серия', value: (apiSpecs['Серия'] || apiSpecs['серия'])! });
+    }
+  }
+
+  const discount = product.oldPrice
+    ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
+    : null;
 
   return (
-    <div className="space-y-6">
-      {/* Size */}
-      <div>
-        <h4
-          className="text-sm font-bold uppercase tracking-wider text-foreground mb-3"
-          style={{ fontFamily: "'Oswald', sans-serif" }}
-        >
-          Размер полотна
-        </h4>
-        <div className="grid grid-cols-2 gap-2">
-          {sizes.map((size, i) => (
-            <button
-              key={size.label}
-              onClick={() => setSelectedSize(i)}
-              className={`px-3 py-2 text-sm rounded-md border transition-colors ${
-                selectedSize === i
-                  ? 'border-[hsl(205,85%,45%)] bg-[hsl(205,85%,45%)] text-white'
-                  : 'border-border bg-background text-foreground hover:bg-accent'
-              }`}
-            >
-              {size.label}
-              {size.priceAdd > 0 && (
-                <span className="text-xs opacity-70 ml-1">+{formatPrice(size.priceAdd)}</span>
-              )}
-            </button>
+    <div className="space-y-5">
+      {/* Quick summary */}
+      {summaryFields.length > 0 && (
+        <div className="space-y-2">
+          {summaryFields.map((f) => (
+            <div key={f.label} className="flex justify-between text-sm">
+              <span className="text-muted-foreground">{f.label}</span>
+              <span className="text-foreground font-medium">{f.value}</span>
+            </div>
           ))}
         </div>
-      </div>
+      )}
 
-      {/* Hardware */}
+      {/* Quantity selector */}
       <div>
         <h4
           className="text-sm font-bold uppercase tracking-wider text-foreground mb-3"
           style={{ fontFamily: "'Oswald', sans-serif" }}
         >
-          Фурнитура
+          Количество
         </h4>
-        <div className="space-y-2">
-          {hardwareOptions.map((hw, i) => (
-            <label
-              key={hw.label}
-              className={`flex items-center justify-between px-3 py-2.5 rounded-md border cursor-pointer transition-colors ${
-                selectedHardware === i
-                  ? 'border-[hsl(205,85%,45%)] bg-[hsl(205,85%,45%)]/5'
-                  : 'border-border hover:bg-accent'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="hardware"
-                  checked={selectedHardware === i}
-                  onChange={() => setSelectedHardware(i)}
-                  className="accent-[hsl(205,85%,45%)]"
-                />
-                <span className="text-sm">{hw.label}</span>
-              </div>
-              {hw.priceAdd > 0 && (
-                <span className="text-xs text-muted-foreground">+{formatPrice(hw.priceAdd)}</span>
-              )}
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {/* Extras */}
-      <div>
-        <h4
-          className="text-sm font-bold uppercase tracking-wider text-foreground mb-3"
-          style={{ fontFamily: "'Oswald', sans-serif" }}
-        >
-          Комплектация
-        </h4>
-        <div className="space-y-2">
-          {extras.map((extra) => (
-            <label
-              key={extra.id}
-              className={`flex items-center justify-between px-3 py-2.5 rounded-md border cursor-pointer transition-colors ${
-                selectedExtras.includes(extra.id)
-                  ? 'border-[hsl(205,85%,45%)] bg-[hsl(205,85%,45%)]/5'
-                  : 'border-border hover:bg-accent'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selectedExtras.includes(extra.id)}
-                  onChange={() => toggleExtra(extra.id)}
-                  className="accent-[hsl(205,85%,45%)] w-4 h-4"
-                />
-                <span className="text-sm">{extra.label}</span>
-              </div>
-              <span className="text-xs text-muted-foreground">+{formatPrice(extra.price)}</span>
-            </label>
-          ))}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+            className="w-10 h-10 rounded-md border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent transition-colors"
+          >
+            <Minus className="w-4 h-4" />
+          </button>
+          <span className="text-lg font-bold text-foreground w-10 text-center">{quantity}</span>
+          <button
+            onClick={() => setQuantity(quantity + 1)}
+            className="w-10 h-10 rounded-md border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -160,23 +87,26 @@ const ProductConfigurator = ({ product }: ProductConfiguratorProps) => {
           <span className="text-sm text-muted-foreground">Итого:</span>
           <div className="text-right">
             <span className="text-2xl font-bold text-foreground">{formatPrice(totalPrice)}</span>
-            {product.oldPrice && (
-              <span className="text-sm text-muted-foreground line-through ml-2">
-                {formatPrice(product.oldPrice + sizes[selectedSize].priceAdd + hardwareOptions[selectedHardware].priceAdd)}
-              </span>
+            {product.oldPrice && discount && (
+              <div className="flex items-center justify-end gap-2 mt-1">
+                <span className="text-sm text-muted-foreground line-through">
+                  {formatPrice(product.oldPrice * quantity)}
+                </span>
+                <span className="text-xs font-bold text-destructive">−{discount}%</span>
+              </div>
             )}
           </div>
         </div>
         <button
           onClick={() => {
-            addItem(product);
+            for (let i = 0; i < quantity; i++) addItem(product);
             setAddedToCart(true);
             setTimeout(() => setAddedToCart(false), 2000);
           }}
           className={`w-full flex items-center justify-center gap-2 py-3 rounded-md font-medium uppercase tracking-wider transition-all ${
             addedToCart
               ? 'bg-green-600 text-white'
-              : 'bg-[hsl(205,85%,45%)] text-white hover:opacity-90'
+              : 'bg-primary text-primary-foreground hover:opacity-90'
           }`}
           style={{ fontFamily: "'Oswald', sans-serif" }}
         >
@@ -188,7 +118,7 @@ const ProductConfigurator = ({ product }: ProductConfiguratorProps) => {
           ) : (
             <>
               <ShoppingCart className="w-4 h-4" />
-              Добавить в корзину
+              В корзину
             </>
           )}
         </button>

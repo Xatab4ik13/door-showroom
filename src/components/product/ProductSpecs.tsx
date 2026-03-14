@@ -5,18 +5,38 @@ interface ProductSpecsProps {
   apiSpecs?: Record<string, string | null> | null;
 }
 
-const defaultSpecs = (p: CatalogProduct) => [
-  { label: 'Материал', value: p.material },
-  { label: 'Покрытие', value: p.finish },
-  { label: 'Производитель', value: p.manufacturer },
-];
+// Internal/technical fields to hide from customers
+const hiddenKeys = new Set([
+  'group', 'source_url', 'source_sku', 'supplier_url', 'xml_url',
+  'import_url', 'sync_id', 'url', 'sku', 'id', 'slug',
+]);
 
 const ProductSpecs = ({ product, apiSpecs }: ProductSpecsProps) => {
-  // Build specs: use API specs if available, otherwise defaults
   const specRows: { label: string; value: string }[] = [];
 
   if (apiSpecs && Object.keys(apiSpecs).length > 0) {
-    // Always show basic info first
+    // Show ALL specs from the supplier (except hidden internal fields)
+    for (const [key, val] of Object.entries(apiSpecs)) {
+      if (!val || hiddenKeys.has(key.toLowerCase())) continue;
+      // Capitalize first letter, replace underscores
+      const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+      specRows.push({ label, value: val });
+    }
+
+    // Add base fields if not already in specs
+    const specLabels = new Set(specRows.map(r => r.label.toLowerCase()));
+
+    if (product.manufacturer && product.manufacturer !== 'Не указан' && !specLabels.has('производитель')) {
+      specRows.unshift({ label: 'Производитель', value: product.manufacturer });
+    }
+    if (product.material && product.material !== 'Не указан' && !specLabels.has('материал')) {
+      specRows.unshift({ label: 'Материал', value: product.material });
+    }
+    if (product.finish && product.finish !== 'Не указан' && !specLabels.has('покрытие') && !specLabels.has('цвет')) {
+      specRows.unshift({ label: 'Покрытие', value: product.finish });
+    }
+  } else {
+    // Fallback for mock data
     if (product.manufacturer && product.manufacturer !== 'Не указан') {
       specRows.push({ label: 'Производитель', value: product.manufacturer });
     }
@@ -26,22 +46,9 @@ const ProductSpecs = ({ product, apiSpecs }: ProductSpecsProps) => {
     if (product.finish && product.finish !== 'Не указан') {
       specRows.push({ label: 'Покрытие', value: product.finish });
     }
-    // Add all API specs (hide internal fields)
-    const hiddenKeys = new Set(['group', 'source_url', 'source_sku', 'supplier_url', 'xml_url', 'import_url', 'sync_id']);
-    for (const [key, val] of Object.entries(apiSpecs)) {
-      if (val && !hiddenKeys.has(key)) {
-        const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
-        specRows.push({ label, value: val });
-      }
-    }
-  } else {
-    specRows.push(...defaultSpecs(product));
-    specRows.push(
-      { label: 'Доступные размеры', value: '600×2000, 700×2000, 800×2000, 900×2000 мм' },
-      { label: 'Толщина полотна', value: '36 мм' },
-      { label: 'Гарантия', value: '5 лет' },
-    );
   }
+
+  if (specRows.length === 0) return null;
 
   return (
     <div>
