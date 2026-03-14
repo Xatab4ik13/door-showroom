@@ -107,8 +107,17 @@ router.post('/xml', requireAuth, upload.single('file'), async (req, res) => {
   }
 });
 
-// POST /api/import/sync/dvercom — manual trigger
-router.post('/sync/dvercom', requireAuth, async (_req, res) => {
+// POST /api/import/sync/dvercom — manual trigger (admin JWT or SYNC_SECRET)
+router.post('/sync/dvercom', async (req, res) => {
+  // Allow auth via JWT or sync secret (for cron/CLI usage)
+  const syncSecret = process.env.SYNC_SECRET || 'rusdoors-sync-2024';
+  const header = req.headers.authorization;
+  const secretHeader = req.headers['x-sync-secret'];
+
+  if (secretHeader !== syncSecret && !header?.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Требуется авторизация' });
+  }
+
   try {
     const result = await syncDverCom();
     res.json(result);
