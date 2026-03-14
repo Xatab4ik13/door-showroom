@@ -152,25 +152,29 @@ export async function syncDverCom() {
           const catSlug = catId ? (CATEGORY_MAP[catId] || `dvercom-cat-${catId}`) : null;
           const dbCategoryId = catSlug ? (categorySlugToId[catSlug] || null) : null;
 
-          // Extract ALL params from YML (not just hardcoded ones)
+          // Extract ALL params from YML (handles malformed nested <param> tags)
           const specsObj: Record<string, string | null> = {};
-          if (offer.param && Array.isArray(offer.param)) {
-            for (const p of offer.param) {
-              if (typeof p === 'object' && p.$ && p.$.name) {
-                specsObj[p.$.name] = p._ || null;
-              }
-            }
+          
+          // 1. Extract nested <param> tags recursively
+          const params = extractAllParams(offer.param);
+          for (const [k, v] of Object.entries(params)) {
+            specsObj[k] = v;
           }
-          // Add model if not already in params
-          if (!specsObj['модель'] && model) specsObj['модель'] = model;
+          
+          // 2. Extract standard YML fields into specs
+          if (vendor) specsObj['производитель'] = vendor;
+          if (model && !specsObj['модель']) specsObj['модель'] = model;
+          if (vendorCode) specsObj['артикул'] = vendorCode;
+          
+          const country = (offer as any).country_of_origin?.[0] || null;
+          if (country) specsObj['страна'] = country;
+          
+          const salesNotes = (offer as any).sales_notes?.[0] || null;
+          if (salesNotes) specsObj['условия оплаты'] = salesNotes;
+          
           // Keep source_url for internal use (stripped on API output)
-          specsObj['source_url'] = sourceUrl;
-
-          // Build slug: clean, unique, URL-friendly
-          const slug = `dvercom-${vendorCode}`.toLowerCase().replace(/[^a-zа-яё0-9-]/gi, '-').replace(/-+/g, '-');
-
-          // Specs JSON — all params from YML
-          const specs = JSON.stringify(specsObj);
+          const sourceUrl2 = offer.url?.[0] || null;
+          specsObj['source_url'] = sourceUrl2;
 
           const result = await pool.query(
             `INSERT INTO products (supplier_id, source_sku, name, slug, category_id, description, price, manufacturer, images, in_stock, specs, sync_status, updated_at)
