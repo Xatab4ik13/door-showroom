@@ -26,9 +26,10 @@ const ProductSpecs = ({ product, apiSpecs }: ProductSpecsProps) => {
     if (product.finish && product.finish !== 'Не указан') {
       specRows.push({ label: 'Покрытие', value: product.finish });
     }
-    // Add all API specs
+    // Add all API specs (hide internal fields)
+    const hiddenKeys = new Set(['group', 'source_url', 'source_sku', 'supplier_url', 'xml_url', 'import_url', 'sync_id']);
     for (const [key, val] of Object.entries(apiSpecs)) {
-      if (val && key !== 'group') {
+      if (val && !hiddenKeys.has(key)) {
         const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
         specRows.push({ label, value: val });
       }

@@ -84,8 +84,17 @@ router.get('/', async (req, res) => {
     ),
   ]);
 
+  // Strip internal fields from specs before sending
+  const products = dataRes.rows.map((row: any) => {
+    if (row.specs && typeof row.specs === 'object') {
+      const { source_url, supplier_url, xml_url, import_url, sync_id, ...cleanSpecs } = row.specs;
+      row.specs = cleanSpecs;
+    }
+    return row;
+  });
+
   res.json({
-    products: dataRes.rows,
+    products,
     total: Number(countRes.rows[0].count),
     page: Number(page),
     limit: Number(limit),
@@ -131,8 +140,14 @@ router.get('/:slug', async (req, res) => {
      WHERE p.slug = $1`,
     [req.params.slug],
   );
-  if (!result.rows[0]) return res.status(404).json({ error: 'Товар не найден' });
-  res.json(result.rows[0]);
+  const product = result.rows[0];
+  if (!product) return res.status(404).json({ error: 'Товар не найден' });
+  // Strip internal fields from specs
+  if (product.specs && typeof product.specs === 'object') {
+    const { source_url, supplier_url, xml_url, import_url, sync_id, ...cleanSpecs } = product.specs;
+    product.specs = cleanSpecs;
+  }
+  res.json(product);
 });
 
 // DELETE /api/products/:id (admin)

@@ -36,7 +36,7 @@ export interface CategoryDef {
 }
 
 export const categories: CategoryDef[] = [
-  { key: 'all', label: 'Все двери' },
+  { key: 'all', label: 'Все товары' },
   {
     key: 'mezhkomnatnye',
     label: 'Межкомнатные двери',

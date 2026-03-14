@@ -23,9 +23,12 @@ export function apiProductToCard(p: ApiProduct): CatalogProduct {
     ? p.images[0]
     : `https://dver.com/xml/images/${p.source_sku}.jpeg`;
 
-  // Tags based on price/availability
+  // Tags based on price/availability/recency
   const tags: Tag[] = [];
   if (p.old_price && p.old_price > Number(p.price)) tags.push('sale');
+  // Mark products created in last 30 days as "new"
+  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  if (p.created_at && new Date(p.created_at).getTime() > thirtyDaysAgo) tags.push('new');
 
   return {
     id: p.slug, // use slug as ID for routing
