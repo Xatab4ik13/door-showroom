@@ -127,4 +127,31 @@ router.post('/sync/dvercom', async (req, res) => {
   }
 });
 
+// POST /api/import/scrape/dvercom — scrape full product pages for specs/accessories
+router.post('/scrape/dvercom', async (req, res) => {
+  const syncSecret = process.env.SYNC_SECRET || 'rusdoors-sync-2024';
+  const header = req.headers.authorization;
+  const secretHeader = req.headers['x-sync-secret'];
+
+  if (secretHeader !== syncSecret && !header?.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Требуется авторизация' });
+  }
+
+  const limit = req.body?.limit ? parseInt(req.body.limit) : undefined;
+
+  try {
+    // Run in background — return immediately
+    res.json({ status: 'started', message: 'Scraping started in background', limit: limit || 'all' });
+
+    // Don't await — let it run
+    scrapeAllProducts(limit).then(result => {
+      console.log('[SCRAPE] Background scraping finished:', result);
+    }).catch(err => {
+      console.error('[SCRAPE] Background scraping failed:', err.message);
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
