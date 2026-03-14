@@ -145,7 +145,7 @@ export async function syncDverCom() {
           const vendorCode = offer.vendorCode?.[0] || offer.vendorcode?.[0] || sku;
           const description = offer.description?.[0] || null;
           const model = offer.model?.[0] || null;
-          const sourceUrl = offer.url?.[0] || null;
+          const sourceUrl = offer.url?.[0] || null; // kept for specs
           
           // Category
           const catId = offer.categoryId?.[0] || offer.categoryid?.[0];
