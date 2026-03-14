@@ -84,7 +84,7 @@ router.get('/', async (req, res) => {
     ),
   ]);
 
-  // Strip internal fields from specs before sending
+  // Strip internal fields from specs before sending (keep _sizes, _accessories for frontend)
   const products = dataRes.rows.map((row: any) => {
     if (row.specs && typeof row.specs === 'object') {
       const { source_url, supplier_url, xml_url, import_url, sync_id, ...cleanSpecs } = row.specs;
