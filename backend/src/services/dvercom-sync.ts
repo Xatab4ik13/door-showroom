@@ -24,17 +24,40 @@ interface YmlOffer {
   vendorcode?: string[];
   description?: string[];
   model?: string[];
-  param?: Array<{ $: { name: string }; _: string }> | Array<string>;
+  sales_notes?: string[];
+  country_of_origin?: string[];
+  param?: any; // malformed nested structure from YML
 }
 
-function extractParam(offer: YmlOffer, paramName: string): string | null {
-  if (!offer.param) return null;
-  for (const p of offer.param) {
-    if (typeof p === 'object' && p.$ && p.$.name === paramName) {
-      return p._ || null;
+/**
+ * Recursively extract param name/value pairs from malformed nested <param> tags.
+ * The YML feed has unclosed <param> tags, so xml2js nests them inside each other.
+ */
+function extractAllParams(node: any, result: Record<string, string> = {}): Record<string, string> {
+  if (!node) return result;
+  
+  // Handle array of params
+  if (Array.isArray(node)) {
+    for (const item of node) {
+      extractAllParams(item, result);
+    }
+    return result;
+  }
+  
+  // Handle single param object with {$: {name: "..."}, _: "value", param: [...nested]}
+  if (typeof node === 'object' && node.$ && node.$.name) {
+    // The text value might be in _ or might be missing if child params consumed it
+    const textValue = node._ || null;
+    if (textValue) {
+      result[node.$.name] = textValue.trim();
+    }
+    // Recurse into nested params
+    if (node.param) {
+      extractAllParams(node.param, result);
     }
   }
-  return null;
+  
+  return result;
 }
 
 export async function syncDverCom() {
@@ -122,31 +145,38 @@ export async function syncDverCom() {
           const vendorCode = offer.vendorCode?.[0] || offer.vendorcode?.[0] || sku;
           const description = offer.description?.[0] || null;
           const model = offer.model?.[0] || null;
-          const sourceUrl = offer.url?.[0] || null;
+          const sourceUrl = offer.url?.[0] || null; // kept for specs
           
           // Category
           const catId = offer.categoryId?.[0] || offer.categoryid?.[0];
           const catSlug = catId ? (CATEGORY_MAP[catId] || `dvercom-cat-${catId}`) : null;
           const dbCategoryId = catSlug ? (categorySlugToId[catSlug] || null) : null;
 
-          // Extract ALL params from YML (not just hardcoded ones)
+          // Extract ALL params from YML (handles malformed nested <param> tags)
           const specsObj: Record<string, string | null> = {};
-          if (offer.param && Array.isArray(offer.param)) {
-            for (const p of offer.param) {
-              if (typeof p === 'object' && p.$ && p.$.name) {
-                specsObj[p.$.name] = p._ || null;
-              }
-            }
+          
+          // 1. Extract nested <param> tags recursively
+          const params = extractAllParams(offer.param);
+          for (const [k, v] of Object.entries(params)) {
+            specsObj[k] = v;
           }
-          // Add model if not already in params
-          if (!specsObj['модель'] && model) specsObj['модель'] = model;
+          
+          // 2. Extract standard YML fields into specs
+          if (vendor) specsObj['производитель'] = vendor;
+          if (model && !specsObj['модель']) specsObj['модель'] = model;
+          if (vendorCode) specsObj['артикул'] = vendorCode;
+          
+          const country = (offer as any).country_of_origin?.[0] || null;
+          if (country) specsObj['страна'] = country;
+          
+          const salesNotes = (offer as any).sales_notes?.[0] || null;
+          if (salesNotes) specsObj['условия оплаты'] = salesNotes;
+          
           // Keep source_url for internal use (stripped on API output)
           specsObj['source_url'] = sourceUrl;
 
           // Build slug: clean, unique, URL-friendly
           const slug = `dvercom-${vendorCode}`.toLowerCase().replace(/[^a-zа-яё0-9-]/gi, '-').replace(/-+/g, '-');
-
-          // Specs JSON — all params from YML
           const specs = JSON.stringify(specsObj);
 
           const result = await pool.query(

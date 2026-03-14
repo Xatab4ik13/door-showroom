@@ -10,6 +10,7 @@ interface ProductSpecsProps {
 const hiddenKeys = new Set([
   'source_url', 'supplier_url', 'xml_url', 'import_url', 'sync_id',
   'url', 'id', 'slug', 'group', 'source_sku',
+  'условия оплаты', // internal payment terms
 ]);
 
 // Nice display names for known Russian param keys
