@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { CatalogProduct } from '@/data/catalog';
 
 interface ProductSpecsProps {
@@ -7,9 +8,34 @@ interface ProductSpecsProps {
 
 // Internal/technical fields to hide from customers
 const hiddenKeys = new Set([
-  'group', 'source_url', 'source_sku', 'supplier_url', 'xml_url',
-  'import_url', 'sync_id', 'url', 'sku', 'id', 'slug',
+  'source_url', 'supplier_url', 'xml_url', 'import_url', 'sync_id',
+  'url', 'id', 'slug', 'group', 'source_sku',
 ]);
+
+// Nice display names for known Russian param keys
+const labelMap: Record<string, string> = {
+  'артикул': 'Артикул',
+  'модель': 'Модель',
+  'цвет': 'Цвет',
+  'коллекция': 'Коллекция',
+  'тип полотна': 'Тип полотна',
+  'тип покрытия': 'Тип покрытия',
+  'толщина': 'Толщина',
+  'стиль': 'Стиль',
+  'упаковка': 'Упаковка',
+  'вид номенклатуры': 'Вид номенклатуры',
+  'серия': 'Серия',
+  'размер': 'Размер',
+  'группа товаров': 'Группа товаров',
+  'материал': 'Материал',
+  'покрытие': 'Покрытие',
+  'производитель': 'Производитель',
+  'страна': 'Страна',
+  'вес': 'Вес',
+  'гарантия': 'Гарантия',
+  'collection': 'Коллекция',
+  'model': 'Модель',
+};
 
 const ProductSpecs = ({ product, apiSpecs }: ProductSpecsProps) => {
   const specRows: { label: string; value: string }[] = [];
@@ -18,8 +44,8 @@ const ProductSpecs = ({ product, apiSpecs }: ProductSpecsProps) => {
     // Show ALL specs from the supplier (except hidden internal fields)
     for (const [key, val] of Object.entries(apiSpecs)) {
       if (!val || hiddenKeys.has(key.toLowerCase())) continue;
-      // Capitalize first letter, replace underscores
-      const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+      // Use mapped label or capitalize
+      const label = labelMap[key.toLowerCase()] || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
       specRows.push({ label, value: val });
     }
 
