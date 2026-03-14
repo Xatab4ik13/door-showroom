@@ -2,20 +2,46 @@ import type { CatalogProduct } from '@/data/catalog';
 
 interface ProductSpecsProps {
   product: CatalogProduct;
+  apiSpecs?: Record<string, string | null> | null;
 }
 
-const specs = (p: CatalogProduct) => [
+const defaultSpecs = (p: CatalogProduct) => [
   { label: 'Материал', value: p.material },
   { label: 'Покрытие', value: p.finish },
   { label: 'Производитель', value: p.manufacturer },
-  { label: 'Доступные размеры', value: '600×2000, 700×2000, 800×2000, 900×2000 мм' },
-  { label: 'Толщина полотна', value: '36 мм' },
-  { label: 'Толщина коробки', value: '75 мм' },
-  { label: 'Вес', value: '18–24 кг' },
-  { label: 'Гарантия', value: '5 лет' },
 ];
 
-const ProductSpecs = ({ product }: ProductSpecsProps) => {
+const ProductSpecs = ({ product, apiSpecs }: ProductSpecsProps) => {
+  // Build specs: use API specs if available, otherwise defaults
+  const specRows: { label: string; value: string }[] = [];
+
+  if (apiSpecs && Object.keys(apiSpecs).length > 0) {
+    // Always show basic info first
+    if (product.manufacturer && product.manufacturer !== 'Не указан') {
+      specRows.push({ label: 'Производитель', value: product.manufacturer });
+    }
+    if (product.material && product.material !== 'Не указан') {
+      specRows.push({ label: 'Материал', value: product.material });
+    }
+    if (product.finish && product.finish !== 'Не указан') {
+      specRows.push({ label: 'Покрытие', value: product.finish });
+    }
+    // Add all API specs
+    for (const [key, val] of Object.entries(apiSpecs)) {
+      if (val && key !== 'group') {
+        const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+        specRows.push({ label, value: val });
+      }
+    }
+  } else {
+    specRows.push(...defaultSpecs(product));
+    specRows.push(
+      { label: 'Доступные размеры', value: '600×2000, 700×2000, 800×2000, 900×2000 мм' },
+      { label: 'Толщина полотна', value: '36 мм' },
+      { label: 'Гарантия', value: '5 лет' },
+    );
+  }
+
   return (
     <div>
       <h3
@@ -26,7 +52,7 @@ const ProductSpecs = ({ product }: ProductSpecsProps) => {
       </h3>
       <table className="w-full text-sm">
         <tbody>
-          {specs(product).map((spec, i) => (
+          {specRows.map((spec, i) => (
             <tr key={spec.label} className={i % 2 === 0 ? 'bg-secondary/50' : ''}>
               <td className="py-2.5 px-3 text-muted-foreground font-medium w-1/2">{spec.label}</td>
               <td className="py-2.5 px-3 text-foreground">{spec.value}</td>

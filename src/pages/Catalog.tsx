@@ -36,8 +36,26 @@ const Catalog = () => {
   // Build API params
   const apiCategory = category !== 'all' ? categorySlugMap[category] : undefined;
 
+  // Build search query: combine user search with subcategory label for API filtering
+  const buildSearch = () => {
+    const parts: string[] = [];
+    if (search) parts.push(search);
+    if (subcategory) {
+      // Find subcategory label to use as search term
+      const catDef = categories.find(c => c.key === category);
+      if (catDef?.subcategories) {
+        for (const sub of catDef.subcategories) {
+          if (sub.key === subcategory) { parts.push(sub.label); break; }
+          const child = sub.children?.find(c => c.key === subcategory);
+          if (child) { parts.push(child.label); break; }
+        }
+      }
+    }
+    return parts.length > 0 ? parts.join(' ') : undefined;
+  };
+
   const { products: apiProducts, total, loading, error, isApi } = useProducts({
-    search: search || undefined,
+    search: buildSearch(),
     category: apiCategory,
     page,
     limit: ITEMS_PER_PAGE,
