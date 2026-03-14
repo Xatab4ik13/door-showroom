@@ -39,9 +39,9 @@ export function apiProductToCard(p: ApiProduct): CatalogProduct {
     price: Number(p.price),
     oldPrice: p.old_price ? Number(p.old_price) : undefined,
     image,
-    material: p.material || 'Не указан',
-    finish: p.color || 'Не указан',
-    manufacturer: p.manufacturer || 'Не указан',
+    material: p.material || undefined,
+    finish: p.color || undefined,
+    manufacturer: p.manufacturer || p.specs?.['Бренд'] || undefined,
     colors: ['#D0CCC6'], // default swatch
   };
 }
