@@ -9,8 +9,6 @@ import catSpecialnye from '@/assets/doors/cat-specialnye.png';
 const categoryItems = [
   { key: 'mezhkomnatnye', label: 'Межкомнатные двери', image: catMezhkomnatnye, scale: 1 },
   { key: 'vhodnye', label: 'Входные двери', image: catVhodnye, scale: 1 },
-  { key: 'peregorodki', label: 'Перегородки', image: catPeregorodki, scale: 1.35 },
-  { key: 'specialnye', label: 'Специальные двери', image: catSpecialnye, scale: 1 },
   { key: 'furnitura', label: 'Фурнитура', image: catFurnitura, scale: 0.55 },
 ];
 
