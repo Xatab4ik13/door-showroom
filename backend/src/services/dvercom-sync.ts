@@ -129,21 +129,25 @@ export async function syncDverCom() {
           const catSlug = catId ? (CATEGORY_MAP[catId] || `dvercom-cat-${catId}`) : null;
           const dbCategoryId = catSlug ? (categorySlugToId[catSlug] || null) : null;
 
-          // Extract params
-          const group = extractParam(offer, 'группа');
-          const modelParam = extractParam(offer, 'модель');
-          const collection = extractParam(offer, 'коллекция');
+          // Extract ALL params from YML (not just hardcoded ones)
+          const specsObj: Record<string, string | null> = {};
+          if (offer.param && Array.isArray(offer.param)) {
+            for (const p of offer.param) {
+              if (typeof p === 'object' && p.$ && p.$.name) {
+                specsObj[p.$.name] = p._ || null;
+              }
+            }
+          }
+          // Add model if not already in params
+          if (!specsObj['модель'] && model) specsObj['модель'] = model;
+          // Keep source_url for internal use (stripped on API output)
+          specsObj['source_url'] = sourceUrl;
 
           // Build slug: clean, unique, URL-friendly
           const slug = `dvercom-${vendorCode}`.toLowerCase().replace(/[^a-zа-яё0-9-]/gi, '-').replace(/-+/g, '-');
 
-          // Specs JSON
-          const specs = JSON.stringify({
-            group: group || null,
-            model: modelParam || model || null,
-            collection: collection || null,
-            source_url: sourceUrl,
-          });
+          // Specs JSON — all params from YML
+          const specs = JSON.stringify(specsObj);
 
           const result = await pool.query(
             `INSERT INTO products (supplier_id, source_sku, name, slug, category_id, description, price, manufacturer, images, in_stock, specs, sync_status, updated_at)
