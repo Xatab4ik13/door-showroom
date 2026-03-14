@@ -5,7 +5,7 @@ import { useCart } from '@/contexts/CartContext';
 import ProductGallery from '@/components/product/ProductGallery';
 import ProductSpecs from '@/components/product/ProductSpecs';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
-import DoorExplodedSVG from '@/components/product/DoorExplodedSVG';
+
 import { catalogProducts } from '@/data/catalog';
 import { fetchProduct, type ApiProduct } from '@/lib/api';
 import { apiProductToCard } from '@/lib/productAdapter';
