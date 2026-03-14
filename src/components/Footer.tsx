@@ -6,10 +6,9 @@ const footerLinks = [
   {
     title: 'Каталог',
     links: [
-      { label: 'Межкомнатные двери', to: '/catalog' },
-      { label: 'Входные двери', to: '/catalog' },
-      { label: 'Перегородки', to: '/catalog' },
-      { label: 'Фурнитура', to: '/catalog' },
+      { label: 'Межкомнатные двери', to: '/catalog?category=mezhkomnatnye' },
+      { label: 'Входные двери', to: '/catalog?category=vhodnye' },
+      { label: 'Фурнитура', to: '/catalog?category=furnitura' },
     ],
   },
   {
@@ -52,7 +51,7 @@ const Footer = () => {
                   <li key={link.label}>
                     <Link
                       to={link.to}
-                      className="text-sm text-muted-foreground hover:text-[hsl(205,85%,45%)] transition-colors"
+                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
                       style={{ fontFamily: "'Manrope', sans-serif" }}
                     >
                       {link.label}
@@ -73,23 +72,25 @@ const Footer = () => {
             </h4>
             <ul className="space-y-3">
               <li className="flex items-start gap-2.5">
-                <Phone className="w-4 h-4 mt-0.5 text-[hsl(205,85%,45%)] shrink-0" />
-                <a href="tel:+74951234567" className="text-sm text-muted-foreground hover:text-[hsl(205,85%,45%)] transition-colors">
-                  +7 (495) 123-45-67
+                <Phone className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+                <a href="tel:88003023323" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  8 (800) 302-33-23
                 </a>
               </li>
               <li className="flex items-start gap-2.5">
-                <Mail className="w-4 h-4 mt-0.5 text-[hsl(205,85%,45%)] shrink-0" />
-                <a href="mailto:info@rusdoors.su" className="text-sm text-muted-foreground hover:text-[hsl(205,85%,45%)] transition-colors">
+                <Phone className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+                <a href="tel:+79257414891" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  +7 (925) 741-48-91
+                </a>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Mail className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+                <a href="mailto:info@rusdoors.su" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   info@rusdoors.su
                 </a>
               </li>
               <li className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 mt-0.5 text-[hsl(205,85%,45%)] shrink-0" />
-                <span className="text-sm text-muted-foreground">Москва, ул. Примерная, д. 1</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <Clock className="w-4 h-4 mt-0.5 text-[hsl(205,85%,45%)] shrink-0" />
+                <Clock className="w-4 h-4 mt-0.5 text-primary shrink-0" />
                 <span className="text-sm text-muted-foreground">Пн–Сб: 10:00–20:00</span>
               </li>
             </ul>
@@ -102,10 +103,10 @@ const Footer = () => {
             © {new Date().getFullYear()} RusDoors. Все права защищены.
           </p>
           <div className="flex gap-6">
-            <Link to="/privacy" className="text-xs text-muted-foreground hover:text-[hsl(205,85%,45%)] transition-colors">
+            <Link to="/privacy" className="text-xs text-muted-foreground hover:text-primary transition-colors">
               Политика конфиденциальности
             </Link>
-            <Link to="/terms" className="text-xs text-muted-foreground hover:text-[hsl(205,85%,45%)] transition-colors">
+            <Link to="/terms" className="text-xs text-muted-foreground hover:text-primary transition-colors">
               Пользовательское соглашение
             </Link>
           </div>

@@ -14,12 +14,6 @@ const navItems = [
   { label: 'Контакты', href: '/contacts' },
 ];
 
-const accountLinks = [
-  { label: 'Профиль', href: '/account', icon: User },
-  { label: 'Заказы', href: '/account', icon: Package },
-  { label: 'Адреса', href: '/account', icon: MapPin },
-];
-
 const Header = () => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -27,18 +21,10 @@ const Header = () => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
 
-  // Close menu on route change
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [location.pathname]);
+  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
-  // Prevent body scroll when menu is open
   useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [menuOpen]);
 
@@ -60,14 +46,14 @@ const Header = () => {
             <Link
               key={item.label}
               to={item.href}
-              className="relative text-[15px] tracking-[0.12em] uppercase text-[hsl(215,50%,15%)] hover:text-[hsl(205,85%,45%)] transition-colors duration-300 py-1 group whitespace-nowrap"
+              className="relative text-[15px] tracking-[0.12em] uppercase text-[hsl(215,50%,15%)] hover:text-primary transition-colors duration-300 py-1 group whitespace-nowrap"
               style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 500, textShadow: '0 0 8px rgba(255,255,255,0.9), 0 0 16px rgba(255,255,255,0.5)' }}
               onMouseEnter={() => setActiveItem(item.label)}
               onMouseLeave={() => setActiveItem(null)}
             >
               {item.label}
               <span
-                className={`absolute bottom-0 left-0 h-[2px] bg-[hsl(205,85%,45%)] transition-all duration-300 ${
+                className={`absolute bottom-0 left-0 h-[2px] bg-primary transition-all duration-300 ${
                   activeItem === item.label ? 'w-full' : 'w-0'
                 }`}
               />
@@ -79,13 +65,13 @@ const Header = () => {
         <div className="hidden lg:flex items-center gap-4">
           <Link
             to="/cart"
-            className="relative p-2 text-[hsl(215,50%,15%)] hover:text-[hsl(205,85%,45%)] transition-colors drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+            className="relative p-2 text-[hsl(215,50%,15%)] hover:text-primary transition-colors drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]"
             aria-label="Корзина"
           >
             <ShoppingCart className="w-7 h-7" strokeWidth={1.5} />
             {totalItems > 0 && (
               <span
-                className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-[hsl(205,85%,45%)] text-white text-[10px] font-bold rounded-full flex items-center justify-center"
+                className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center"
                 style={{ fontFamily: "'Oswald', sans-serif" }}
               >
                 {totalItems}
@@ -94,7 +80,7 @@ const Header = () => {
           </Link>
           <Link
             to={isAuthenticated ? '/account' : '/login'}
-            className="p-2 text-[hsl(215,50%,15%)] hover:text-[hsl(205,85%,45%)] transition-colors drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+            className="p-2 text-[hsl(215,50%,15%)] hover:text-primary transition-colors drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]"
             aria-label="Личный кабинет"
           >
             <User className="w-7 h-7" strokeWidth={1.5} />
@@ -139,7 +125,6 @@ const Header = () => {
             className="fixed inset-0 z-30 bg-background"
           >
             <div className="h-full flex flex-col pt-28 px-8 pb-8 overflow-y-auto">
-              {/* Navigation links */}
               <nav className="flex-1 flex flex-col justify-center -mt-12">
                 {navItems.map((item, i) => (
                   <motion.div
@@ -155,7 +140,7 @@ const Header = () => {
                       className="group flex items-center py-4 border-b border-border"
                     >
                       <span
-                        className="text-2xl sm:text-3xl font-bold uppercase tracking-wider text-foreground group-hover:text-[hsl(205,85%,45%)] transition-colors duration-300"
+                        className="text-2xl sm:text-3xl font-bold uppercase tracking-wider text-foreground group-hover:text-primary transition-colors duration-300"
                         style={{ fontFamily: "'Oswald', sans-serif" }}
                       >
                         {item.label}
@@ -165,7 +150,6 @@ const Header = () => {
                 ))}
               </nav>
 
-              {/* Bottom section: Cart + Account */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -179,7 +163,7 @@ const Header = () => {
                   className="flex items-center justify-between px-5 py-4 bg-secondary rounded-xl group hover:bg-accent transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <ShoppingCart className="w-5 h-5 text-[hsl(205,85%,45%)]" strokeWidth={1.5} />
+                    <ShoppingCart className="w-5 h-5 text-primary" strokeWidth={1.5} />
                     <span
                       className="text-sm font-medium uppercase tracking-wider text-foreground"
                       style={{ fontFamily: "'Oswald', sans-serif" }}
@@ -189,7 +173,7 @@ const Header = () => {
                   </div>
                   {totalItems > 0 && (
                     <span
-                      className="w-6 h-6 bg-[hsl(205,85%,45%)] text-white text-xs font-bold rounded-full flex items-center justify-center"
+                      className="w-6 h-6 bg-primary text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center"
                       style={{ fontFamily: "'Oswald', sans-serif" }}
                     >
                       {totalItems}
@@ -200,28 +184,27 @@ const Header = () => {
                 <Link
                   to={isAuthenticated ? '/account' : '/login'}
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-between px-5 py-4 bg-[hsl(205,85%,45%)] rounded-xl group hover:opacity-90 transition-opacity"
+                  className="flex items-center justify-between px-5 py-4 bg-primary rounded-xl group hover:opacity-90 transition-opacity"
                 >
                   <div className="flex items-center gap-3">
-                    <User className="w-5 h-5 text-white" strokeWidth={1.5} />
+                    <User className="w-5 h-5 text-primary-foreground" strokeWidth={1.5} />
                     <span
-                      className="text-sm font-medium uppercase tracking-wider text-white"
+                      className="text-sm font-medium uppercase tracking-wider text-primary-foreground"
                       style={{ fontFamily: "'Oswald', sans-serif" }}
                     >
                       {isAuthenticated ? 'Личный кабинет' : 'Войти'}
                     </span>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-white/70" />
+                  <ArrowRight className="w-4 h-4 text-primary-foreground/70" />
                 </Link>
 
-                {/* Contact info */}
                 <div className="flex items-center gap-2 pt-4 justify-center">
                   <Phone className="w-4 h-4 text-muted-foreground" />
                   <a
-                    href="tel:+74951234567"
-                    className="text-sm text-muted-foreground hover:text-[hsl(205,85%,45%)] transition-colors"
+                    href="tel:88003023323"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
-                    +7 (495) 123-45-67
+                    8 (800) 302-33-23
                   </a>
                 </div>
               </motion.div>
