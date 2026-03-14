@@ -18,23 +18,30 @@ const ProductConfigurator = ({ product, apiSpecs }: ProductConfiguratorProps) =>
 
   const totalPrice = product.price * quantity;
 
-  // Extract key info from API specs for the configurator summary
+  // Extract key summary fields from specs
   const summaryFields: { label: string; value: string }[] = [];
   if (product.manufacturer && product.manufacturer !== 'Не указан') {
     summaryFields.push({ label: 'Производитель', value: product.manufacturer });
   }
-  if (product.material && product.material !== 'Не указан') {
-    summaryFields.push({ label: 'Материал', value: product.material });
-  }
-  if (product.finish && product.finish !== 'Не указан') {
-    summaryFields.push({ label: 'Покрытие / Цвет', value: product.finish });
-  }
   if (apiSpecs) {
-    if (apiSpecs['Размер'] || apiSpecs['размер']) {
-      summaryFields.push({ label: 'Размер', value: (apiSpecs['Размер'] || apiSpecs['размер'])! });
+    const color = apiSpecs['цвет'] || apiSpecs['Цвет'] || product.finish;
+    if (color && color !== 'Не указан') {
+      summaryFields.push({ label: 'Цвет', value: color });
     }
-    if (apiSpecs['Серия'] || apiSpecs['серия']) {
-      summaryFields.push({ label: 'Серия', value: (apiSpecs['Серия'] || apiSpecs['серия'])! });
+    const style = apiSpecs['стиль'] || apiSpecs['Стиль'];
+    if (style) summaryFields.push({ label: 'Стиль', value: style });
+    const covering = apiSpecs['тип покрытия'] || apiSpecs['Тип покрытия'];
+    if (covering) summaryFields.push({ label: 'Покрытие', value: covering });
+    const thickness = apiSpecs['толщина'] || apiSpecs['Толщина'];
+    if (thickness) summaryFields.push({ label: 'Толщина', value: `${thickness} мм` });
+    const availability = apiSpecs['вид номенклатуры'] || apiSpecs['Вид номенклатуры'];
+    if (availability) summaryFields.push({ label: 'Наличие', value: availability });
+  } else {
+    if (product.finish && product.finish !== 'Не указан') {
+      summaryFields.push({ label: 'Покрытие / Цвет', value: product.finish });
+    }
+    if (product.material && product.material !== 'Не указан') {
+      summaryFields.push({ label: 'Материал', value: product.material });
     }
   }
 
