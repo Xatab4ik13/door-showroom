@@ -179,18 +179,24 @@ export async function syncDverCom() {
           // Keep source_url for internal use (stripped on API output)
           specsObj['source_url'] = sourceUrl;
 
+          // Extract material and color from specs for dedicated columns
+          const material = specsObj['Покрытие'] || specsObj['покрытие'] || specsObj['Материал'] || specsObj['материал'] || specsObj['Тип покрытия'] || null;
+          const color = specsObj['Цвет'] || specsObj['цвет'] || specsObj['Оттенок'] || null;
+
           // Build slug: clean, unique, URL-friendly
           const slug = `dvercom-${vendorCode}`.toLowerCase().replace(/[^a-zа-яё0-9-]/gi, '-').replace(/-+/g, '-');
           const specs = JSON.stringify(specsObj);
 
           const result = await pool.query(
-            `INSERT INTO products (supplier_id, source_sku, name, slug, category_id, description, price, manufacturer, images, in_stock, specs, sync_status, updated_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'active', NOW())
+            `INSERT INTO products (supplier_id, source_sku, name, slug, category_id, description, price, manufacturer, material, color, images, in_stock, specs, sync_status, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 'active', NOW())
              ON CONFLICT (supplier_id, source_sku) DO UPDATE SET
                name = EXCLUDED.name, price = EXCLUDED.price,
                category_id = COALESCE(EXCLUDED.category_id, products.category_id),
                description = EXCLUDED.description,
                manufacturer = EXCLUDED.manufacturer,
+               material = COALESCE(EXCLUDED.material, products.material),
+               color = COALESCE(EXCLUDED.color, products.color),
                images = EXCLUDED.images,
                in_stock = EXCLUDED.in_stock,
                specs = EXCLUDED.specs,
@@ -198,7 +204,7 @@ export async function syncDverCom() {
              RETURNING (xmax = 0) as is_new`,
             [
               supplierId, vendorCode, name, slug, dbCategoryId,
-              description, price, vendor,
+              description, price, vendor, material, color,
               JSON.stringify([picture]),
               available,
               specs,
