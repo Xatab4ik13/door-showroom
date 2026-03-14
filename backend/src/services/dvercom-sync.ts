@@ -24,17 +24,40 @@ interface YmlOffer {
   vendorcode?: string[];
   description?: string[];
   model?: string[];
-  param?: Array<{ $: { name: string }; _: string }> | Array<string>;
+  sales_notes?: string[];
+  country_of_origin?: string[];
+  param?: any; // malformed nested structure from YML
 }
 
-function extractParam(offer: YmlOffer, paramName: string): string | null {
-  if (!offer.param) return null;
-  for (const p of offer.param) {
-    if (typeof p === 'object' && p.$ && p.$.name === paramName) {
-      return p._ || null;
+/**
+ * Recursively extract param name/value pairs from malformed nested <param> tags.
+ * The YML feed has unclosed <param> tags, so xml2js nests them inside each other.
+ */
+function extractAllParams(node: any, result: Record<string, string> = {}): Record<string, string> {
+  if (!node) return result;
+  
+  // Handle array of params
+  if (Array.isArray(node)) {
+    for (const item of node) {
+      extractAllParams(item, result);
+    }
+    return result;
+  }
+  
+  // Handle single param object with {$: {name: "..."}, _: "value", param: [...nested]}
+  if (typeof node === 'object' && node.$ && node.$.name) {
+    // The text value might be in _ or might be missing if child params consumed it
+    const textValue = node._ || null;
+    if (textValue) {
+      result[node.$.name] = textValue.trim();
+    }
+    // Recurse into nested params
+    if (node.param) {
+      extractAllParams(node.param, result);
     }
   }
-  return null;
+  
+  return result;
 }
 
 export async function syncDverCom() {
