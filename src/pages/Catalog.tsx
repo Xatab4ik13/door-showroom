@@ -262,11 +262,6 @@ const Catalog = () => {
           >
             {pageTitle}
           </h1>
-          {isApi && (
-            <p className="text-xs text-muted-foreground mt-1">
-              Данные обновлены с dver.com · {total} товаров
-            </p>
-          )}
         </div>
         <div className="flex items-center gap-3">
           {/* Sort */}

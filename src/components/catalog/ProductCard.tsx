@@ -70,7 +70,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
       {/* Info */}
       <div className="p-4">
-        <p className="text-xs text-muted-foreground mb-1">{product.manufacturer}</p>
+        {product.manufacturer && <p className="text-xs text-muted-foreground mb-1">{product.manufacturer}</p>}
         <h3
           className="text-base font-semibold text-foreground uppercase tracking-wide mb-2"
           style={{ fontFamily: "'Oswald', sans-serif" }}
