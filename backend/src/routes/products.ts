@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
   }
   if (search) {
     params.push(`%${search}%`);
-    conditions.push(`(p.name ILIKE $${params.length} OR p.source_sku ILIKE $${params.length})`);
+    conditions.push(`(p.name ILIKE $${params.length} OR p.source_sku ILIKE $${params.length} OR p.description ILIKE $${params.length} OR p.material ILIKE $${params.length} OR p.color ILIKE $${params.length} OR p.specs::text ILIKE $${params.length})`);
   }
   if (price_min) {
     params.push(Number(price_min));
