@@ -14,6 +14,9 @@ const categorySlugMap: Record<string, string> = {
   mezhkomnatnye: 'mezhkomnatnye',
   vhodnye: 'vhodnye',
   furnitura: 'furnitura',
+  peregorodki: 'peregorodki',
+  'sistemy-otkryvaniya': 'sistemy-otkryvaniya',
+  specialnye: 'specialnye',
 };
 
 const Catalog = () => {

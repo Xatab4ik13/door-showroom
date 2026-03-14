@@ -192,19 +192,6 @@ const Product = () => {
           </div>
         </div>
 
-        {/* Door Block Schema */}
-        <section className="mb-16">
-          <h2
-            className="text-2xl md:text-3xl font-bold uppercase tracking-wide text-foreground mb-2"
-            style={{ fontFamily: "'Oswald', sans-serif" }}
-          >
-            Схема дверного блока
-          </h2>
-          <p className="text-muted-foreground text-sm mb-8">
-            Нажмите на деталь для подробной информации
-          </p>
-          <DoorExplodedSVG accentColor={product.colors[0]} />
-        </section>
       </div>
   );
 };
