@@ -173,8 +173,7 @@ export async function syncDverCom() {
           if (salesNotes) specsObj['условия оплаты'] = salesNotes;
           
           // Keep source_url for internal use (stripped on API output)
-          const sourceUrl2 = offer.url?.[0] || null;
-          specsObj['source_url'] = sourceUrl2;
+          specsObj['source_url'] = sourceUrl;
 
           // Build slug: clean, unique, URL-friendly
           const slug = `dvercom-${vendorCode}`.toLowerCase().replace(/[^a-zа-яё0-9-]/gi, '-').replace(/-+/g, '-');
