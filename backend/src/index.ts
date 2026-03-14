@@ -12,8 +12,18 @@ import { syncDverCom } from './services/dvercom-sync.js';
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+const allowedOrigins = [
+  'https://rusdoors.su',
+  'https://www.rusdoors.su',
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'https://rusdoors.su',
+  origin(origin, cb) {
+    // allow server-to-server (no origin) and allowed list
+    if (!origin || allowedOrigins.some(o => origin.startsWith(o))) return cb(null, true);
+    cb(null, false);
+  },
   credentials: true,
 }));
 app.use(express.json({ limit: '50mb' }));
