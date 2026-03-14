@@ -83,7 +83,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
             <span className="text-sm text-muted-foreground line-through">{formatPrice(product.oldPrice)}</span>
           )}
         </div>
-        <p className="text-xs text-muted-foreground mt-1">{product.material} · {product.finish}</p>
+        {(product.material || product.finish) && (
+          <p className="text-xs text-muted-foreground mt-1">
+            {[product.material, product.finish].filter(Boolean).join(' · ')}
+          </p>
+        )}
       </div>
     </motion.div>
     </Link>
