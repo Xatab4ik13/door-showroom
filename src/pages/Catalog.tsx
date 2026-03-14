@@ -1,5 +1,6 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Filter, X, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import CatalogSidebar from '@/components/catalog/CatalogSidebar';
 import ProductCard from '@/components/catalog/ProductCard';
 import { catalogProducts as mockProducts, categories, type Category, type Tag } from '@/data/catalog';
@@ -19,9 +20,19 @@ const categorySlugMap: Record<string, string> = {
   specialnye: 'specialnye',
 };
 
+const validCategories = new Set<string>(['mezhkomnatnye', 'vhodnye', 'furnitura', 'peregorodki', 'sistemy-otkryvaniya', 'specialnye']);
+
 const Catalog = () => {
-  const [category, setCategory] = useState<Category | 'all'>('all');
-  const [subcategory, setSubcategory] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Read initial state from URL
+  const urlCategory = searchParams.get('category') || 'all';
+  const urlSubcategory = searchParams.get('sub') || null;
+
+  const [category, setCategory] = useState<Category | 'all'>(
+    validCategories.has(urlCategory) ? urlCategory as Category : 'all'
+  );
+  const [subcategory, setSubcategory] = useState<string | null>(urlSubcategory);
   const [tag, setTag] = useState<Tag | 'all'>('all');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 0]);
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
@@ -32,6 +43,28 @@ const Catalog = () => {
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<'updated_at' | 'price' | 'name'>('updated_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // Sync URL params when category/subcategory change
+  useEffect(() => {
+    const params: Record<string, string> = {};
+    if (category !== 'all') params.category = category;
+    if (subcategory) params.sub = subcategory;
+    setSearchParams(params, { replace: true });
+  }, [category, subcategory, setSearchParams]);
+
+  // Sync state when URL changes externally (e.g. browser back/forward)
+  useEffect(() => {
+    const urlCat = searchParams.get('category') || 'all';
+    const urlSub = searchParams.get('sub') || null;
+    if (validCategories.has(urlCat) && urlCat !== category) {
+      setCategory(urlCat as Category);
+    } else if (urlCat === 'all' && category !== 'all') {
+      setCategory('all');
+    }
+    if (urlSub !== subcategory) {
+      setSubcategory(urlSub);
+    }
+  }, [searchParams]);
 
   // Fetch facets for dynamic filter options
   const { facets } = useFacets();

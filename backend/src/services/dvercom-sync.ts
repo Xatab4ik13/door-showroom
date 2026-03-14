@@ -5,10 +5,14 @@ import { parseStringPromise } from 'xml2js';
 const DVERCOM_YML_URL = process.env.DVERCOM_YML_URL || 'https://dver.com/xml/dver_yml.xml';
 
 // Category mapping from dver.com IDs to our slugs
+// Check dver.com YML <categories> for full list of IDs
 const CATEGORY_MAP: Record<string, string> = {
   '1': 'mezhkomnatnye',
   '2': 'vhodnye',
   '3': 'furnitura',
+  '4': 'peregorodki',
+  '5': 'specialnye',
+  '6': 'sistemy-otkryvaniya',
 };
 
 interface YmlOffer {
