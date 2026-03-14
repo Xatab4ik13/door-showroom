@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { CatalogProduct } from '@/data/catalog';
 
 interface ProductSpecsProps {
@@ -10,7 +9,8 @@ interface ProductSpecsProps {
 const hiddenKeys = new Set([
   'source_url', 'supplier_url', 'xml_url', 'import_url', 'sync_id',
   'url', 'id', 'slug', 'group', 'source_sku',
-  'условия оплаты', // internal payment terms
+  'условия оплаты',
+  '_sizes', '_accessories', // internal structured data
 ]);
 
 // Nice display names for known Russian param keys
@@ -28,6 +28,7 @@ const labelMap: Record<string, string> = {
   'серия': 'Серия',
   'размер': 'Размер',
   'группа товаров': 'Группа товаров',
+  'группа': 'Группа',
   'материал': 'Материал',
   'покрытие': 'Покрытие',
   'производитель': 'Производитель',
@@ -38,44 +39,63 @@ const labelMap: Record<string, string> = {
   'model': 'Модель',
 };
 
+// Priority order for known keys (lower = shown first)
+const keyOrder: Record<string, number> = {
+  'артикул': 1,
+  'производитель': 2,
+  'модель': 3,
+  'коллекция': 4,
+  'цвет': 5,
+  'тип полотна': 6,
+  'тип покрытия': 7,
+  'толщина': 8,
+  'стиль': 9,
+  'группа': 10,
+  'вид номенклатуры': 11,
+  'упаковка': 12,
+  'страна': 13,
+};
+
 const ProductSpecs = ({ product, apiSpecs }: ProductSpecsProps) => {
-  const specRows: { label: string; value: string }[] = [];
+  const specRows: { label: string; value: string; order: number }[] = [];
 
   if (apiSpecs && Object.keys(apiSpecs).length > 0) {
-    // Show ALL specs from the supplier (except hidden internal fields)
     for (const [key, val] of Object.entries(apiSpecs)) {
-      if (!val || hiddenKeys.has(key.toLowerCase())) continue;
-      // Use mapped label or capitalize
+      if (!val || hiddenKeys.has(key) || hiddenKeys.has(key.toLowerCase())) continue;
+      if (key.startsWith('_')) continue; // skip internal prefixed keys
       const label = labelMap[key.toLowerCase()] || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
-      specRows.push({ label, value: val });
+      const order = keyOrder[key.toLowerCase()] || 50;
+      specRows.push({ label, value: val, order });
     }
 
     // Add base fields if not already in specs
     const specLabels = new Set(specRows.map(r => r.label.toLowerCase()));
 
     if (product.manufacturer && product.manufacturer !== 'Не указан' && !specLabels.has('производитель')) {
-      specRows.unshift({ label: 'Производитель', value: product.manufacturer });
+      specRows.push({ label: 'Производитель', value: product.manufacturer, order: 2 });
     }
     if (product.material && product.material !== 'Не указан' && !specLabels.has('материал')) {
-      specRows.unshift({ label: 'Материал', value: product.material });
+      specRows.push({ label: 'Материал', value: product.material, order: 15 });
     }
     if (product.finish && product.finish !== 'Не указан' && !specLabels.has('покрытие') && !specLabels.has('цвет')) {
-      specRows.unshift({ label: 'Покрытие', value: product.finish });
+      specRows.push({ label: 'Покрытие', value: product.finish, order: 16 });
     }
   } else {
-    // Fallback for mock data
     if (product.manufacturer && product.manufacturer !== 'Не указан') {
-      specRows.push({ label: 'Производитель', value: product.manufacturer });
+      specRows.push({ label: 'Производитель', value: product.manufacturer, order: 2 });
     }
     if (product.material && product.material !== 'Не указан') {
-      specRows.push({ label: 'Материал', value: product.material });
+      specRows.push({ label: 'Материал', value: product.material, order: 15 });
     }
     if (product.finish && product.finish !== 'Не указан') {
-      specRows.push({ label: 'Покрытие', value: product.finish });
+      specRows.push({ label: 'Покрытие', value: product.finish, order: 16 });
     }
   }
 
   if (specRows.length === 0) return null;
+
+  // Sort by priority order
+  specRows.sort((a, b) => a.order - b.order);
 
   return (
     <div>
