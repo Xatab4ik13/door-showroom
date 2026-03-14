@@ -84,8 +84,17 @@ router.get('/', async (req, res) => {
     ),
   ]);
 
+  // Strip internal fields from specs before sending
+  const products = dataRes.rows.map((row: any) => {
+    if (row.specs && typeof row.specs === 'object') {
+      const { source_url, supplier_url, xml_url, import_url, sync_id, ...cleanSpecs } = row.specs;
+      row.specs = cleanSpecs;
+    }
+    return row;
+  });
+
   res.json({
-    products: dataRes.rows,
+    products,
     total: Number(countRes.rows[0].count),
     page: Number(page),
     limit: Number(limit),
