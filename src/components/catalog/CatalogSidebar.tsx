@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { categories, tagFilters, manufacturers, materials, finishes, type Category, type Tag } from '@/data/catalog';
+import { categories, tagFilters, manufacturers as defaultManufacturers, materials as defaultMaterials, finishes as defaultFinishes, type Category, type Tag } from '@/data/catalog';
 
 interface CatalogSidebarProps {
   selectedCategory: Category | 'all';
@@ -19,6 +19,9 @@ interface CatalogSidebarProps {
   selectedManufacturers: string[];
   onManufacturersChange: (mans: string[]) => void;
   maxPrice: number;
+  dynamicManufacturers?: string[];
+  dynamicMaterials?: string[];
+  dynamicColors?: string[];
 }
 
 const FilterSection = ({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) => {
@@ -58,8 +61,18 @@ const CatalogSidebar = ({
   selectedMaterials, onMaterialsChange,
   selectedFinishes, onFinishesChange,
   selectedManufacturers, onManufacturersChange,
-  maxPrice,
+  dynamicManufacturers,
+  dynamicMaterials,
+  dynamicColors,
 }: CatalogSidebarProps) => {
+
+  // Use dynamic values from API if available, otherwise defaults
+  const manufacturersList = dynamicManufacturers && dynamicManufacturers.length > 0
+    ? dynamicManufacturers : defaultManufacturers;
+  const materialsList = dynamicMaterials && dynamicMaterials.length > 0
+    ? dynamicMaterials : defaultMaterials;
+  const colorsList = dynamicColors && dynamicColors.length > 0
+    ? dynamicColors : defaultFinishes;
 
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [expandedSubs, setExpandedSubs] = useState<Set<string>>(new Set());
@@ -123,7 +136,6 @@ const CatalogSidebar = ({
 
             return (
               <div key={cat.key}>
-                {/* Category button */}
                 <div className="flex items-center">
                   <button
                     onClick={() => handleCategoryClick(cat.key)}
@@ -152,7 +164,6 @@ const CatalogSidebar = ({
                   )}
                 </div>
 
-                {/* Subcategories */}
                 <AnimatePresence>
                   {hasSubs && isExpanded && (
                     <motion.div
@@ -196,7 +207,6 @@ const CatalogSidebar = ({
                                 )}
                               </div>
 
-                              {/* Third level children */}
                               <AnimatePresence>
                                 {hasChildren && isSubExpanded && (
                                   <motion.div
@@ -285,7 +295,7 @@ const CatalogSidebar = ({
         </FilterSection>
 
         <FilterSection title="Материал" defaultOpen={false}>
-          {materials.map((m) => (
+          {materialsList.map((m) => (
             <CheckboxItem
               key={m}
               label={m}
@@ -296,7 +306,7 @@ const CatalogSidebar = ({
         </FilterSection>
 
         <FilterSection title="Цвет / покрытие" defaultOpen={false}>
-          {finishes.map((f) => (
+          {colorsList.map((f) => (
             <CheckboxItem
               key={f}
               label={f}
@@ -307,7 +317,7 @@ const CatalogSidebar = ({
         </FilterSection>
 
         <FilterSection title="Производитель" defaultOpen={false}>
-          {manufacturers.map((m) => (
+          {manufacturersList.map((m) => (
             <CheckboxItem
               key={m}
               label={m}
