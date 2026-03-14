@@ -1,15 +1,7 @@
 import { useState, useEffect } from 'react';
-import { fetchProducts, type ApiProduct, type ProductsResponse } from '@/lib/api';
+import { fetchProducts, type ApiProduct, type ProductFilters, type ProductsResponse } from '@/lib/api';
 
-interface UseProductsParams {
-  supplier?: string;
-  category?: string;
-  search?: string;
-  page?: number;
-  limit?: number;
-}
-
-export function useProducts(params?: UseProductsParams) {
+export function useProducts(params?: ProductFilters) {
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
