@@ -176,6 +176,10 @@ export async function syncDverCom() {
           const sourceUrl2 = offer.url?.[0] || null;
           specsObj['source_url'] = sourceUrl2;
 
+          // Build slug: clean, unique, URL-friendly
+          const slug = `dvercom-${vendorCode}`.toLowerCase().replace(/[^a-zа-яё0-9-]/gi, '-').replace(/-+/g, '-');
+          const specs = JSON.stringify(specsObj);
+
           const result = await pool.query(
             `INSERT INTO products (supplier_id, source_sku, name, slug, category_id, description, price, manufacturer, images, in_stock, specs, sync_status, updated_at)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'active', NOW())
