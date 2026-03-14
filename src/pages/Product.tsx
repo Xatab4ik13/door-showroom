@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Check } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Check, Loader2 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import ProductGallery from '@/components/product/ProductGallery';
 import ProductSpecs from '@/components/product/ProductSpecs';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
 import DoorExplodedSVG from '@/components/product/DoorExplodedSVG';
 import { catalogProducts } from '@/data/catalog';
+import { fetchProduct, type ApiProduct } from '@/lib/api';
+import { apiProductToCard } from '@/lib/productAdapter';
 
 const formatPrice = (price: number) =>
   new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(price);
@@ -15,8 +17,43 @@ const Product = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedColor, setSelectedColor] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [apiProduct, setApiProduct] = useState<ApiProduct | null>(null);
   const { addItem } = useCart();
-  const product = catalogProducts.find((p) => p.id === id);
+
+  // Try to fetch from API first
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    fetchProduct(id)
+      .then((data) => {
+        setApiProduct(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        // API failed, will fall back to mock data
+        setApiProduct(null);
+        setLoading(false);
+      });
+  }, [id]);
+
+  // Resolve product: API data first, then mock fallback
+  const product = apiProduct
+    ? apiProductToCard(apiProduct)
+    : catalogProducts.find((p) => p.id === id) || null;
+
+  // Use API images array if available
+  const apiImages = apiProduct?.images && apiProduct.images.length > 0
+    ? apiProduct.images
+    : null;
+
+  if (loading) {
+    return (
+      <div className="pt-28 px-6 flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -48,7 +85,11 @@ const Product = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
           {/* Gallery */}
           <div className="lg:col-span-4">
-            <ProductGallery product={product} selectedColorIndex={selectedColor} />
+            <ProductGallery
+              product={product}
+              selectedColorIndex={selectedColor}
+              apiImages={apiImages}
+            />
           </div>
 
           {/* Product info */}
@@ -60,6 +101,13 @@ const Product = () => {
             >
               {product.name}
             </h1>
+
+            {/* Description from API */}
+            {apiProduct?.description && (
+              <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                {apiProduct.description}
+              </p>
+            )}
 
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-6">
@@ -73,32 +121,34 @@ const Product = () => {
             </div>
 
             {/* Color swatches */}
-            <div className="mb-6">
-              <p
-                className="text-sm font-semibold uppercase tracking-wider text-foreground mb-2"
-                style={{ fontFamily: "'Oswald', sans-serif" }}
-              >
-                Выберите цвет
-              </p>
-              <div className="flex gap-2">
-                {product.colors.map((c, i) => (
-                  <button
-                    key={c}
-                    onClick={() => setSelectedColor(i)}
-                    className={`w-9 h-9 rounded-full border-2 transition-all duration-200 ${
-                      selectedColor === i
-                        ? 'border-foreground scale-110 shadow-md'
-                        : 'border-border hover:scale-105'
-                    }`}
-                    style={{ backgroundColor: c }}
-                    aria-label={`Цвет ${i + 1}`}
-                  />
-                ))}
+            {product.colors.length > 1 && (
+              <div className="mb-6">
+                <p
+                  className="text-sm font-semibold uppercase tracking-wider text-foreground mb-2"
+                  style={{ fontFamily: "'Oswald', sans-serif" }}
+                >
+                  Выберите цвет
+                </p>
+                <div className="flex gap-2">
+                  {product.colors.map((c, i) => (
+                    <button
+                      key={c}
+                      onClick={() => setSelectedColor(i)}
+                      className={`w-9 h-9 rounded-full border-2 transition-all duration-200 ${
+                        selectedColor === i
+                          ? 'border-foreground scale-110 shadow-md'
+                          : 'border-border hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: c }}
+                      aria-label={`Цвет ${i + 1}`}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Specs */}
-            <ProductSpecs product={product} />
+            <ProductSpecs product={product} apiSpecs={apiProduct?.specs} />
 
             {/* Add to cart */}
             <button
