@@ -226,7 +226,15 @@ const ProductConfigurator = ({ product, apiSpecs }: ProductConfiguratorProps) =>
 
         <button
           onClick={() => {
-            for (let i = 0; i < doorQty; i++) addItem(product);
+            const cartAccessories: CartAccessory[] = accessories
+              .filter(a => (accessoryQtys[a.article] || 0) > 0)
+              .map(a => ({
+                article: a.article,
+                name: a.displayName,
+                price: a.price,
+                quantity: accessoryQtys[a.article] || 0,
+              }));
+            addItem(product, doorQty, selectedSize, cartAccessories);
             setAddedToCart(true);
             setTimeout(() => setAddedToCart(false), 2000);
           }}
