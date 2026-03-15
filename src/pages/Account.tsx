@@ -285,14 +285,36 @@ const Account = () => {
                       {order.status === 'confirmed' && order.payment_status !== 'paid' && (
                         <div className="mt-3 pt-3 border-t border-border">
                           <button
-                            className="w-full py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                            className="w-full py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50"
                             style={{ fontFamily: "'Oswald', sans-serif" }}
-                            onClick={() => {
-                              // TODO: integrate real payment
-                              alert('Оплата будет подключена позже. Свяжитесь с менеджером.');
+                            disabled={payingOrderId === order.id}
+                            onClick={async () => {
+                              setPayingOrderId(order.id);
+                              setPaymentMessage(null);
+                              try {
+                                const res = await fetch(`${API_BASE}/api/payments/init`, {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ order_id: order.id }),
+                                });
+                                const data = await res.json();
+                                if (res.ok && data.paymentUrl) {
+                                  window.location.href = data.paymentUrl;
+                                } else {
+                                  setPaymentMessage({ type: 'error', text: data.error || 'Ошибка создания платежа' });
+                                  setPayingOrderId(null);
+                                }
+                              } catch {
+                                setPaymentMessage({ type: 'error', text: 'Сервер недоступен' });
+                                setPayingOrderId(null);
+                              }
                             }}
                           >
-                            <CreditCard className="w-4 h-4" />
+                            {payingOrderId === order.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <CreditCard className="w-4 h-4" />
+                            )}
                             Оплатить {formatPrice(order.total)}
                           </button>
                         </div>
