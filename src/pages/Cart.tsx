@@ -55,7 +55,10 @@ const Cart = () => {
           {/* Items list */}
           <div className="lg:col-span-2 space-y-4">
             <AnimatePresence>
-              {items.map(({ product, quantity }) => (
+              {items.map(({ product, quantity, selectedSize, accessories }) => {
+                const accTotal = accessories.reduce((s, a) => s + a.price * a.quantity, 0);
+                const lineTotal = product.price * quantity + accTotal;
+                return (
                 <motion.div
                   key={product.id}
                   layout
@@ -76,7 +79,23 @@ const Cart = () => {
                     >
                       {product.name}
                     </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">{product.material} · {product.finish}</p>
+                    {selectedSize && (
+                      <p className="text-xs text-primary mt-0.5">Размер: {selectedSize}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {[product.material, product.finish].filter(Boolean).join(' · ')}
+                    </p>
+
+                    {/* Accessories */}
+                    {accessories.length > 0 && (
+                      <div className="mt-2 space-y-0.5">
+                        {accessories.map((a) => (
+                          <p key={a.article} className="text-[11px] text-muted-foreground">
+                            + {a.name} × {a.quantity} — {formatPrice(a.price * a.quantity)}
+                          </p>
+                        ))}
+                      </div>
+                    )}
 
                     <div className="flex items-center gap-3 mt-3">
                       <div className="flex items-center border border-border rounded-md">
@@ -104,13 +123,14 @@ const Cart = () => {
                   </div>
 
                   <div className="text-right shrink-0">
-                    <span className="text-sm font-bold text-foreground">{formatPrice(product.price * quantity)}</span>
+                    <span className="text-sm font-bold text-foreground">{formatPrice(lineTotal)}</span>
                     {product.oldPrice && (
                       <p className="text-xs text-muted-foreground line-through">{formatPrice(product.oldPrice * quantity)}</p>
                     )}
                   </div>
                 </motion.div>
-              ))}
+                );
+              })}
             </AnimatePresence>
 
             <button
