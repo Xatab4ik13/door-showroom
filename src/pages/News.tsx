@@ -182,6 +182,53 @@ const formatDate = (dateStr: string) => {
 
 const News = () => {
   const [activeCategory, setActiveCategory] = useState('Все');
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  // SEO meta tags
+  useEffect(() => {
+    document.title = 'Новости и статьи о дверях — RUSDOORS Москва';
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', 'Полезные статьи о выборе дверей в Москве: входные и межкомнатные двери, шумоизоляция, электронные замки, двери скрытого монтажа. Экспертные обзоры от RUSDOORS.');
+
+    // JSON-LD Blog
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'Blog',
+      name: 'Блог RUSDOORS — статьи о дверях',
+      url: 'https://rusdoors.su/news',
+      publisher: {
+        '@type': 'Organization',
+        name: 'RUSDOORS',
+        url: 'https://rusdoors.su',
+      },
+      blogPost: newsItems.map(item => ({
+        '@type': 'BlogPosting',
+        headline: item.title,
+        datePublished: item.date,
+        description: item.excerpt,
+        author: { '@type': 'Organization', name: 'RUSDOORS' },
+      })),
+    };
+    let scriptEl = document.getElementById('news-jsonld');
+    if (!scriptEl) {
+      scriptEl = document.createElement('script');
+      scriptEl.id = 'news-jsonld';
+      scriptEl.setAttribute('type', 'application/ld+json');
+      document.head.appendChild(scriptEl);
+    }
+    scriptEl.textContent = JSON.stringify(jsonLd);
+
+    return () => {
+      document.title = 'RUSDOORS — Интернет-магазин дверей в Москве';
+      const el = document.getElementById('news-jsonld');
+      if (el) el.remove();
+    };
+  }, []);
 
   const filtered = activeCategory === 'Все'
     ? newsItems
