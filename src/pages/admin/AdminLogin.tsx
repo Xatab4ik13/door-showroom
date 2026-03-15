@@ -113,7 +113,7 @@ const AdminLogin = () => {
         </Button>
 
         <p className="text-xs text-muted-foreground text-center" style={{ fontFamily: "'Manrope', sans-serif" }}>
-          Демо: admin / admin123 или manager / manager123
+          Доступ только для сотрудников
         </p>
       </form>
     </div>
