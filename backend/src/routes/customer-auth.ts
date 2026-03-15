@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { pool } from '../db/pool.js';
+import { sendEmail, passwordResetEmail } from '../services/email.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret-in-production';
 const router = Router();

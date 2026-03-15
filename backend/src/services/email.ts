@@ -142,9 +142,31 @@ export function accountCreatedEmail(data: {
         <p style="margin:0;font-size:15px;color:#333;"><strong>Пароль:</strong> ${data.password}</p>
       </div>
       <p style="font-size:13px;color:#999;margin:16px 0 0;">
-        Рекомендуем сменить пароль после первого входа.
+        Рекомендуем сменить пароль после первого входа в разделе «Профиль».
       </p>
       ${buttonHtml('Войти в кабинет', `${SITE_URL}/login`)}
+    `),
+  };
+}
+
+export function passwordResetEmail(data: {
+  name: string;
+  resetCode: string;
+}): { subject: string; html: string } {
+  return {
+    subject: 'Восстановление пароля — RUSDOORS',
+    html: baseTemplate('Восстановление пароля', `
+      <p style="font-size:15px;color:#333;line-height:1.6;margin:0 0 16px;">
+        ${data.name}, вы запросили восстановление пароля.
+      </p>
+      <div style="background:#f5f3ef;border-radius:12px;padding:20px 24px;margin:16px 0;text-align:center;">
+        <p style="margin:0 0 8px;font-size:13px;color:#999;text-transform:uppercase;letter-spacing:1px;">Код восстановления</p>
+        <p style="margin:0;font-size:32px;font-weight:700;color:#1a1a1a;letter-spacing:6px;">${data.resetCode}</p>
+      </div>
+      <p style="font-size:13px;color:#999;margin:16px 0 0;">
+        Код действителен 15 минут. Если вы не запрашивали восстановление, проигнорируйте это письмо.
+      </p>
+      ${buttonHtml('Восстановить пароль', `${SITE_URL}/reset-password`)}
     `),
   };
 }
