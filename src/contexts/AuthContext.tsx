@@ -29,6 +29,7 @@ interface AuthContextType {
   register: (email: string, password: string, name: string, phone?: string) => Promise<string | null>;
   logout: () => void;
   updateProfile: (data: { name?: string; phone?: string }) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<string | null>;
   orders: CustomerOrder[];
   loadOrders: () => Promise<void>;
   ordersLoading: boolean;
