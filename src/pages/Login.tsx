@@ -37,7 +37,7 @@ const Login = () => {
     if (err) {
       setError(err);
     } else {
-      navigate('/account');
+      navigate(redirectTo);
     }
   };
 
