@@ -31,6 +31,7 @@ const tabs: { key: Tab; label: string; icon: typeof User }[] = [
 const Account = () => {
   const { user, isAuthenticated, loading: authLoading, logout, updateProfile, changePassword, orders, loadOrders, ordersLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>('orders');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -41,6 +42,20 @@ const Account = () => {
   const [pwError, setPwError] = useState('');
   const [pwSuccess, setPwSuccess] = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
+  const [payingOrderId, setPayingOrderId] = useState<number | null>(null);
+  const [paymentMessage, setPaymentMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Handle payment redirect params
+  useEffect(() => {
+    const payment = searchParams.get('payment');
+    const orderNum = searchParams.get('order');
+    if (payment === 'success' && orderNum) {
+      setPaymentMessage({ type: 'success', text: `Оплата заказа ${orderNum} прошла успешно!` });
+      loadOrders(); // refresh orders to show updated status
+    } else if (payment === 'fail' && orderNum) {
+      setPaymentMessage({ type: 'error', text: `Оплата заказа ${orderNum} не прошла. Попробуйте ещё раз.` });
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
