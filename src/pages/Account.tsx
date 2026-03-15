@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { User, Package, LogOut, ArrowLeft, Loader2, Clock, Check, CreditCard, Truck, PackageCheck, XCircle, Lock, KeyRound } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'https://api.rusdoors.su';
 
 const statusLabels: Record<string, { label: string; color: string; icon: typeof Clock }> = {
   pending: { label: 'Ожидает', color: 'bg-primary/10 text-primary', icon: Clock },
