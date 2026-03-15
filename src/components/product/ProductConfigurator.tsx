@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ShoppingCart, Check, Minus, Plus } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext';
+import { useCart, type CartAccessory } from '@/contexts/CartContext';
 import type { CatalogProduct } from '@/data/catalog';
 
 interface Accessory {
