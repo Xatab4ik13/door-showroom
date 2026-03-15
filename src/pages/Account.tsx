@@ -220,6 +220,17 @@ const Account = () => {
                 Мои заказы
               </h2>
 
+              {paymentMessage && (
+                <div className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
+                  paymentMessage.type === 'success'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-destructive/10 text-destructive border border-destructive/20'
+                }`}>
+                  {paymentMessage.type === 'success' ? <Check className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                  {paymentMessage.text}
+                </div>
+              )}
+
               {ordersLoading ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="w-5 h-5 animate-spin text-primary" />
