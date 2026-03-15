@@ -9,6 +9,7 @@ import suppliersRouter from './routes/suppliers.js';
 import importRouter from './routes/import.js';
 import ordersRouter from './routes/orders.js';
 import customersRouter from './routes/customers.js';
+import customerAuthRouter from './routes/customer-auth.js';
 import { syncDverCom } from './services/dvercom-sync.js';
 
 const app = express();
