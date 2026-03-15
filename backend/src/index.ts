@@ -46,6 +46,7 @@ app.use('/api/import', importRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/customers', customersRouter);
 app.use('/api/customer-auth', customerAuthRouter);
+app.use('/api/payments', paymentsRouter);
 
 // CRON: sync dver.com every 6 hours
 cron.schedule('0 */6 * * *', async () => {
