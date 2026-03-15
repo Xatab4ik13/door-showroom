@@ -65,7 +65,6 @@ const Checkout = () => {
           quantity,
           price: product.price,
         });
-        // Add accessories as separate line items
         accessories.forEach((a) => {
           if (a.quantity > 0) {
             orderItems.push({
@@ -93,14 +92,18 @@ const Checkout = () => {
         }),
       });
 
-      if (res.ok) {
-        const order = await res.json();
-        setOrderNumber(order.order_number);
-      } else {
-        setOrderNumber(`RD-${Date.now().toString().slice(-6)}`);
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ error: 'Ошибка сервера' }));
+        setErrors({ name: errData.error || `Ошибка ${res.status}. Попробуйте ещё раз.` });
+        return;
       }
-    } catch {
-      setOrderNumber(`RD-${Date.now().toString().slice(-6)}`);
+
+      const order = await res.json();
+      setOrderNumber(order.order_number);
+    } catch (err) {
+      console.error('[Checkout] Order submit error:', err);
+      setErrors({ name: 'Сервер недоступен. Проверьте подключение и попробуйте ещё раз.' });
+      return;
     }
 
     setSubmitted(true);
