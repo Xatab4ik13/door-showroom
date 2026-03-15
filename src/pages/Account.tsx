@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Package, LogOut, ArrowLeft, Loader2, Clock, Check, CreditCard, Truck, PackageCheck, XCircle } from 'lucide-react';
+import { User, Package, LogOut, ArrowLeft, Loader2, Clock, Check, CreditCard, Truck, PackageCheck, XCircle, Lock, KeyRound } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const statusLabels: Record<string, { label: string; color: string; icon: typeof Clock }> = {
