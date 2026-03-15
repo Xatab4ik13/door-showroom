@@ -313,6 +313,32 @@ const Checkout = () => {
             onSubmit={handleSubmit}
             className="lg:col-span-2 space-y-6"
           >
+            {/* Login prompt */}
+            {!isAuthenticated && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-card border border-primary/20 rounded-2xl p-5 flex items-center justify-between gap-4"
+              >
+                <div>
+                  <p className="text-sm font-medium text-foreground" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                    Уже есть личный кабинет?
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Войдите, чтобы данные заполнились автоматически
+                  </p>
+                </div>
+                <Link
+                  to="/login?redirect=/checkout"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium uppercase tracking-wider hover:opacity-90 transition-opacity shrink-0"
+                  style={{ fontFamily: "'Oswald', sans-serif" }}
+                >
+                  <LogIn className="w-4 h-4" />
+                  Войти
+                </Link>
+              </motion.div>
+            )}
+
             {/* Contact info */}
             <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
               <h2 className="text-lg font-bold uppercase tracking-wider text-foreground mb-6" style={{ fontFamily: "'Oswald', sans-serif" }}>
