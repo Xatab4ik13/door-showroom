@@ -241,9 +241,10 @@ router.get('/my/list', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const isNumeric = /^\d+$/.test(id);
     const result = await pool.query(
       `SELECT id, order_number, status, items, total, discount, payment_status, created_at, updated_at
-       FROM orders WHERE id = $1 OR order_number = $1`,
+       FROM orders WHERE ${isNumeric ? 'id = $1::int' : 'order_number = $1'}`,
       [id],
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Заказ не найден' });
