@@ -7,6 +7,8 @@ import authRouter from './routes/auth.js';
 import productsRouter from './routes/products.js';
 import suppliersRouter from './routes/suppliers.js';
 import importRouter from './routes/import.js';
+import ordersRouter from './routes/orders.js';
+import customersRouter from './routes/customers.js';
 import { syncDverCom } from './services/dvercom-sync.js';
 
 const app = express();
