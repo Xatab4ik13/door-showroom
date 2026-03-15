@@ -86,22 +86,39 @@ const DualRangeSlider = ({ min, max, step, value, onChange }: SliderProps) => {
   );
 };
 
+// Fallback data when API is unavailable
+const fallbackFacets: Facets = {
+  manufacturers: [],
+  materials: ['Экошпон', 'Эмаль', 'Шпон', 'ПВХ', 'Массив', 'Стекло', 'Ламинированные'],
+  colors: ['Белый', 'Венге', 'Дуб', 'Орех', 'Серый', 'Капучино', 'Беленый дуб', 'Антрацит'],
+  categories: [],
+};
+
 const DoorCalculator = () => {
   const navigate = useNavigate();
   const [category, setCategory] = useState('all');
   const [material, setMaterial] = useState('all');
   const [finish, setFinish] = useState('all');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
-  const [facets, setFacets] = useState<Facets | null>(null);
+  const [facets, setFacets] = useState<Facets>(fallbackFacets);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchFacets()
       .then((data) => {
-        setFacets(data);
+        // Merge: use API data if non-empty, otherwise keep fallback
+        setFacets({
+          manufacturers: data.manufacturers.length ? data.manufacturers : fallbackFacets.manufacturers,
+          materials: data.materials.length ? data.materials : fallbackFacets.materials,
+          colors: data.colors.length ? data.colors : fallbackFacets.colors,
+          categories: data.categories.length ? data.categories : fallbackFacets.categories,
+        });
         setPriceRange([0, 100000]);
       })
-      .catch(() => {})
+      .catch(() => {
+        // API unavailable — use fallback
+        setFacets(fallbackFacets);
+      })
       .finally(() => setLoading(false));
   }, []);
 
