@@ -87,7 +87,7 @@ const ProductSEO = ({ product, apiProduct }: ProductSEOProps) => {
 
     // Cleanup
     return () => {
-      document.title = 'RUSDOORS — Интернет-магазин премиальных дверей';
+      document.title = 'Купить двери в Москве — входные и межкомнатные двери | RUSDOORS';
       const jsonLdEl = document.getElementById('product-jsonld');
       if (jsonLdEl) jsonLdEl.remove();
     };
