@@ -27,12 +27,18 @@ const tabs: { key: Tab; label: string; icon: typeof User }[] = [
 ];
 
 const Account = () => {
-  const { user, isAuthenticated, loading: authLoading, logout, updateProfile, orders, loadOrders, ordersLoading } = useAuth();
+  const { user, isAuthenticated, loading: authLoading, logout, updateProfile, changePassword, orders, loadOrders, ordersLoading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('orders');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [saving, setSaving] = useState(false);
+  const [currentPw, setCurrentPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState(false);
+  const [pwLoading, setPwLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
