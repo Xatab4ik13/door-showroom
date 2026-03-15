@@ -12,38 +12,25 @@ export const pool = new Pool({
 });
 
 async function ensureDefaultAdminUsers(client: pg.PoolClient) {
-  const existingAdmins = await client.query(
-    'SELECT email FROM admin_users WHERE email = ANY($1::text[])',
-    [['admin', 'manager']],
+  const adminHash = await bcrypt.hash('admin123', 12);
+  const managerHash = await bcrypt.hash('manager123', 12);
+
+  // Upsert: create or update password for default accounts
+  await client.query(
+    `INSERT INTO admin_users (email, password_hash, name)
+     VALUES ($1, $2, $3)
+     ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash`,
+    ['admin', adminHash, 'Администратор'],
   );
 
-  const existingEmails = new Set(
-    existingAdmins.rows.map((row: { email: string }) => row.email),
+  await client.query(
+    `INSERT INTO admin_users (email, password_hash, name)
+     VALUES ($1, $2, $3)
+     ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash`,
+    ['manager', managerHash, 'Менеджер'],
   );
 
-  const seeded: string[] = [];
-
-  if (!existingEmails.has('admin')) {
-    const adminHash = await bcrypt.hash('admin123', 12);
-    await client.query(
-      'INSERT INTO admin_users (email, password_hash, name) VALUES ($1, $2, $3) ON CONFLICT (email) DO NOTHING',
-      ['admin', adminHash, 'Администратор'],
-    );
-    seeded.push('admin');
-  }
-
-  if (!existingEmails.has('manager')) {
-    const managerHash = await bcrypt.hash('manager123', 12);
-    await client.query(
-      'INSERT INTO admin_users (email, password_hash, name) VALUES ($1, $2, $3) ON CONFLICT (email) DO NOTHING',
-      ['manager', managerHash, 'Менеджер'],
-    );
-    seeded.push('manager');
-  }
-
-  if (seeded.length > 0) {
-    console.log(`✅ Seeded admin users: ${seeded.join(', ')}`);
-  }
+  console.log('✅ Default admin users ensured (admin / manager)');
 }
 
 export async function initDatabase() {
