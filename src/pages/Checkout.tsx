@@ -57,12 +57,26 @@ const Checkout = () => {
     // Send order to API
     const API_BASE = import.meta.env.VITE_API_URL || 'https://api.rusdoors.su';
     try {
-      const orderItems = items.map(({ product, quantity }) => ({
-        name: product.name,
-        id: product.id,
-        quantity,
-        price: product.price,
-      }));
+      const orderItems: { name: string; id: string; quantity: number; price: number }[] = [];
+      items.forEach(({ product, quantity, accessories }) => {
+        orderItems.push({
+          name: product.name,
+          id: product.id,
+          quantity,
+          price: product.price,
+        });
+        // Add accessories as separate line items
+        accessories.forEach((a) => {
+          if (a.quantity > 0) {
+            orderItems.push({
+              name: `${a.name} (к ${product.name})`,
+              id: a.article,
+              quantity: a.quantity,
+              price: a.price,
+            });
+          }
+        });
+      });
 
       const res = await fetch(`${API_BASE}/api/orders`, {
         method: 'POST',
