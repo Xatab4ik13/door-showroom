@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import PageSEO from '@/components/PageSEO';
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send } from 'lucide-react';
 import maxMessengerIcon from '@/assets/icons/max-messenger.png';
 
