@@ -7,6 +7,7 @@ import { catalogProducts as mockProducts, categories, type Category, type Tag } 
 import { useProducts } from '@/hooks/useProducts';
 import { useFacets } from '@/hooks/useFacets';
 import { apiProductToCard } from '@/lib/productAdapter';
+import PageSEO from '@/components/PageSEO';
 
 const ITEMS_PER_PAGE = 24;
 
