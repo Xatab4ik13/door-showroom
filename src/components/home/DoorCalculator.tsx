@@ -124,7 +124,7 @@ const DoorCalculator = () => {
 
   // Only show categories that exist in API
   const availableCategories = categories.filter(
-    (c) => c.key === 'all' || facets?.categories.some((fc) => fc.slug === c.key)
+    (c) => c.key === 'all' || !facets.categories.length || facets.categories.some((fc) => fc.slug === c.key)
   );
 
   const handleSubmit = () => {
