@@ -140,6 +140,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setOrdersLoading(false);
   };
 
+  const changePassword = async (currentPassword: string, newPassword: string): Promise<string | null> => {
+    if (!token) return 'Не авторизован';
+    try {
+      const res = await fetch(`${API_BASE}/api/customer-auth/change-password`, {
+        method: 'POST',
+        headers: authHeaders(token),
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) return data.error || 'Ошибка смены пароля';
+      return null;
+    } catch {
+      return 'Сервер недоступен';
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{ user, isAuthenticated: !!user, loading, login, register, logout, updateProfile, orders, loadOrders, ordersLoading, token }}
