@@ -1,4 +1,5 @@
 import pg from 'pg';
+import bcrypt from 'bcrypt';
 
 const { Pool } = pg;
 
@@ -9,6 +10,41 @@ export const pool = new Pool({
   user: process.env.DB_USER || 'rusdoors',
   password: process.env.DB_PASSWORD || 'changeme',
 });
+
+async function ensureDefaultAdminUsers(client: pg.PoolClient) {
+  const existingAdmins = await client.query(
+    'SELECT email FROM admin_users WHERE email = ANY($1::text[])',
+    [['admin', 'manager']],
+  );
+
+  const existingEmails = new Set(
+    existingAdmins.rows.map((row: { email: string }) => row.email),
+  );
+
+  const seeded: string[] = [];
+
+  if (!existingEmails.has('admin')) {
+    const adminHash = await bcrypt.hash('admin123', 12);
+    await client.query(
+      'INSERT INTO admin_users (email, password_hash, name) VALUES ($1, $2, $3) ON CONFLICT (email) DO NOTHING',
+      ['admin', adminHash, 'Администратор'],
+    );
+    seeded.push('admin');
+  }
+
+  if (!existingEmails.has('manager')) {
+    const managerHash = await bcrypt.hash('manager123', 12);
+    await client.query(
+      'INSERT INTO admin_users (email, password_hash, name) VALUES ($1, $2, $3) ON CONFLICT (email) DO NOTHING',
+      ['manager', managerHash, 'Менеджер'],
+    );
+    seeded.push('manager');
+  }
+
+  if (seeded.length > 0) {
+    console.log(`✅ Seeded admin users: ${seeded.join(', ')}`);
+  }
+}
 
 export async function initDatabase() {
   const client = await pool.connect();
@@ -133,6 +169,8 @@ export async function initDatabase() {
       CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at);
       CREATE INDEX IF NOT EXISTS idx_customers_email ON customers(email);
     `);
+
+    await ensureDefaultAdminUsers(client);
     console.log('✅ Database initialized');
   } finally {
     client.release();

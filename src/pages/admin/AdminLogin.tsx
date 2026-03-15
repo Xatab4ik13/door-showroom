@@ -4,33 +4,38 @@ import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Lock, LogIn } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
 const AdminLogin = () => {
-  const { loginAdmin, isAdminAuthenticated } = useAdminAuth();
+  const { loginAdmin, isAdminAuthenticated, loading } = useAdminAuth();
   const navigate = useNavigate();
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  if (isAdminAuthenticated) {
+  if (isAdminAuthenticated && !loading) {
     navigate('/admin', { replace: true });
     return null;
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!login.trim() || !password.trim()) {
       setError('Введите логин и пароль');
       return;
     }
-    const ok = loginAdmin(login.trim(), password.trim());
-    if (ok) {
+
+    setSubmitting(true);
+    const loginError = await loginAdmin(login.trim(), password.trim());
+    setSubmitting(false);
+
+    if (!loginError) {
       navigate('/admin', { replace: true });
     } else {
-      setError('Неверный логин или пароль');
+      setError(loginError);
     }
   };
 
@@ -99,11 +104,12 @@ const AdminLogin = () => {
 
         <Button
           type="submit"
-          className="w-full gap-2 bg-[hsl(205,85%,45%)] hover:bg-[hsl(205,85%,40%)] text-white uppercase tracking-wider"
+          disabled={submitting || loading}
+          className="w-full gap-2 bg-[hsl(205,85%,45%)] hover:bg-[hsl(205,85%,40%)] text-white uppercase tracking-wider disabled:opacity-70"
           style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 500 }}
         >
           <LogIn className="w-4 h-4" />
-          Войти
+          {submitting ? 'Вход...' : 'Войти'}
         </Button>
 
         <p className="text-xs text-muted-foreground text-center" style={{ fontFamily: "'Manrope', sans-serif" }}>
