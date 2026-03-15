@@ -75,6 +75,27 @@ const Account = () => {
     setSaving(false);
   };
 
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwError('');
+    setPwSuccess(false);
+    if (newPw !== confirmPw) {
+      setPwError('Пароли не совпадают');
+      return;
+    }
+    setPwLoading(true);
+    const err = await changePassword(currentPw, newPw);
+    setPwLoading(false);
+    if (err) {
+      setPwError(err);
+    } else {
+      setPwSuccess(true);
+      setCurrentPw('');
+      setNewPw('');
+      setConfirmPw('');
+    }
+  };
+
   return (
     <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1200px] mx-auto">
       <button
