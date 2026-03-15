@@ -40,6 +40,7 @@ const statusToIndex: Record<string, number> = {
 
 const Checkout = () => {
   const { items, totalItems, totalPrice, totalDiscount, clearCart } = useCart();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState<CheckoutForm>({ name: '', phone: '', email: '', address: '', comment: '' });
   const [errors, setErrors] = useState<Partial<Record<keyof CheckoutForm, string>>>({});
