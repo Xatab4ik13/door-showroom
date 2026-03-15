@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import PageSEO from '@/components/PageSEO';
 import { Ruler, Wrench, Sparkles, CheckCircle2, Building2, Calendar, ShieldCheck, Award } from 'lucide-react';
 
 const fadeUp = {
