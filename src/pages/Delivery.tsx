@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import PageSEO from '@/components/PageSEO';
 import { Truck, CreditCard, Clock, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 const fadeUp = {
