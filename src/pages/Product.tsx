@@ -66,6 +66,7 @@ const Product = () => {
 
   return (
     <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto">
+      <ProductSEO product={product} apiProduct={apiProduct} />
       {/* Breadcrumb */}
       <Link
         to="/catalog"
