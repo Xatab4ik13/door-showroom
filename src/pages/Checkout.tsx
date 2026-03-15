@@ -74,6 +74,18 @@ const Checkout = () => {
     return () => clearInterval(interval);
   }, [submitted, orderId, pollStatus]);
 
+  // Auto-fill form from authenticated user data
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setForm(prev => ({
+        ...prev,
+        name: prev.name || user.name || '',
+        email: prev.email || user.email || '',
+        phone: prev.phone || user.phone || '',
+      }));
+    }
+  }, [isAuthenticated, user]);
+
   const handleChange = (field: keyof CheckoutForm, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }));
