@@ -85,6 +85,36 @@ export async function initDatabase() {
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
 
+      -- Customers table
+      CREATE TABLE IF NOT EXISTS customers (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        name VARCHAR(255) NOT NULL DEFAULT '',
+        phone VARCHAR(50),
+        password_hash VARCHAR(255),
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+
+      -- Orders table
+      CREATE TABLE IF NOT EXISTS orders (
+        id SERIAL PRIMARY KEY,
+        order_number VARCHAR(20) UNIQUE NOT NULL,
+        customer_id INTEGER REFERENCES customers(id),
+        customer_name VARCHAR(255) NOT NULL,
+        customer_email VARCHAR(255) NOT NULL,
+        customer_phone VARCHAR(50),
+        address TEXT,
+        comment TEXT,
+        status VARCHAR(20) NOT NULL DEFAULT 'pending',
+        items JSONB NOT NULL DEFAULT '[]',
+        total NUMERIC(10,2) NOT NULL DEFAULT 0,
+        discount NUMERIC(10,2) DEFAULT 0,
+        payment_status VARCHAR(20) DEFAULT 'unpaid',
+        manager_id INTEGER REFERENCES admin_users(id),
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+
       -- Insert default suppliers
       INSERT INTO suppliers (slug, name, format, sync_enabled)
       VALUES 
@@ -98,6 +128,10 @@ export async function initDatabase() {
       CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
       CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
       CREATE INDEX IF NOT EXISTS idx_products_source_sku ON products(source_sku);
+      CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
+      CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+      CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at);
+      CREATE INDEX IF NOT EXISTS idx_customers_email ON customers(email);
     `);
     console.log('✅ Database initialized');
   } finally {
