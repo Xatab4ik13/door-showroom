@@ -57,12 +57,26 @@ const Checkout = () => {
     // Send order to API
     const API_BASE = import.meta.env.VITE_API_URL || 'https://api.rusdoors.su';
     try {
-      const orderItems = items.map(({ product, quantity }) => ({
-        name: product.name,
-        id: product.id,
-        quantity,
-        price: product.price,
-      }));
+      const orderItems: { name: string; id: string; quantity: number; price: number }[] = [];
+      items.forEach(({ product, quantity, accessories }) => {
+        orderItems.push({
+          name: product.name,
+          id: product.id,
+          quantity,
+          price: product.price,
+        });
+        // Add accessories as separate line items
+        accessories.forEach((a) => {
+          if (a.quantity > 0) {
+            orderItems.push({
+              name: `${a.name} (к ${product.name})`,
+              id: a.article,
+              quantity: a.quantity,
+              price: a.price,
+            });
+          }
+        });
+      });
 
       const res = await fetch(`${API_BASE}/api/orders`, {
         method: 'POST',
@@ -349,18 +363,26 @@ const Checkout = () => {
 
                 {/* Items */}
                 <div className="space-y-3 max-h-[280px] overflow-y-auto mb-4 pr-1" style={{ scrollbarWidth: 'thin' }}>
-                  {items.map(({ product, quantity }) => (
-                    <div key={product.id} className="flex gap-3 items-center">
-                      <div className="w-12 h-16 bg-secondary rounded-lg overflow-hidden flex items-center justify-center p-1 shrink-0">
-                        <img src={product.image} alt={product.name} className="max-h-full max-w-full object-contain" />
+                  {items.map(({ product, quantity, accessories }) => (
+                    <div key={product.id} className="space-y-1">
+                      <div className="flex gap-3 items-center">
+                        <div className="w-12 h-16 bg-secondary rounded-lg overflow-hidden flex items-center justify-center p-1 shrink-0">
+                          <img src={product.image} alt={product.name} className="max-h-full max-w-full object-contain" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-foreground truncate" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                            {product.name}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">{quantity} шт.</p>
+                        </div>
+                        <span className="text-xs font-medium text-foreground shrink-0">{formatPrice(product.price * quantity)}</span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-foreground truncate" style={{ fontFamily: "'Oswald', sans-serif" }}>
-                          {product.name}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground">{quantity} шт.</p>
-                      </div>
-                      <span className="text-xs font-medium text-foreground shrink-0">{formatPrice(product.price * quantity)}</span>
+                      {accessories.length > 0 && accessories.map((a) => (
+                        <div key={a.article} className="flex justify-between pl-[60px] text-[10px] text-muted-foreground">
+                          <span>+ {a.name} × {a.quantity}</span>
+                          <span>{formatPrice(a.price * a.quantity)}</span>
+                        </div>
+                      ))}
                     </div>
                   ))}
                 </div>

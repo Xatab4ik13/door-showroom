@@ -1,127 +1,148 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
-export interface MockUser {
-  id: string;
-  phone: string;
+const API_BASE = import.meta.env.VITE_API_URL || 'https://api.rusdoors.su';
+
+export interface CustomerUser {
+  id: number;
+  email: string;
   name: string;
-  addresses: Address[];
+  phone: string | null;
 }
 
-export interface Address {
-  id: string;
-  label: string;
-  city: string;
-  street: string;
-  apartment: string;
-}
-
-export interface MockOrder {
-  id: string;
-  date: string;
-  status: 'processing' | 'shipped' | 'delivered';
+export interface CustomerOrder {
+  id: number;
+  order_number: string;
+  status: string;
   items: { name: string; quantity: number; price: number }[];
   total: number;
+  discount: number;
+  payment_status: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface AuthContextType {
-  user: MockUser | null;
+  user: CustomerUser | null;
   isAuthenticated: boolean;
-  login: (phone: string) => void;
-  verifyCode: (code: string) => boolean;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<string | null>;
+  register: (email: string, password: string, name: string, phone?: string) => Promise<string | null>;
   logout: () => void;
-  updateProfile: (data: Partial<Pick<MockUser, 'name' | 'phone'>>) => void;
-  addAddress: (address: Omit<Address, 'id'>) => void;
-  removeAddress: (id: string) => void;
-  orders: MockOrder[];
-  pendingPhone: string | null;
+  updateProfile: (data: { name?: string; phone?: string }) => Promise<void>;
+  orders: CustomerOrder[];
+  loadOrders: () => Promise<void>;
+  ordersLoading: boolean;
+  token: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const USER_KEY = 'rusdoors_user';
-const ORDERS_KEY = 'rusdoors_orders';
-
-const MOCK_CODE = '1234';
-
-const mockOrders: MockOrder[] = [
-  {
-    id: 'ORD-001', date: '2026-02-15', status: 'delivered',
-    items: [{ name: 'Vetro', quantity: 1, price: 12900 }], total: 12900,
-  },
-  {
-    id: 'ORD-002', date: '2026-02-28', status: 'shipped',
-    items: [{ name: 'Nero', quantity: 2, price: 34500 }], total: 69000,
-  },
-];
+const TOKEN_KEY = 'rusdoors_customer_token';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<MockUser | null>(() => {
-    try {
-      const raw = localStorage.getItem(USER_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
+  const [user, setUser] = useState<CustomerUser | null>(null);
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
+  const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState<CustomerOrder[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+
+  const authHeaders = (t: string) => ({
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${t}`,
   });
-  const [orders] = useState<MockOrder[]>(() => {
+
+  // Load user on mount
+  useEffect(() => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    fetch(`${API_BASE}/api/customer-auth/me`, { headers: authHeaders(token) })
+      .then(async (res) => {
+        if (res.ok) {
+          setUser(await res.json());
+        } else {
+          localStorage.removeItem(TOKEN_KEY);
+          setToken(null);
+        }
+      })
+      .catch(() => {
+        // API unavailable — keep token, try later
+      })
+      .finally(() => setLoading(false));
+  }, [token]);
+
+  const login = async (email: string, password: string): Promise<string | null> => {
     try {
-      const raw = localStorage.getItem(ORDERS_KEY);
-      return raw ? JSON.parse(raw) : mockOrders;
-    } catch { return mockOrders; }
-  });
-  const [pendingPhone, setPendingPhone] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
-    else localStorage.removeItem(USER_KEY);
-  }, [user]);
-
-  useEffect(() => {
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-  }, [orders]);
-
-  const login = (phone: string) => {
-    setPendingPhone(phone);
+      const res = await fetch(`${API_BASE}/api/customer-auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) return data.error || 'Ошибка входа';
+      localStorage.setItem(TOKEN_KEY, data.token);
+      setToken(data.token);
+      setUser(data.user);
+      return null;
+    } catch {
+      return 'Сервер недоступен';
+    }
   };
 
-  const verifyCode = (code: string): boolean => {
-    if (code === MOCK_CODE && pendingPhone) {
-      setUser({
-        id: crypto.randomUUID(),
-        phone: pendingPhone,
-        name: '',
-        addresses: [],
+  const register = async (email: string, password: string, name: string, phone?: string): Promise<string | null> => {
+    try {
+      const res = await fetch(`${API_BASE}/api/customer-auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name, phone }),
       });
-      setPendingPhone(null);
-      return true;
+      const data = await res.json();
+      if (!res.ok) return data.error || 'Ошибка регистрации';
+      localStorage.setItem(TOKEN_KEY, data.token);
+      setToken(data.token);
+      setUser(data.user);
+      return null;
+    } catch {
+      return 'Сервер недоступен';
     }
-    return false;
   };
 
   const logout = () => {
+    localStorage.removeItem(TOKEN_KEY);
+    setToken(null);
     setUser(null);
-    setPendingPhone(null);
+    setOrders([]);
   };
 
-  const updateProfile = (data: Partial<Pick<MockUser, 'name' | 'phone'>>) => {
-    setUser((prev) => prev ? { ...prev, ...data } : prev);
+  const updateProfile = async (data: { name?: string; phone?: string }) => {
+    if (!token) return;
+    const res = await fetch(`${API_BASE}/api/customer-auth/profile`, {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify(data),
+    });
+    if (res.ok) {
+      setUser(await res.json());
+    }
   };
 
-  const addAddress = (address: Omit<Address, 'id'>) => {
-    setUser((prev) => prev ? {
-      ...prev,
-      addresses: [...prev.addresses, { ...address, id: crypto.randomUUID() }],
-    } : prev);
-  };
-
-  const removeAddress = (id: string) => {
-    setUser((prev) => prev ? {
-      ...prev,
-      addresses: prev.addresses.filter((a) => a.id !== id),
-    } : prev);
+  const loadOrders = async () => {
+    if (!user?.email) return;
+    setOrdersLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/orders/by-email/${encodeURIComponent(user.email)}`);
+      if (res.ok) {
+        setOrders(await res.json());
+      }
+    } catch { /* ignore */ }
+    setOrdersLoading(false);
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, login, verifyCode, logout, updateProfile, addAddress, removeAddress, orders, pendingPhone }}
+      value={{ user, isAuthenticated: !!user, loading, login, register, logout, updateProfile, orders, loadOrders, ordersLoading, token }}
     >
       {children}
     </AuthContext.Provider>

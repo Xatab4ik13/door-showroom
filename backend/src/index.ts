@@ -9,6 +9,7 @@ import suppliersRouter from './routes/suppliers.js';
 import importRouter from './routes/import.js';
 import ordersRouter from './routes/orders.js';
 import customersRouter from './routes/customers.js';
+import customerAuthRouter from './routes/customer-auth.js';
 import { syncDverCom } from './services/dvercom-sync.js';
 
 const app = express();
@@ -43,6 +44,7 @@ app.use('/api/suppliers', suppliersRouter);
 app.use('/api/import', importRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/customers', customersRouter);
+app.use('/api/customer-auth', customerAuthRouter);
 
 // CRON: sync dver.com every 6 hours
 cron.schedule('0 */6 * * *', async () => {
