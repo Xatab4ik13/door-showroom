@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import ProductGallery from '@/components/product/ProductGallery';
 import ProductSpecs from '@/components/product/ProductSpecs';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
+import ProductSEO from '@/components/product/ProductSEO';
 
 import { catalogProducts } from '@/data/catalog';
 import { fetchProduct, type ApiProduct } from '@/lib/api';
