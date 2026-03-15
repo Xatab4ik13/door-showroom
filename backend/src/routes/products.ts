@@ -150,6 +150,29 @@ router.get('/:slug', async (req, res) => {
   res.json(product);
 });
 
+// PATCH /api/products/:id (admin — edit product)
+router.patch('/:id', requireAuth, async (req, res) => {
+  const { name, price, old_price, description } = req.body;
+  const fields: string[] = [];
+  const params: any[] = [];
+
+  if (name !== undefined) { params.push(name); fields.push(`name = $${params.length}`); }
+  if (price !== undefined) { params.push(price); fields.push(`price = $${params.length}`); }
+  if (old_price !== undefined) { params.push(old_price); fields.push(`old_price = $${params.length}`); }
+  if (description !== undefined) { params.push(description); fields.push(`description = $${params.length}`); }
+
+  if (fields.length === 0) return res.status(400).json({ error: 'No fields to update' });
+
+  fields.push('updated_at = NOW()');
+  params.push(req.params.id);
+
+  await pool.query(
+    `UPDATE products SET ${fields.join(', ')} WHERE id = $${params.length}`,
+    params,
+  );
+  res.json({ ok: true });
+});
+
 // DELETE /api/products/:id (admin)
 router.delete('/:id', requireAuth, async (req, res) => {
   await pool.query("UPDATE products SET sync_status = 'removed' WHERE id = $1", [req.params.id]);
