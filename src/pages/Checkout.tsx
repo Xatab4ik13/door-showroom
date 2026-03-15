@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ShoppingBag, Check, Clock, CreditCard, Truck, PackageCheck, Shield, Loader2, XCircle } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Check, Clock, CreditCard, Truck, PackageCheck, Shield, Loader2, XCircle, LogIn } from 'lucide-react';
 import { z } from 'zod';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://api.rusdoors.su';
 

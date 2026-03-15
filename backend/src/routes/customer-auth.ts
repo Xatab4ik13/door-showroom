@@ -9,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret-in-production';
 const router = Router();
 
 function signCustomerToken(customerId: number, email: string): string {
-  return jwt.sign({ id: customerId, email, type: 'customer' }, JWT_SECRET, { expiresIn: '30d' });
+  return jwt.sign({ id: customerId, email, type: 'customer' }, JWT_SECRET, { expiresIn: '365d' });
 }
 
 // POST /api/customer-auth/register
