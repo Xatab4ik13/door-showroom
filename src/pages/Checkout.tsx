@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ShoppingBag, Check, Clock, CreditCard, Truck, PackageCheck, Shield, Loader2, XCircle } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Check, Clock, CreditCard, Truck, PackageCheck, Shield, Loader2, XCircle, LogIn } from 'lucide-react';
 import { z } from 'zod';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://api.rusdoors.su';
 
@@ -39,6 +40,7 @@ const statusToIndex: Record<string, number> = {
 
 const Checkout = () => {
   const { items, totalItems, totalPrice, totalDiscount, clearCart } = useCart();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState<CheckoutForm>({ name: '', phone: '', email: '', address: '', comment: '' });
   const [errors, setErrors] = useState<Partial<Record<keyof CheckoutForm, string>>>({});
@@ -71,6 +73,18 @@ const Checkout = () => {
     const interval = setInterval(pollStatus, 10000); // every 10s
     return () => clearInterval(interval);
   }, [submitted, orderId, pollStatus]);
+
+  // Auto-fill form from authenticated user data
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setForm(prev => ({
+        ...prev,
+        name: prev.name || user.name || '',
+        email: prev.email || user.email || '',
+        phone: prev.phone || user.phone || '',
+      }));
+    }
+  }, [isAuthenticated, user]);
 
   const handleChange = (field: keyof CheckoutForm, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -299,6 +313,32 @@ const Checkout = () => {
             onSubmit={handleSubmit}
             className="lg:col-span-2 space-y-6"
           >
+            {/* Login prompt */}
+            {!isAuthenticated && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-card border border-primary/20 rounded-2xl p-5 flex items-center justify-between gap-4"
+              >
+                <div>
+                  <p className="text-sm font-medium text-foreground" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                    Уже есть личный кабинет?
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Войдите, чтобы данные заполнились автоматически
+                  </p>
+                </div>
+                <Link
+                  to="/login?redirect=/checkout"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium uppercase tracking-wider hover:opacity-90 transition-opacity shrink-0"
+                  style={{ fontFamily: "'Oswald', sans-serif" }}
+                >
+                  <LogIn className="w-4 h-4" />
+                  Войти
+                </Link>
+              </motion.div>
+            )}
+
             {/* Contact info */}
             <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
               <h2 className="text-lg font-bold uppercase tracking-wider text-foreground mb-6" style={{ fontFamily: "'Oswald', sans-serif" }}>
