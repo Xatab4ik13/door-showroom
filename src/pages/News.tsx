@@ -282,63 +282,90 @@ const News = () => {
         </motion.div>
       </section>
 
+      {/* Expanded article overlay */}
+      {expandedId && (
+        <section className="px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto mb-12">
+          <motion.article
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-card border border-border rounded-2xl p-6 md:p-10"
+          >
+            {(() => {
+              const article = newsItems.find(n => n.id === expandedId);
+              if (!article) return null;
+              return (
+                <>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-4 text-muted-foreground text-sm">
+                      <span className="px-3 py-1 bg-primary/10 text-primary text-xs uppercase tracking-widest rounded-full" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                        {article.category}
+                      </span>
+                      <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{formatDate(article.date)}</span>
+                      <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{article.readTime}</span>
+                    </div>
+                    <button
+                      onClick={() => setExpandedId(null)}
+                      className="text-muted-foreground hover:text-foreground transition-colors text-sm uppercase tracking-wider"
+                      style={{ fontFamily: "'Oswald', sans-serif" }}
+                    >
+                      ✕ Закрыть
+                    </button>
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-bold uppercase tracking-wide text-foreground mb-6" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                    {article.title}
+                  </h2>
+                  <div className="prose prose-sm max-w-none text-foreground/90 leading-relaxed" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                    {article.content.split('\n\n').map((paragraph, idx) => (
+                      <p key={idx} className="mb-4" dangerouslySetInnerHTML={{
+                        __html: paragraph
+                          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                          .replace(/\n- /g, '<br/>• ')
+                          .replace(/\n(\d+)\. /g, '<br/>$1. ')
+                      }} />
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
+          </motion.article>
+        </section>
+      )}
+
       {/* Featured article */}
-      {featured && (
+      {featured && !expandedId && (
         <section className="px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto mb-12">
           <motion.article
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
+            onClick={() => setExpandedId(featured.id)}
             className="group relative bg-secondary rounded-2xl overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-500"
           >
             <div className="grid md:grid-cols-2">
-              {/* Gradient placeholder */}
-              <div className="aspect-[16/10] md:aspect-auto bg-gradient-to-br from-[hsl(205,85%,45%)] via-[hsl(205,70%,35%)] to-[hsl(215,50%,15%)] relative overflow-hidden">
+              <div className="aspect-[16/10] md:aspect-auto bg-gradient-to-br from-primary via-primary/70 to-primary/30 relative overflow-hidden">
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span
-                    className="text-white/10 text-[120px] md:text-[180px] font-bold uppercase select-none"
-                    style={{ fontFamily: "'Oswald', sans-serif" }}
-                  >
-                    RD
-                  </span>
+                  <span className="text-white/10 text-[120px] md:text-[180px] font-bold uppercase select-none" style={{ fontFamily: "'Oswald', sans-serif" }}>RD</span>
                 </div>
                 <div className="absolute top-4 left-4">
-                  <span
-                    className="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-xs uppercase tracking-widest rounded-full"
-                    style={{ fontFamily: "'Oswald', sans-serif" }}
-                  >
+                  <span className="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-xs uppercase tracking-widest rounded-full" style={{ fontFamily: "'Oswald', sans-serif" }}>
                     {featured.category}
                   </span>
                 </div>
               </div>
-
               <div className="p-8 md:p-12 flex flex-col justify-center">
                 <div className="flex items-center gap-4 text-muted-foreground text-sm mb-4">
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {formatDate(featured.date)}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5" />
-                    {featured.readTime}
-                  </span>
+                  <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{formatDate(featured.date)}</span>
+                  <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{featured.readTime}</span>
                 </div>
-                <h2
-                  className="text-2xl md:text-3xl font-bold uppercase tracking-wide text-foreground group-hover:text-[hsl(205,85%,45%)] transition-colors duration-300"
-                  style={{ fontFamily: "'Oswald', sans-serif" }}
-                >
+                <h2 className="text-2xl md:text-3xl font-bold uppercase tracking-wide text-foreground group-hover:text-primary transition-colors duration-300" style={{ fontFamily: "'Oswald', sans-serif" }}>
                   {featured.title}
                 </h2>
                 <p className="mt-4 text-muted-foreground leading-relaxed" style={{ fontFamily: "'Manrope', sans-serif" }}>
                   {featured.excerpt}
                 </p>
-                <div className="mt-6 flex items-center gap-2 text-[hsl(205,85%,45%)] group-hover:gap-3 transition-all duration-300">
-                  <span
-                    className="text-sm uppercase tracking-wider font-medium"
-                    style={{ fontFamily: "'Oswald', sans-serif" }}
-                  >
-                    Читать
-                  </span>
+                <div className="mt-6 flex items-center gap-2 text-primary group-hover:gap-3 transition-all duration-300">
+                  <span className="text-sm uppercase tracking-wider font-medium" style={{ fontFamily: "'Oswald', sans-serif" }}>Читать</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
               </div>
@@ -348,70 +375,51 @@ const News = () => {
       )}
 
       {/* News grid */}
-      <section className="px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto pb-20">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rest.map((item, i) => (
-            <motion.article
-              key={item.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * i, duration: 0.5 }}
-              className="group bg-card rounded-xl border border-border overflow-hidden cursor-pointer hover:border-[hsl(205,85%,45%)]/30 hover:shadow-md transition-all duration-400"
-            >
-              {/* Mini gradient header */}
-              <div className="h-40 bg-gradient-to-br from-secondary via-accent to-muted relative overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span
-                    className="text-foreground/5 text-[80px] font-bold uppercase select-none"
-                    style={{ fontFamily: "'Oswald', sans-serif" }}
-                  >
-                    {String(item.id).padStart(2, '0')}
-                  </span>
+      {!expandedId && (
+        <section className="px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto pb-20">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {rest.map((item, i) => (
+              <motion.article
+                key={item.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * i, duration: 0.5 }}
+                onClick={() => setExpandedId(item.id)}
+                className="group bg-card rounded-xl border border-border overflow-hidden cursor-pointer hover:border-primary/30 hover:shadow-md transition-all duration-400"
+              >
+                <div className="h-40 bg-gradient-to-br from-secondary via-accent to-muted relative overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-foreground/5 text-[80px] font-bold uppercase select-none" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                      {String(item.id).padStart(2, '0')}
+                    </span>
+                  </div>
+                  <div className="absolute top-3 left-3">
+                    <span className="px-2.5 py-1 bg-background/80 backdrop-blur-sm text-foreground text-[10px] uppercase tracking-widest rounded-full" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                      {item.category}
+                    </span>
+                  </div>
                 </div>
-                <div className="absolute top-3 left-3">
-                  <span
-                    className="px-2.5 py-1 bg-background/80 backdrop-blur-sm text-foreground text-[10px] uppercase tracking-widest rounded-full"
-                    style={{ fontFamily: "'Oswald', sans-serif" }}
-                  >
-                    {item.category}
-                  </span>
+                <div className="p-6">
+                  <div className="flex items-center gap-3 text-muted-foreground text-xs mb-3">
+                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{formatDate(item.date)}</span>
+                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{item.readTime}</span>
+                  </div>
+                  <h3 className="text-lg font-bold uppercase tracking-wide text-foreground group-hover:text-primary transition-colors duration-300 line-clamp-2" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-sm text-muted-foreground leading-relaxed line-clamp-3" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                    {item.excerpt}
+                  </p>
+                  <div className="mt-4 flex items-center gap-1.5 text-primary opacity-0 group-hover:opacity-100 translate-x-[-4px] group-hover:translate-x-0 transition-all duration-300">
+                    <span className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Читать далее</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
                 </div>
-              </div>
-
-              <div className="p-6">
-                <div className="flex items-center gap-3 text-muted-foreground text-xs mb-3">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {formatDate(item.date)}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {item.readTime}
-                  </span>
-                </div>
-                <h3
-                  className="text-lg font-bold uppercase tracking-wide text-foreground group-hover:text-[hsl(205,85%,45%)] transition-colors duration-300 line-clamp-2"
-                  style={{ fontFamily: "'Oswald', sans-serif" }}
-                >
-                  {item.title}
-                </h3>
-                <p
-                  className="mt-3 text-sm text-muted-foreground leading-relaxed line-clamp-3"
-                  style={{ fontFamily: "'Manrope', sans-serif" }}
-                >
-                  {item.excerpt}
-                </p>
-                <div className="mt-4 flex items-center gap-1.5 text-[hsl(205,85%,45%)] opacity-0 group-hover:opacity-100 translate-x-[-4px] group-hover:translate-x-0 transition-all duration-300">
-                  <span className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>
-                    Читать далее
-                  </span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </div>
-              </div>
-            </motion.article>
-          ))}
-        </div>
-      </section>
+              </motion.article>
+            ))}
+          </div>
+        </section>
+      )}
 
     </>
   );
