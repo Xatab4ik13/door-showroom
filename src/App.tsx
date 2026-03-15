@@ -14,6 +14,7 @@ import Product from "./pages/Product";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Account from "./pages/Account";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Delivery from "./pages/Delivery";
 import About from "./pages/About";
@@ -52,6 +53,7 @@ const App = () => (
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/account" element={<Account />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/delivery" element={<Delivery />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/news" element={<News />} />

@@ -125,7 +125,15 @@ const Login = () => {
         </button>
       </form>
 
-      <p className="text-sm text-center text-muted-foreground mt-6">
+      {mode === 'login' && (
+        <p className="text-sm text-center text-muted-foreground mt-4">
+          <button onClick={() => navigate('/reset-password')} className="text-primary hover:underline">
+            Забыли пароль?
+          </button>
+        </p>
+      )}
+
+      <p className="text-sm text-center text-muted-foreground mt-3">
         {mode === 'login' ? (
           <>
             Нет аккаунта?{' '}

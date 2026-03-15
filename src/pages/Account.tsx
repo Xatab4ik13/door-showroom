@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Package, LogOut, ArrowLeft, Loader2, Clock, Check, CreditCard, Truck, PackageCheck, XCircle } from 'lucide-react';
+import { User, Package, LogOut, ArrowLeft, Loader2, Clock, Check, CreditCard, Truck, PackageCheck, XCircle, Lock, KeyRound } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const statusLabels: Record<string, { label: string; color: string; icon: typeof Clock }> = {
@@ -18,20 +18,27 @@ const formatPrice = (price: number) =>
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-type Tab = 'profile' | 'orders';
+type Tab = 'profile' | 'orders' | 'security';
 
 const tabs: { key: Tab; label: string; icon: typeof User }[] = [
   { key: 'orders', label: 'Заказы', icon: Package },
   { key: 'profile', label: 'Профиль', icon: User },
+  { key: 'security', label: 'Безопасность', icon: KeyRound },
 ];
 
 const Account = () => {
-  const { user, isAuthenticated, loading: authLoading, logout, updateProfile, orders, loadOrders, ordersLoading } = useAuth();
+  const { user, isAuthenticated, loading: authLoading, logout, updateProfile, changePassword, orders, loadOrders, ordersLoading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('orders');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [saving, setSaving] = useState(false);
+  const [currentPw, setCurrentPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState(false);
+  const [pwLoading, setPwLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -66,6 +73,27 @@ const Account = () => {
     setSaving(true);
     await updateProfile({ name, phone });
     setSaving(false);
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwError('');
+    setPwSuccess(false);
+    if (newPw !== confirmPw) {
+      setPwError('Пароли не совпадают');
+      return;
+    }
+    setPwLoading(true);
+    const err = await changePassword(currentPw, newPw);
+    setPwLoading(false);
+    if (err) {
+      setPwError(err);
+    } else {
+      setPwSuccess(true);
+      setCurrentPw('');
+      setNewPw('');
+      setConfirmPw('');
+    }
   };
 
   return (
@@ -256,6 +284,70 @@ const Account = () => {
                   );
                 })
               )}
+            </div>
+          )}
+
+          {activeTab === 'security' && (
+            <div className="bg-card border border-border rounded-lg p-6">
+              <h2
+                className="text-lg font-bold uppercase tracking-wider text-foreground mb-5"
+                style={{ fontFamily: "'Oswald', sans-serif" }}
+              >
+                Смена пароля
+              </h2>
+              <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
+                <div>
+                  <label className="text-xs text-muted-foreground uppercase tracking-wider block mb-1" style={{ fontFamily: "'Oswald', sans-serif" }}>Текущий пароль</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="password"
+                      value={currentPw}
+                      onChange={(e) => setCurrentPw(e.target.value)}
+                      required
+                      className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground uppercase tracking-wider block mb-1" style={{ fontFamily: "'Oswald', sans-serif" }}>Новый пароль</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="password"
+                      value={newPw}
+                      onChange={(e) => setNewPw(e.target.value)}
+                      required
+                      minLength={6}
+                      className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground uppercase tracking-wider block mb-1" style={{ fontFamily: "'Oswald', sans-serif" }}>Подтвердите пароль</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="password"
+                      value={confirmPw}
+                      onChange={(e) => setConfirmPw(e.target.value)}
+                      required
+                      minLength={6}
+                      className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                </div>
+                {pwError && <p className="text-xs text-destructive">{pwError}</p>}
+                {pwSuccess && <p className="text-xs text-emerald-600">Пароль успешно изменён!</p>}
+                <button
+                  type="submit"
+                  disabled={pwLoading}
+                  className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium uppercase tracking-wider hover:opacity-90 transition-opacity disabled:opacity-50"
+                  style={{ fontFamily: "'Oswald', sans-serif" }}
+                >
+                  {pwLoading ? 'Сохранение...' : 'Сменить пароль'}
+                </button>
+              </form>
             </div>
           )}
         </div>

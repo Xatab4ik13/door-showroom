@@ -88,23 +88,31 @@ router.post('/', async (req, res) => {
 
     // Send emails asynchronously (don't block response)
     setImmediate(async () => {
-      // 1. Order confirmation email
-      const orderEmail = orderCreatedEmail({
-        order_number: order.order_number,
-        customer_name: name,
-        items: typeof order.items === 'string' ? JSON.parse(order.items) : order.items,
-        total: Number(order.total),
-      });
-      await sendEmail(email, orderEmail.subject, orderEmail.html);
-
-      // 2. Account created email (if new account)
-      if (generatedPassword) {
-        const accEmail = accountCreatedEmail({
-          name,
-          email,
-          password: generatedPassword,
+      try {
+        // 1. Order confirmation email
+        const orderEmail = orderCreatedEmail({
+          order_number: order.order_number,
+          customer_name: name,
+          items: typeof order.items === 'string' ? JSON.parse(order.items) : order.items,
+          total: Number(order.total),
         });
-        await sendEmail(email, accEmail.subject, accEmail.html);
+        const sent1 = await sendEmail(email, orderEmail.subject, orderEmail.html);
+        console.log(`[ORDERS] Order email to ${email}: ${sent1 ? 'sent' : 'failed'}`);
+
+        // 2. Account created email (if new account)
+        if (generatedPassword) {
+          const accEmail = accountCreatedEmail({
+            name,
+            email,
+            password: generatedPassword,
+          });
+          const sent2 = await sendEmail(email, accEmail.subject, accEmail.html);
+          console.log(`[ORDERS] Account email to ${email}: ${sent2 ? 'sent' : 'failed'}, password generated: ${!!generatedPassword}`);
+        } else {
+          console.log(`[ORDERS] No account email needed for ${email} (already has password)`);
+        }
+      } catch (err) {
+        console.error('[ORDERS] Email sending error:', err);
       }
     });
 
