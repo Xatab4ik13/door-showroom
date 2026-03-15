@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 4000;
 const allowedOrigins = [
   'https://rusdoors.su',
   'https://www.rusdoors.su',
+  'https://id-preview--84d6a2c8-b4c0-4fe5-bd18-0ac658dfad9f.lovable.app',
   ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
 ];
 
