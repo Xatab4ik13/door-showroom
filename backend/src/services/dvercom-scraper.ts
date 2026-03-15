@@ -129,17 +129,29 @@ async function scrapeProductPage(url: string): Promise<ScrapedDetails | null> {
  * Scrape all product pages from dver.com and enrich the database
  * with full specs, sizes, and accessories.
  */
-export async function scrapeAllProducts(limit?: number) {
-  console.log('[SCRAPER] Starting full product page scraping...');
+export async function scrapeAllProducts(limit?: number, force?: boolean) {
+  console.log(`[SCRAPER] Starting product page scraping (force=${!!force})...`);
 
-  // Get all products that have a source_url in specs
-  const query = limit
-    ? `SELECT id, name, specs FROM products WHERE supplier_id = (SELECT id FROM suppliers WHERE slug = 'dvercom') AND sync_status = 'active' ORDER BY id LIMIT $1`
-    : `SELECT id, name, specs FROM products WHERE supplier_id = (SELECT id FROM suppliers WHERE slug = 'dvercom') AND sync_status = 'active' ORDER BY id`;
+  let query: string;
+  let params: any[] = [];
 
-  const result = await pool.query(query, limit ? [limit] : []);
+  if (force) {
+    // Force: re-scrape all products
+    query = limit
+      ? `SELECT id, name, specs FROM products WHERE supplier_id = (SELECT id FROM suppliers WHERE slug = 'dvercom') AND sync_status = 'active' ORDER BY id LIMIT $1`
+      : `SELECT id, name, specs FROM products WHERE supplier_id = (SELECT id FROM suppliers WHERE slug = 'dvercom') AND sync_status = 'active' ORDER BY id`;
+    if (limit) params = [limit];
+  } else {
+    // Resume: skip already enriched products (those with _sizes or _accessories)
+    query = limit
+      ? `SELECT id, name, specs FROM products WHERE supplier_id = (SELECT id FROM suppliers WHERE slug = 'dvercom') AND sync_status = 'active' AND (specs IS NULL OR NOT (specs::text LIKE '%_sizes%' OR specs::text LIKE '%_accessories%')) ORDER BY id LIMIT $1`
+      : `SELECT id, name, specs FROM products WHERE supplier_id = (SELECT id FROM suppliers WHERE slug = 'dvercom') AND sync_status = 'active' AND (specs IS NULL OR NOT (specs::text LIKE '%_sizes%' OR specs::text LIKE '%_accessories%')) ORDER BY id`;
+    if (limit) params = [limit];
+  }
+
+  const result = await pool.query(query, params);
   const products = result.rows;
-  console.log(`[SCRAPER] Found ${products.length} products to scrape`);
+  console.log(`[SCRAPER] Found ${products.length} products to scrape (${force ? 'all' : 'unenriched only'})`);
 
   let scraped = 0, failed = 0, skipped = 0;
 
