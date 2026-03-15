@@ -1,7 +1,10 @@
 import { Router } from 'express';
+import bcrypt from 'bcrypt';
 import { pool } from '../db/pool.js';
 import { requireAuth, type AuthRequest } from '../middleware/auth.js';
 import jwt from 'jsonwebtoken';
+import { sendEmail, orderCreatedEmail, orderStatusEmail, accountCreatedEmail } from '../services/email.js';
+import crypto from 'crypto';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret-in-production';
 const router = Router();
@@ -18,11 +21,15 @@ const STATUS_FLOW: Record<string, string[]> = {
 
 // Generate unique order number using DB sequence
 async function generateOrderNumber(client: any): Promise<string> {
-  // Use a sequence for guaranteed uniqueness
   await client.query(`CREATE SEQUENCE IF NOT EXISTS order_number_seq START 1001`);
   const res = await client.query(`SELECT nextval('order_number_seq') as num`);
   const num = String(res.rows[0].num).padStart(4, '0');
   return `RD-${num}`;
+}
+
+// Generate random password
+function generatePassword(): string {
+  return crypto.randomBytes(4).toString('hex'); // 8 chars
 }
 
 // POST /api/orders — create order (public, from checkout)
@@ -38,8 +45,9 @@ router.post('/', async (req, res) => {
     await client.query('BEGIN');
 
     // Find or create customer
-    let customerResult = await client.query('SELECT id FROM customers WHERE email = $1', [email]);
+    let customerResult = await client.query('SELECT id, password_hash FROM customers WHERE email = $1', [email]);
     let customerId: number;
+    let generatedPassword: string | null = null;
 
     if (customerResult.rows.length > 0) {
       customerId = customerResult.rows[0].id;
@@ -47,10 +55,20 @@ router.post('/', async (req, res) => {
         'UPDATE customers SET name = COALESCE(NULLIF($1, \'\'), name), phone = COALESCE(NULLIF($2, \'\'), phone) WHERE id = $3',
         [name, phone, customerId],
       );
+
+      // If customer has no password, generate one (auto-create account)
+      if (!customerResult.rows[0].password_hash) {
+        generatedPassword = generatePassword();
+        const hash = await bcrypt.hash(generatedPassword, 12);
+        await client.query('UPDATE customers SET password_hash = $1 WHERE id = $2', [hash, customerId]);
+      }
     } else {
+      // New customer — auto-create account with generated password
+      generatedPassword = generatePassword();
+      const hash = await bcrypt.hash(generatedPassword, 12);
       const insertRes = await client.query(
-        'INSERT INTO customers (email, name, phone) VALUES ($1, $2, $3) RETURNING id',
-        [email, name, phone || null],
+        'INSERT INTO customers (email, name, phone, password_hash) VALUES ($1, $2, $3, $4) RETURNING id',
+        [email, name, phone || null, hash],
       );
       customerId = insertRes.rows[0].id;
     }
@@ -65,7 +83,32 @@ router.post('/', async (req, res) => {
     );
 
     await client.query('COMMIT');
-    res.status(201).json(orderRes.rows[0]);
+
+    const order = orderRes.rows[0];
+
+    // Send emails asynchronously (don't block response)
+    setImmediate(async () => {
+      // 1. Order confirmation email
+      const orderEmail = orderCreatedEmail({
+        order_number: order.order_number,
+        customer_name: name,
+        items: typeof order.items === 'string' ? JSON.parse(order.items) : order.items,
+        total: Number(order.total),
+      });
+      await sendEmail(email, orderEmail.subject, orderEmail.html);
+
+      // 2. Account created email (if new account)
+      if (generatedPassword) {
+        const accEmail = accountCreatedEmail({
+          name,
+          email,
+          password: generatedPassword,
+        });
+        await sendEmail(email, accEmail.subject, accEmail.html);
+      }
+    });
+
+    res.status(201).json(order);
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('[ORDERS] Create error:', err);
@@ -170,11 +213,34 @@ router.get('/monthly', requireAuth, async (req, res) => {
   }
 });
 
+// GET /api/orders/my/list — customer: view own orders (JWT-protected)
+router.get('/my/list', async (req, res) => {
+  const header = req.headers.authorization;
+  if (!header?.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Не авторизован' });
+  }
+
+  try {
+    const decoded = jwt.verify(header.slice(7), JWT_SECRET) as { id: number; email: string; type: string };
+    if (decoded.type !== 'customer') {
+      return res.status(401).json({ error: 'Невалидный токен' });
+    }
+
+    const result = await pool.query(
+      `SELECT id, order_number, status, items, total, discount, payment_status, created_at, updated_at
+       FROM orders WHERE customer_email = $1 ORDER BY created_at DESC`,
+      [decoded.email],
+    );
+    res.json(result.rows);
+  } catch {
+    return res.status(401).json({ error: 'Невалидный токен' });
+  }
+});
+
 // GET /api/orders/:id — get single order (for status polling)
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    // Allow access by order ID or order_number
     const result = await pool.query(
       `SELECT id, order_number, status, items, total, discount, payment_status, created_at, updated_at
        FROM orders WHERE id = $1 OR order_number = $1`,
@@ -194,10 +260,14 @@ router.patch('/:id/status', requireAuth, async (req: AuthRequest, res) => {
     const { status } = req.body;
     const { id } = req.params;
 
-    const orderRes = await pool.query('SELECT status FROM orders WHERE id = $1', [id]);
+    const orderRes = await pool.query(
+      'SELECT id, order_number, status, customer_name, customer_email, total FROM orders WHERE id = $1',
+      [id],
+    );
     if (!orderRes.rows.length) return res.status(404).json({ error: 'Заказ не найден' });
 
-    const currentStatus = orderRes.rows[0].status;
+    const order = orderRes.rows[0];
+    const currentStatus = order.status;
     const allowed = STATUS_FLOW[currentStatus] || [];
 
     if (!allowed.includes(status)) {
@@ -222,34 +292,23 @@ router.patch('/:id/status', requireAuth, async (req: AuthRequest, res) => {
       params,
     );
 
+    // Send status notification email asynchronously
+    setImmediate(async () => {
+      const emailData = orderStatusEmail({
+        order_number: order.order_number,
+        customer_name: order.customer_name,
+        status,
+        total: Number(order.total),
+      });
+      if (emailData) {
+        await sendEmail(order.customer_email, emailData.subject, emailData.html);
+      }
+    });
+
     res.json({ ok: true });
   } catch (err) {
     console.error('[ORDERS] Status change error:', err);
     res.status(500).json({ error: 'Ошибка обновления статуса' });
-  }
-});
-
-// GET /api/orders/my/list — customer: view own orders (JWT-protected)
-router.get('/my/list', async (req, res) => {
-  const header = req.headers.authorization;
-  if (!header?.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Не авторизован' });
-  }
-
-  try {
-    const decoded = jwt.verify(header.slice(7), JWT_SECRET) as { id: number; email: string; type: string };
-    if (decoded.type !== 'customer') {
-      return res.status(401).json({ error: 'Невалидный токен' });
-    }
-
-    const result = await pool.query(
-      `SELECT id, order_number, status, items, total, discount, payment_status, created_at, updated_at
-       FROM orders WHERE customer_email = $1 ORDER BY created_at DESC`,
-      [decoded.email],
-    );
-    res.json(result.rows);
-  } catch {
-    return res.status(401).json({ error: 'Невалидный токен' });
   }
 });
 
