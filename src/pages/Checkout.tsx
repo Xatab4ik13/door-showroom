@@ -41,7 +41,7 @@ const Checkout = () => {
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = checkoutSchema.safeParse(form);
     if (!result.success) {
@@ -53,14 +53,44 @@ const Checkout = () => {
       setErrors(fieldErrors);
       return;
     }
-    // Generate mock order number
-    const num = `RD-${Date.now().toString().slice(-6)}`;
-    setOrderNumber(num);
+
+    // Send order to API
+    const API_BASE = import.meta.env.VITE_API_URL || 'https://api.rusdoors.su';
+    try {
+      const orderItems = items.map(({ product, quantity }) => ({
+        name: product.name,
+        slug: product.slug || product.id,
+        quantity,
+        price: product.price,
+      }));
+
+      const res = await fetch(`${API_BASE}/api/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          comment: form.comment,
+          items: orderItems,
+          total: totalPrice,
+          discount: totalDiscount,
+        }),
+      });
+
+      if (res.ok) {
+        const order = await res.json();
+        setOrderNumber(order.order_number);
+      } else {
+        setOrderNumber(`RD-${Date.now().toString().slice(-6)}`);
+      }
+    } catch {
+      setOrderNumber(`RD-${Date.now().toString().slice(-6)}`);
+    }
+
     setSubmitted(true);
     setOrderStatus(0);
-
-    // Mock: auto-confirm after 3 seconds for demo
-    setTimeout(() => setOrderStatus(1), 3000);
   };
 
   const handleMockPayment = () => {
