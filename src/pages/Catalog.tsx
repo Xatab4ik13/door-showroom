@@ -97,9 +97,9 @@ const Catalog = () => {
     limit: ITEMS_PER_PAGE,
     price_min: priceRange[0] > 0 ? priceRange[0] : undefined,
     price_max: priceRange[1] > 0 ? priceRange[1] : undefined,
-    manufacturer: selectedManufacturers.length === 1 ? selectedManufacturers[0] : undefined,
-    material: selectedMaterials.length === 1 ? selectedMaterials[0] : undefined,
-    color: selectedFinishes.length === 1 ? selectedFinishes[0] : undefined,
+    manufacturer: selectedManufacturers.length > 0 ? selectedManufacturers.join(',') : undefined,
+    material: selectedMaterials.length > 0 ? selectedMaterials.join(',') : undefined,
+    color: selectedFinishes.length > 0 ? selectedFinishes.join(',') : undefined,
     sort,
     order: sortOrder,
   });

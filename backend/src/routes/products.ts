@@ -39,16 +39,40 @@ router.get('/', async (req, res) => {
     conditions.push(`p.price <= $${params.length}`);
   }
   if (manufacturer) {
-    params.push(manufacturer);
-    conditions.push(`p.manufacturer = $${params.length}`);
+    const mfrs = String(manufacturer).split(',').map(s => s.trim()).filter(Boolean);
+    if (mfrs.length === 1) {
+      params.push(mfrs[0]);
+      conditions.push(`p.manufacturer = $${params.length}`);
+    } else {
+      params.push(mfrs);
+      conditions.push(`p.manufacturer = ANY($${params.length})`);
+    }
   }
   if (material) {
-    params.push(`%${material}%`);
-    conditions.push(`p.material ILIKE $${params.length}`);
+    const mats = String(material).split(',').map(s => s.trim()).filter(Boolean);
+    if (mats.length === 1) {
+      params.push(`%${mats[0]}%`);
+      conditions.push(`p.material ILIKE $${params.length}`);
+    } else {
+      const matConditions = mats.map((m, i) => {
+        params.push(`%${m}%`);
+        return `p.material ILIKE $${params.length}`;
+      });
+      conditions.push(`(${matConditions.join(' OR ')})`);
+    }
   }
   if (color) {
-    params.push(`%${color}%`);
-    conditions.push(`p.color ILIKE $${params.length}`);
+    const cols = String(color).split(',').map(s => s.trim()).filter(Boolean);
+    if (cols.length === 1) {
+      params.push(`%${cols[0]}%`);
+      conditions.push(`p.color ILIKE $${params.length}`);
+    } else {
+      const colConditions = cols.map((c, i) => {
+        params.push(`%${c}%`);
+        return `p.color ILIKE $${params.length}`;
+      });
+      conditions.push(`(${colConditions.join(' OR ')})`);
+    }
   }
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
