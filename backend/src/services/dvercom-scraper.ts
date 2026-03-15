@@ -132,10 +132,10 @@ async function scrapeProductPage(url: string): Promise<ScrapedDetails | null> {
 export async function scrapeAllProducts(limit?: number) {
   console.log('[SCRAPER] Starting full product page scraping...');
 
-  // Get all products that have a source_url in specs
+  // Get products that need scraping — skip already enriched ones (have _sizes or scraped specs beyond YML basics)
   const query = limit
-    ? `SELECT id, name, specs FROM products WHERE supplier_id = (SELECT id FROM suppliers WHERE slug = 'dvercom') AND sync_status = 'active' ORDER BY id LIMIT $1`
-    : `SELECT id, name, specs FROM products WHERE supplier_id = (SELECT id FROM suppliers WHERE slug = 'dvercom') AND sync_status = 'active' ORDER BY id`;
+    ? `SELECT id, name, specs FROM products WHERE supplier_id = (SELECT id FROM suppliers WHERE slug = 'dvercom') AND sync_status = 'active' AND (specs IS NULL OR NOT (specs::text LIKE '%_sizes%' OR specs::text LIKE '%_accessories%')) ORDER BY id LIMIT $1`
+    : `SELECT id, name, specs FROM products WHERE supplier_id = (SELECT id FROM suppliers WHERE slug = 'dvercom') AND sync_status = 'active' AND (specs IS NULL OR NOT (specs::text LIKE '%_sizes%' OR specs::text LIKE '%_accessories%')) ORDER BY id`;
 
   const result = await pool.query(query, limit ? [limit] : []);
   const products = result.rows;
