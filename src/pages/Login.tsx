@@ -1,114 +1,147 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Phone, ArrowRight, ArrowLeft } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Mail, Lock, ArrowLeft, User, Phone, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
-  const { login, verifyCode, pendingPhone } = useAuth();
+  const { login, register } = useAuth();
   const navigate = useNavigate();
+  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [code, setCode] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSendCode = () => {
-    if (phone.replace(/\D/g, '').length < 10) {
-      setError('Введите корректный номер телефона');
-      return;
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError('');
-    login(phone);
-  };
+    setLoading(true);
 
-  const handleVerify = () => {
-    const ok = verifyCode(code);
-    if (ok) {
-      navigate('/account');
+    let err: string | null;
+    if (mode === 'login') {
+      err = await login(email, password);
     } else {
-      setError('Неверный код. Для демо используйте: 1234');
+      if (!name.trim()) {
+        setError('Укажите имя');
+        setLoading(false);
+        return;
+      }
+      err = await register(email, password, name, phone);
+    }
+
+    setLoading(false);
+    if (err) {
+      setError(err);
+    } else {
+      navigate('/account');
     }
   };
 
   return (
     <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-md mx-auto">
-        <button
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Назад
-        </button>
+      <button
+        onClick={() => navigate(-1)}
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Назад
+      </button>
 
-        <h1
-          className="text-3xl font-bold uppercase tracking-wide text-foreground mb-2"
-          style={{ fontFamily: "'Oswald', sans-serif" }}
-        >
-          Вход
-        </h1>
-        <p className="text-muted-foreground text-sm mb-8">
-          {pendingPhone
-            ? `Мы отправили SMS-код на ${pendingPhone}`
-            : 'Введите номер телефона для входа'}
-        </p>
+      <h1
+        className="text-3xl font-bold uppercase tracking-wide text-foreground mb-2"
+        style={{ fontFamily: "'Oswald', sans-serif" }}
+      >
+        {mode === 'login' ? 'Вход' : 'Регистрация'}
+      </h1>
+      <p className="text-muted-foreground text-sm mb-8">
+        {mode === 'login'
+          ? 'Войдите, чтобы отслеживать заказы'
+          : 'Создайте аккаунт для отслеживания заказов'}
+      </p>
 
-        {!pendingPhone ? (
-          <div className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {mode === 'register' && (
+          <>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ваше имя"
+                className="w-full pl-10 pr-4 py-3 border border-border rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              />
+            </div>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+7 (999) 123-45-67"
-                className="w-full pl-10 pr-4 py-3 border border-border rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(205,85%,45%)]/30 focus:border-[hsl(205,85%,45%)]"
+                placeholder="+7 (999) 123-45-67 (необязательно)"
+                className="w-full pl-10 pr-4 py-3 border border-border rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
               />
             </div>
-            {error && <p className="text-xs text-destructive">{error}</p>}
-            <button
-              onClick={handleSendCode}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-[hsl(205,85%,45%)] text-white rounded-lg text-sm font-medium uppercase tracking-wider hover:opacity-90 transition-opacity"
-              style={{ fontFamily: "'Oswald', sans-serif" }}
-            >
-              Получить код
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex gap-2 justify-center">
-              {[0, 1, 2, 3].map((i) => (
-                <input
-                  key={i}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={code[i] || ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    const newCode = code.split('');
-                    newCode[i] = val;
-                    setCode(newCode.join(''));
-                    if (val && e.target.nextElementSibling instanceof HTMLInputElement) {
-                      e.target.nextElementSibling.focus();
-                    }
-                  }}
-                  className="w-14 h-14 text-center text-2xl font-bold border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-[hsl(205,85%,45%)]/30 focus:border-[hsl(205,85%,45%)]"
-                  style={{ fontFamily: "'Oswald', sans-serif" }}
-                />
-              ))}
-            </div>
-            {error && <p className="text-xs text-destructive text-center">{error}</p>}
-            <button
-              onClick={handleVerify}
-              className="w-full py-3 bg-[hsl(205,85%,45%)] text-white rounded-lg text-sm font-medium uppercase tracking-wider hover:opacity-90 transition-opacity"
-              style={{ fontFamily: "'Oswald', sans-serif" }}
-            >
-              Подтвердить
-            </button>
-            <p className="text-xs text-center text-muted-foreground">
-              Для демо: код <span className="font-bold text-foreground">1234</span>
-            </p>
-          </div>
+          </>
         )}
+
+        <div className="relative">
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            required
+            className="w-full pl-10 pr-4 py-3 border border-border rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+          />
+        </div>
+
+        <div className="relative">
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Пароль"
+            required
+            minLength={6}
+            className="w-full pl-10 pr-4 py-3 border border-border rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+          />
+        </div>
+
+        {error && <p className="text-xs text-destructive">{error}</p>}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-primary-foreground rounded-lg text-sm font-medium uppercase tracking-wider hover:opacity-90 transition-opacity disabled:opacity-50"
+          style={{ fontFamily: "'Oswald', sans-serif" }}
+        >
+          {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+          {mode === 'login' ? 'Войти' : 'Зарегистрироваться'}
+        </button>
+      </form>
+
+      <p className="text-sm text-center text-muted-foreground mt-6">
+        {mode === 'login' ? (
+          <>
+            Нет аккаунта?{' '}
+            <button onClick={() => { setMode('register'); setError(''); }} className="text-primary hover:underline">
+              Зарегистрироваться
+            </button>
+          </>
+        ) : (
+          <>
+            Уже есть аккаунт?{' '}
+            <button onClick={() => { setMode('login'); setError(''); }} className="text-primary hover:underline">
+              Войти
+            </button>
+          </>
+        )}
+      </p>
     </div>
   );
 };
