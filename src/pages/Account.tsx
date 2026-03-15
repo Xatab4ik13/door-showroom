@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { User, Package, LogOut, ArrowLeft, Loader2, Clock, Check, CreditCard, Truck, PackageCheck, XCircle, Lock, KeyRound } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'https://api.rusdoors.su';
 
 const statusLabels: Record<string, { label: string; color: string; icon: typeof Clock }> = {
   pending: { label: 'Ожидает', color: 'bg-primary/10 text-primary', icon: Clock },
@@ -29,6 +31,7 @@ const tabs: { key: Tab; label: string; icon: typeof User }[] = [
 const Account = () => {
   const { user, isAuthenticated, loading: authLoading, logout, updateProfile, changePassword, orders, loadOrders, ordersLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>('orders');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -39,6 +42,20 @@ const Account = () => {
   const [pwError, setPwError] = useState('');
   const [pwSuccess, setPwSuccess] = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
+  const [payingOrderId, setPayingOrderId] = useState<number | null>(null);
+  const [paymentMessage, setPaymentMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Handle payment redirect params
+  useEffect(() => {
+    const payment = searchParams.get('payment');
+    const orderNum = searchParams.get('order');
+    if (payment === 'success' && orderNum) {
+      setPaymentMessage({ type: 'success', text: `Оплата заказа ${orderNum} прошла успешно!` });
+      loadOrders(); // refresh orders to show updated status
+    } else if (payment === 'fail' && orderNum) {
+      setPaymentMessage({ type: 'error', text: `Оплата заказа ${orderNum} не прошла. Попробуйте ещё раз.` });
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -203,6 +220,17 @@ const Account = () => {
                 Мои заказы
               </h2>
 
+              {paymentMessage && (
+                <div className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
+                  paymentMessage.type === 'success'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-destructive/10 text-destructive border border-destructive/20'
+                }`}>
+                  {paymentMessage.type === 'success' ? <Check className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                  {paymentMessage.text}
+                </div>
+              )}
+
               {ordersLoading ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="w-5 h-5 animate-spin text-primary" />
@@ -268,14 +296,36 @@ const Account = () => {
                       {order.status === 'confirmed' && order.payment_status !== 'paid' && (
                         <div className="mt-3 pt-3 border-t border-border">
                           <button
-                            className="w-full py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                            className="w-full py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50"
                             style={{ fontFamily: "'Oswald', sans-serif" }}
-                            onClick={() => {
-                              // TODO: integrate real payment
-                              alert('Оплата будет подключена позже. Свяжитесь с менеджером.');
+                            disabled={payingOrderId === order.id}
+                            onClick={async () => {
+                              setPayingOrderId(order.id);
+                              setPaymentMessage(null);
+                              try {
+                                const res = await fetch(`${API_BASE}/api/payments/init`, {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ order_id: order.id }),
+                                });
+                                const data = await res.json();
+                                if (res.ok && data.paymentUrl) {
+                                  window.location.href = data.paymentUrl;
+                                } else {
+                                  setPaymentMessage({ type: 'error', text: data.error || 'Ошибка создания платежа' });
+                                  setPayingOrderId(null);
+                                }
+                              } catch {
+                                setPaymentMessage({ type: 'error', text: 'Сервер недоступен' });
+                                setPayingOrderId(null);
+                              }
                             }}
                           >
-                            <CreditCard className="w-4 h-4" />
+                            {payingOrderId === order.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <CreditCard className="w-4 h-4" />
+                            )}
                             Оплатить {formatPrice(order.total)}
                           </button>
                         </div>
