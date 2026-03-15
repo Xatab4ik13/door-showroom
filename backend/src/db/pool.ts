@@ -133,10 +133,14 @@ export async function initDatabase() {
         total NUMERIC(10,2) NOT NULL DEFAULT 0,
         discount NUMERIC(10,2) DEFAULT 0,
         payment_status VARCHAR(20) DEFAULT 'unpaid',
+        payment_id VARCHAR(100),
         manager_id INTEGER REFERENCES admin_users(id),
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       );
+
+      -- Add payment_id column if missing (migration for existing DBs)
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_id VARCHAR(100);
 
       -- Insert default suppliers
       INSERT INTO suppliers (slug, name, format, sync_enabled)
