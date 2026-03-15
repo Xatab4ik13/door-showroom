@@ -14,11 +14,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm ci
+
+      # Regenerate lockfile to avoid npm ci failures from Lovable edits
+      - name: Install dependencies
+        run: |
+          rm -f package-lock.json
+          npm install --package-lock-only
+          npm ci
+
       - run: npm run build
 
-      # Deploy to VPS
-      - name: Deploy via SSH
+      # Deploy backend code to VPS
+      - name: Deploy backend via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -27,16 +34,12 @@ jobs:
           script: |
             cd /opt/rusdoors
             git pull origin main
-            
-            # Copy built frontend
-            rm -rf frontend-dist
-            mkdir -p frontend-dist
-            
+
             # Rebuild backend + restart
             docker compose build backend
             docker compose up -d
-            
-            echo "✅ Deploy completed at $(date)"
+
+            echo "✅ Backend deployed at $(date)"
 
       # Upload frontend build to VPS
       - name: Upload frontend build
@@ -59,3 +62,4 @@ jobs:
           script: |
             cd /opt/rusdoors
             docker compose restart nginx
+            echo "✅ Frontend deployed at $(date)"
