@@ -18,11 +18,12 @@ const formatPrice = (price: number) =>
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-type Tab = 'profile' | 'orders';
+type Tab = 'profile' | 'orders' | 'security';
 
 const tabs: { key: Tab; label: string; icon: typeof User }[] = [
   { key: 'orders', label: 'Заказы', icon: Package },
   { key: 'profile', label: 'Профиль', icon: User },
+  { key: 'security', label: 'Безопасность', icon: KeyRound },
 ];
 
 const Account = () => {
