@@ -51,7 +51,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     Authorization: `Bearer ${t}`,
   });
 
-  // Load user on mount
   useEffect(() => {
     if (!token) {
       setLoading(false);
@@ -67,9 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setToken(null);
         }
       })
-      .catch(() => {
-        // API unavailable — keep token, try later
-      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, [token]);
 
@@ -129,10 +126,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const loadOrders = async () => {
-    if (!user?.email) return;
+    if (!token) return;
     setOrdersLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/orders/by-email/${encodeURIComponent(user.email)}`);
+      const res = await fetch(`${API_BASE}/api/orders/my/list`, {
+        headers: authHeaders(token),
+      });
       if (res.ok) {
         setOrders(await res.json());
       }
