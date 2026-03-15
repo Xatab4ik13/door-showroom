@@ -4,7 +4,11 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from './AdminSidebar';
 
 const AdminLayout = () => {
-  const { isAdminAuthenticated, admin } = useAdminAuth();
+  const { isAdminAuthenticated, admin, loading } = useAdminAuth();
+
+  if (loading) {
+    return null;
+  }
 
   if (!isAdminAuthenticated) {
     return <Navigate to="/admin/login" replace />;
