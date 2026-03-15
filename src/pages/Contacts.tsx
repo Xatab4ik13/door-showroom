@@ -29,6 +29,11 @@ const messengers = [
 const Contacts = () => {
   return (
     <>
+      <PageSEO
+        title="Контакты RUSDOORS — телефон, адрес магазина дверей в Москве"
+        description="Свяжитесь с RUSDOORS: 8 (800) 302-33-23, +7 (925) 741-48-91. Бесплатная консультация, замер дверей по Москве и МО. Telegram, MAX мессенджер."
+        canonical="https://rusdoors.su/contacts"
+      />
       {/* Hero */}
       <section className="pt-32 md:pt-40 pb-16 md:pb-20 px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
         <motion.div

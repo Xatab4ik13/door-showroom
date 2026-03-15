@@ -26,6 +26,11 @@ const features = [
 const About = () => {
   return (
     <>
+      <PageSEO
+        title="О компании RUSDOORS — магазин дверей в Москве с 2014 года"
+        description="RUSDOORS — интернет-магазин входных и межкомнатных дверей в Москве. Работаем с 2014 года, широкий ассортимент от проверенных производителей, бесплатный замер и доставка."
+        canonical="https://rusdoors.su/about"
+      />
       <main>
         {/* Hero */}
         <section className="pt-32 md:pt-40 pb-16 md:pb-24 px-4 md:px-8 lg:px-12">

@@ -28,6 +28,11 @@ const whyUs = [
 const Delivery = () => {
   return (
     <>
+      <PageSEO
+        title="Доставка и оплата дверей в Москве — RUSDOORS"
+        description="Доставка дверей по Москве и Московской области. Оплата картой, онлайн, при получении. Бесплатный замер, установка дверей. Честные сроки от RUSDOORS."
+        canonical="https://rusdoors.su/delivery"
+      />
       <main>
         {/* Hero */}
         <section className="pt-32 md:pt-40 pb-16 md:pb-24 px-4 md:px-8 lg:px-12">
