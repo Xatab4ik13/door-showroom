@@ -7,6 +7,7 @@ import { catalogProducts as mockProducts, categories, type Category, type Tag } 
 import { useProducts } from '@/hooks/useProducts';
 import { useFacets } from '@/hooks/useFacets';
 import { apiProductToCard } from '@/lib/productAdapter';
+import PageSEO from '@/components/PageSEO';
 
 const ITEMS_PER_PAGE = 24;
 
@@ -251,7 +252,23 @@ const Catalog = () => {
     );
   };
 
+  const categoryTitles: Record<string, string> = {
+    all: 'Каталог дверей в Москве',
+    mezhkomnatnye: 'Межкомнатные двери в Москве',
+    vhodnye: 'Входные двери в Москве',
+    furnitura: 'Фурнитура для дверей',
+    peregorodki: 'Перегородки',
+    specialnye: 'Специальные двери',
+  };
+
+  const seoTitle = `${categoryTitles[category] || 'Каталог дверей'} — купить с доставкой | RUSDOORS`;
+  const seoDesc = category === 'all'
+    ? 'Каталог входных и межкомнатных дверей RUSDOORS. Более 3000 моделей от ведущих производителей. Доставка и установка по Москве и МО. Цены от 3 000 ₽.'
+    : `${categoryTitles[category] || 'Двери'} — купить в интернет-магазине RUSDOORS с доставкой по Москве. Широкий выбор, выгодные цены, бесплатный замер.`;
+
   return (
+    <>
+    <PageSEO title={seoTitle} description={seoDesc} canonical={`https://rusdoors.su/catalog${category !== 'all' ? `?category=${category}` : ''}`} />
     <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
       {/* Page title */}
       <div className="mb-8 flex items-center justify-between">
@@ -349,6 +366,7 @@ const Catalog = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

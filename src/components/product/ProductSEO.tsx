@@ -14,10 +14,10 @@ const ProductSEO = ({ product, apiProduct }: ProductSEOProps) => {
     const brand = product.manufacturer || apiProduct?.specs?.['Бренд'] || '';
     const desc = apiProduct?.description
       ? apiProduct.description.slice(0, 155)
-      : `${name}${brand ? ` от ${brand}` : ''} — купить в интернет-магазине RUSDOORS с доставкой по России`;
+      : `${name}${brand ? ` от ${brand}` : ''} — купить в Москве в интернет-магазине RUSDOORS с доставкой и установкой`;
 
     // Title
-    document.title = `${name}${brand ? ` ${brand}` : ''} — купить | RUSDOORS`;
+    document.title = `${name}${brand ? ` ${brand}` : ''} — купить в Москве | RUSDOORS`;
 
     // Meta description
     let metaDesc = document.querySelector('meta[name="description"]');
@@ -87,7 +87,7 @@ const ProductSEO = ({ product, apiProduct }: ProductSEOProps) => {
 
     // Cleanup
     return () => {
-      document.title = 'RUSDOORS — Интернет-магазин премиальных дверей';
+      document.title = 'Купить двери в Москве — входные и межкомнатные двери | RUSDOORS';
       const jsonLdEl = document.getElementById('product-jsonld');
       if (jsonLdEl) jsonLdEl.remove();
     };
