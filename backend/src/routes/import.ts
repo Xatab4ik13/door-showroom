@@ -138,13 +138,14 @@ router.post('/scrape/dvercom', async (req, res) => {
   }
 
   const limit = req.body?.limit ? parseInt(req.body.limit) : undefined;
+  const force = req.body?.force === true; // force=true to re-scrape already enriched products
 
   try {
     // Run in background — return immediately
-    res.json({ status: 'started', message: 'Scraping started in background', limit: limit || 'all' });
+    res.json({ status: 'started', message: 'Scraping started in background (skips already enriched)', limit: limit || 'all', force });
 
     // Don't await — let it run
-    scrapeAllProducts(limit).then(result => {
+    scrapeAllProducts(limit, force).then(result => {
       console.log('[SCRAPE] Background scraping finished:', result);
     }).catch(err => {
       console.error('[SCRAPE] Background scraping failed:', err.message);
