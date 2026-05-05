@@ -20,15 +20,23 @@ const defaultSlides: Slide[] = [
 ];
 
 const HeroBanner = () => {
+  const [slides, setSlides] = useState<Slide[]>(defaultSlides);
   const [current, setCurrent] = useState(0);
 
-  const next = useCallback(() => setCurrent((c) => (c + 1) % slides.length), []);
-  const prev = useCallback(() => setCurrent((c) => (c - 1 + slides.length) % slides.length), []);
+  useEffect(() => {
+    fetchContent<Slide[]>('hero_slides').then((data) => {
+      if (data && Array.isArray(data) && data.length > 0) setSlides(data);
+    });
+  }, []);
+
+  const next = useCallback(() => setCurrent((c) => (c + 1) % slides.length), [slides.length]);
+  const prev = useCallback(() => setCurrent((c) => (c - 1 + slides.length) % slides.length), [slides.length]);
 
   useEffect(() => {
+    if (slides.length < 2) return;
     const timer = setInterval(next, 6000);
     return () => clearInterval(timer);
-  }, [next]);
+  }, [next, slides.length]);
 
   return (
     <section className="relative w-full h-screen overflow-hidden">
