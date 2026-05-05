@@ -77,18 +77,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const addItem = (
     product: CatalogProduct,
     quantity = 1,
-    selectedSize?: string,
-    accessories: CartAccessory[] = [],
+    extras: AddItemExtras = {},
   ) => {
+    const { selectedSize, accessories = [], panelColor = null, services = [] } = extras;
     setItems((prev) => {
       const existing = prev.find((i) => i.product.id === product.id);
-      if (existing && accessories.length === 0) {
+      const isSimple = accessories.length === 0 && !panelColor && services.length === 0;
+      if (existing && isSimple) {
         return prev.map((i) =>
           i.product.id === product.id ? { ...i, quantity: i.quantity + quantity } : i,
         );
       }
-      // If adding with accessories, always add as new item
-      return [...prev, { product, quantity, selectedSize, accessories }];
+      return [...prev, { product, quantity, selectedSize, accessories, panelColor, services }];
     });
   };
 
