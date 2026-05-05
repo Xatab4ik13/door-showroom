@@ -159,6 +159,54 @@ export async function initDatabase() {
       CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
       CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at);
       CREATE INDEX IF NOT EXISTS idx_customers_email ON customers(email);
+
+      -- Internal panel colors (per category and/or per product)
+      CREATE TABLE IF NOT EXISTS panel_colors (
+        id SERIAL PRIMARY KEY,
+        category_slug VARCHAR(100),
+        product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+        name VARCHAR(255) NOT NULL,
+        image_url TEXT,
+        price_modifier NUMERIC(10,2) DEFAULT 0,
+        sort_order INTEGER DEFAULT 0,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_panel_colors_cat ON panel_colors(category_slug);
+      CREATE INDEX IF NOT EXISTS idx_panel_colors_prod ON panel_colors(product_id);
+
+      -- Additional services (per category and/or per product)
+      CREATE TABLE IF NOT EXISTS services (
+        id SERIAL PRIMARY KEY,
+        category_slug VARCHAR(100),
+        product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        price NUMERIC(10,2) NOT NULL DEFAULT 0,
+        price_type VARCHAR(20) NOT NULL DEFAULT 'fixed', -- 'fixed' | 'per_door'
+        sort_order INTEGER DEFAULT 0,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_services_cat ON services(category_slug);
+      CREATE INDEX IF NOT EXISTS idx_services_prod ON services(product_id);
+
+      -- Per-product service excludes (hide a category-level service on a specific product)
+      CREATE TABLE IF NOT EXISTS product_service_excludes (
+        product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+        service_id INTEGER NOT NULL REFERENCES services(id) ON DELETE CASCADE,
+        PRIMARY KEY (product_id, service_id)
+      );
+
+      -- Recommended products (per product and/or per category)
+      CREATE TABLE IF NOT EXISTS product_recommendations (
+        id SERIAL PRIMARY KEY,
+        source_product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+        source_category_slug VARCHAR(100),
+        recommended_product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+        sort_order INTEGER DEFAULT 0,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_reco_prod ON product_recommendations(source_product_id);
+      CREATE INDEX IF NOT EXISTS idx_reco_cat ON product_recommendations(source_category_slug);
     `);
 
     await ensureDefaultAdminUsers(client);
