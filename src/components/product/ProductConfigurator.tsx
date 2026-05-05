@@ -58,16 +58,22 @@ const ProductConfigurator = ({ product, apiSpecs }: ProductConfiguratorProps) =>
   const [addedToCart, setAddedToCart] = useState(false);
   const { addItem } = useCart();
 
+  // For furniture (handles, hinges, locks, etc.) we don't show door-specific UI
+  // like sizes / "Полотно" line / accessories — only quantity.
+  const isFurniture = product.category === 'furnitura';
+
   // Parse sizes from specs
   const sizes: string[] = useMemo(() => {
+    if (isFurniture) return [];
     if (!apiSpecs?._sizes) return [];
     try {
       return JSON.parse(apiSpecs._sizes);
     } catch { return []; }
-  }, [apiSpecs]);
+  }, [apiSpecs, isFurniture]);
 
   // Parse accessories from specs, clean names, filter out the door itself
   const accessories: CleanAccessory[] = useMemo(() => {
+    if (isFurniture) return [];
     if (!apiSpecs?._accessories) return [];
     try {
       const parsed: Accessory[] = JSON.parse(apiSpecs._accessories);
@@ -86,7 +92,7 @@ const ProductConfigurator = ({ product, apiSpecs }: ProductConfiguratorProps) =>
           displayName: getAccessoryDisplayName(a.name),
         }));
     } catch { return []; }
-  }, [apiSpecs, product.id, product.price]);
+  }, [apiSpecs, product.id, product.price, isFurniture]);
 
   const [selectedSize, setSelectedSize] = useState(
     sizes.length > 0 ? (sizes.find(s => s.includes('200') && s.includes('70')) || sizes[0]) : ''
