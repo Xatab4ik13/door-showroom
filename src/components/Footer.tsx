@@ -33,7 +33,7 @@ const Footer = () => {
               <img src={logo} alt="RusDoors" className="h-24 md:h-[120px] w-auto -my-4" />
             </Link>
             <p className="text-sm leading-relaxed text-muted-foreground" style={{ fontFamily: "'Manrope', sans-serif" }}>
-              Премиальные двери для вашего интерьера. Широкий ассортимент от ведущих производителей.
+              Качественные двери для вашего интерьера. Широкий ассортимент от ведущих производителей.
             </p>
           </div>
 

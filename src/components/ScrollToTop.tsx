@@ -1,12 +1,19 @@
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigationType } from 'react-router-dom';
 
+/**
+ * Auto-scroll to top on route change, EXCEPT when the user navigates back/forward
+ * (browser POP) — in that case we preserve the previous scroll position so that
+ * returning to the catalog from a product keeps the user where they were.
+ */
 const ScrollToTop = () => {
   const { pathname } = useLocation();
+  const navType = useNavigationType();
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [pathname]);
+    if (navType === 'POP') return;
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+  }, [pathname, navType]);
 
   return null;
 };
