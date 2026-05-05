@@ -5,9 +5,10 @@ import ProductGallery from '@/components/product/ProductGallery';
 import ProductSpecs from '@/components/product/ProductSpecs';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
 import ProductSEO from '@/components/product/ProductSEO';
+import ProductRecommendations from '@/components/product/ProductRecommendations';
 
 import { catalogProducts } from '@/data/catalog';
-import { fetchProduct, type ApiProduct } from '@/lib/api';
+import { fetchProduct, fetchProductExtras, type ApiProduct, type ProductExtras } from '@/lib/api';
 import { apiProductToCard } from '@/lib/productAdapter';
 
 const formatPrice = (price: number) =>
@@ -18,6 +19,7 @@ const Product = () => {
   const [selectedColor, setSelectedColor] = useState(0);
   const [loading, setLoading] = useState(true);
   const [apiProduct, setApiProduct] = useState<ApiProduct | null>(null);
+  const [extras, setExtras] = useState<ProductExtras>({ panel_colors: [], services: [], recommendations: [] });
 
   useEffect(() => {
     if (!id) return;
@@ -26,6 +28,7 @@ const Product = () => {
       .then((data) => {
         setApiProduct(data);
         setLoading(false);
+        fetchProductExtras(data.id).then(setExtras).catch(() => {});
       })
       .catch(() => {
         setApiProduct(null);
