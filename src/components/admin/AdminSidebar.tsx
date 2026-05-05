@@ -6,6 +6,8 @@ import {
   Users,
   Settings,
   LogOut,
+  Image,
+  Sparkles,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
@@ -29,6 +31,8 @@ const mainNav = [
   { title: 'Дашборд', url: '/admin', icon: LayoutDashboard },
   { title: 'Заказы', url: '/admin/orders', icon: ShoppingCart },
   { title: 'Товары', url: '/admin/products', icon: Package },
+  { title: 'Расширения товара', url: '/admin/extras', icon: Sparkles },
+  { title: 'Контент сайта', url: '/admin/content', icon: Image },
   { title: 'Поставщики', url: '/admin/suppliers', icon: Truck },
   { title: 'Клиенты', url: '/admin/customers', icon: Users },
 ];

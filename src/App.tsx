@@ -30,6 +30,8 @@ import Products from "./pages/admin/Products";
 import Suppliers from "./pages/admin/Suppliers";
 import Customers from "./pages/admin/Customers";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminContent from "./pages/admin/Content";
+import AdminProductExtras from "./pages/admin/ProductExtras";
 import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -72,6 +74,8 @@ const App = () => (
                   <Route path="suppliers" element={<Suppliers />} />
                   <Route path="customers" element={<Customers />} />
                   <Route path="settings" element={<AdminSettings />} />
+                  <Route path="content" element={<AdminContent />} />
+                  <Route path="extras" element={<AdminProductExtras />} />
                 </Route>
 
                 <Route path="*" element={<NotFound />} />
