@@ -111,10 +111,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
 
   const totalPrice = items.reduce((sum, i) => {
-    let itemTotal = i.product.price * i.quantity;
-    i.accessories.forEach((a) => {
-      itemTotal += a.price * a.quantity;
-    });
+    const panelMod = i.panelColor?.price_modifier || 0;
+    let itemTotal = (i.product.price + panelMod) * i.quantity;
+    i.accessories.forEach((a) => { itemTotal += a.price * a.quantity; });
+    (i.services || []).forEach((s) => { itemTotal += s.price; });
     return sum + itemTotal;
   }, 0);
 
