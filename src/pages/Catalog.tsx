@@ -26,12 +26,12 @@ const validCategories = new Set<string>(['mezhkomnatnye', 'vhodnye', 'furnitura'
 const Catalog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Read initial state from URL
-  const urlCategory = searchParams.get('category') || 'all';
+  // Read initial state from URL — by default show interior doors first (not all/furniture)
+  const urlCategory = searchParams.get('category') || 'mezhkomnatnye';
   const urlSubcategory = searchParams.get('sub') || null;
 
   const [category, setCategory] = useState<Category | 'all'>(
-    validCategories.has(urlCategory) ? urlCategory as Category : 'all'
+    validCategories.has(urlCategory) ? urlCategory as Category : 'mezhkomnatnye'
   );
   const [subcategory, setSubcategory] = useState<string | null>(urlSubcategory);
   const [tag, setTag] = useState<Tag | 'all'>('all');
