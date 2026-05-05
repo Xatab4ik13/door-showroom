@@ -176,10 +176,17 @@ const Product = () => {
             >
               Заказ
             </h3>
-            <ProductConfigurator product={product} apiSpecs={apiProduct?.specs} />
+            <ProductConfigurator
+              product={product}
+              apiSpecs={apiProduct?.specs}
+              panelColors={extras.panel_colors}
+              services={extras.services}
+            />
           </div>
         </div>
       </div>
+
+      <ProductRecommendations items={extras.recommendations} />
     </div>
   );
 };
