@@ -8,16 +8,38 @@ export interface CartAccessory {
   quantity: number;
 }
 
+export interface CartService {
+  id: number;
+  name: string;
+  price: number; // total for this line
+}
+
+export interface CartPanelColor {
+  id: number;
+  name: string;
+  image_url: string | null;
+  price_modifier: number;
+}
+
 export interface CartItem {
   product: CatalogProduct;
   quantity: number;
   selectedSize?: string;
   accessories: CartAccessory[];
+  panelColor?: CartPanelColor | null;
+  services?: CartService[];
+}
+
+export interface AddItemExtras {
+  selectedSize?: string;
+  accessories?: CartAccessory[];
+  panelColor?: CartPanelColor | null;
+  services?: CartService[];
 }
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (product: CatalogProduct, quantity?: number, selectedSize?: string, accessories?: CartAccessory[]) => void;
+  addItem: (product: CatalogProduct, quantity?: number, extras?: AddItemExtras) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -55,18 +77,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const addItem = (
     product: CatalogProduct,
     quantity = 1,
-    selectedSize?: string,
-    accessories: CartAccessory[] = [],
+    extras: AddItemExtras = {},
   ) => {
+    const { selectedSize, accessories = [], panelColor = null, services = [] } = extras;
     setItems((prev) => {
       const existing = prev.find((i) => i.product.id === product.id);
-      if (existing && accessories.length === 0) {
+      const isSimple = accessories.length === 0 && !panelColor && services.length === 0;
+      if (existing && isSimple) {
         return prev.map((i) =>
           i.product.id === product.id ? { ...i, quantity: i.quantity + quantity } : i,
         );
       }
-      // If adding with accessories, always add as new item
-      return [...prev, { product, quantity, selectedSize, accessories }];
+      return [...prev, { product, quantity, selectedSize, accessories, panelColor, services }];
     });
   };
 
@@ -89,10 +111,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
 
   const totalPrice = items.reduce((sum, i) => {
-    let itemTotal = i.product.price * i.quantity;
-    i.accessories.forEach((a) => {
-      itemTotal += a.price * a.quantity;
-    });
+    const panelMod = i.panelColor?.price_modifier || 0;
+    let itemTotal = (i.product.price + panelMod) * i.quantity;
+    i.accessories.forEach((a) => { itemTotal += a.price * a.quantity; });
+    (i.services || []).forEach((s) => { itemTotal += s.price; });
     return sum + itemTotal;
   }, 0);
 
