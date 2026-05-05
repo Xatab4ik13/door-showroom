@@ -126,3 +126,35 @@ export async function fetchProductExtras(productId: number): Promise<ProductExtr
     return { panel_colors: [], services: [], recommendations: [] };
   }
 }
+
+// ==== Site content (CMS-lite) ====
+export async function fetchContent<T = any>(key: string): Promise<T | null> {
+  try {
+    const res = await fetch(`${API_BASE}/api/content/${key}`);
+    if (!res.ok) return null;
+    return res.json();
+  } catch { return null; }
+}
+
+export async function saveContent(key: string, value: any, token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/content/${key}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(value),
+  });
+  if (!res.ok) throw new Error('Save failed');
+}
+
+export async function uploadImage(file: File, token: string): Promise<string> {
+  const fd = new FormData();
+  fd.append('file', file);
+  const res = await fetch(`${API_BASE}/api/uploads/image`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: fd,
+  });
+  if (!res.ok) throw new Error('Upload failed');
+  const data = await res.json();
+  // Convert relative /uploads/... to absolute backend URL
+  return data.url.startsWith('http') ? data.url : `${API_BASE}${data.url}`;
+}
