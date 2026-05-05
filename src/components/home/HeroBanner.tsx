@@ -8,8 +8,8 @@ import banner03 from '@/assets/banners/banner-03.jpg';
 const slides = [
   {
     image: banner01,
-    title: 'Премиальные двери',
-    subtitle: 'для вашего интерьера',
+    title: 'Двери для вашего дома',
+    subtitle: 'качество и стиль для каждого интерьера',
     cta: 'Смотреть каталог',
     href: '/catalog',
   },
