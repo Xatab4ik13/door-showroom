@@ -149,10 +149,10 @@ const ProductConfigurator = ({ product, apiSpecs }: ProductConfiguratorProps) =>
         </div>
       )}
 
-      {/* Door (Полотно) quantity */}
+      {/* Quantity (door panel or single product for furniture) */}
       <div className="flex items-center justify-between py-2">
         <div className="flex-1">
-          <span className="text-sm font-medium text-foreground">Полотно</span>
+          <span className="text-sm font-medium text-foreground">{isFurniture ? 'Количество' : 'Полотно'}</span>
           <span className="ml-2 text-sm font-bold text-primary">{formatPrice(product.price)}</span>
         </div>
         <div className="flex items-center gap-2">
