@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Filter, X, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Filter, X, Loader2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import CatalogSidebar from '@/components/catalog/CatalogSidebar';
 import ProductCard from '@/components/catalog/ProductCard';
@@ -280,7 +280,18 @@ const Catalog = () => {
             {pageTitle}
           </h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              placeholder="Поиск по каталогу..."
+              className="pl-9 pr-3 py-2 text-sm rounded-md border border-border bg-background text-foreground w-56 md:w-72 focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
           {/* Sort */}
           <select
             value={`${sort}-${sortOrder}`}
