@@ -55,9 +55,11 @@ const Cart = () => {
           {/* Items list */}
           <div className="lg:col-span-2 space-y-4">
             <AnimatePresence>
-              {items.map(({ product, quantity, selectedSize, accessories }) => {
+              {items.map(({ product, quantity, selectedSize, accessories, panelColor, services }) => {
                 const accTotal = accessories.reduce((s, a) => s + a.price * a.quantity, 0);
-                const lineTotal = product.price * quantity + accTotal;
+                const svcTotal = (services || []).reduce((s, x) => s + x.price, 0);
+                const panelMod = panelColor?.price_modifier || 0;
+                const lineTotal = (product.price + panelMod) * quantity + accTotal + svcTotal;
                 return (
                 <motion.div
                   key={product.id}
@@ -82,16 +84,30 @@ const Cart = () => {
                     {selectedSize && (
                       <p className="text-xs text-primary mt-0.5">Размер: {selectedSize}</p>
                     )}
+                    {panelColor && (
+                      <p className="text-xs text-primary mt-0.5">
+                        Цвет панели: {panelColor.name}{panelMod ? ` (+${formatPrice(panelMod)})` : ''}
+                      </p>
+                    )}
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {[product.material, product.finish].filter(Boolean).join(' · ')}
                     </p>
 
-                    {/* Accessories */}
                     {accessories.length > 0 && (
                       <div className="mt-2 space-y-0.5">
                         {accessories.map((a) => (
                           <p key={a.article} className="text-[11px] text-muted-foreground">
                             + {a.name} × {a.quantity} — {formatPrice(a.price * a.quantity)}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+
+                    {services && services.length > 0 && (
+                      <div className="mt-1 space-y-0.5">
+                        {services.map((s) => (
+                          <p key={s.id} className="text-[11px] text-muted-foreground">
+                            + Услуга: {s.name} — {formatPrice(s.price)}
                           </p>
                         ))}
                       </div>
