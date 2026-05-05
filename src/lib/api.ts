@@ -85,3 +85,44 @@ export async function fetchProduct(slug: string): Promise<ApiProduct> {
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
 }
+
+export interface PanelColor {
+  id: number;
+  name: string;
+  image_url: string | null;
+  price_modifier: number;
+  sort_order: number;
+}
+
+export interface ProductService {
+  id: number;
+  name: string;
+  description: string | null;
+  price: number;
+  price_type: 'fixed' | 'per_door';
+  sort_order: number;
+}
+
+export interface RecommendedProduct {
+  id: number;
+  name: string;
+  slug: string;
+  price: number;
+  images: string[];
+}
+
+export interface ProductExtras {
+  panel_colors: PanelColor[];
+  services: ProductService[];
+  recommendations: RecommendedProduct[];
+}
+
+export async function fetchProductExtras(productId: number): Promise<ProductExtras> {
+  try {
+    const res = await fetch(`${API_BASE}/api/product-extras/${productId}`);
+    if (!res.ok) return { panel_colors: [], services: [], recommendations: [] };
+    return res.json();
+  } catch {
+    return { panel_colors: [], services: [], recommendations: [] };
+  }
+}
