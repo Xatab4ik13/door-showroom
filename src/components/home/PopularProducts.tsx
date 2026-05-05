@@ -4,33 +4,34 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import ProductCard from '@/components/catalog/ProductCard';
 import { catalogProducts, type CatalogProduct } from '@/data/catalog';
-import { fetchProducts, type ApiProduct } from '@/lib/api';
+import { fetchProducts, fetchProduct, fetchContent } from '@/lib/api';
 import { apiProductToCard } from '@/lib/productAdapter';
-
-/** Hand-picked cheap doors with different materials/finishes */
-const CURATED_SLUGS = [
-  'dvercom-f0000095971', // Лайт-07 экошпон ~3500
-  'dvercom-f0000095814', // ПВХ дверь
-  'dvercom-f0000096100', // эмаль
-  'dvercom-f0000087498', // шпон/массив
-];
 
 const PopularProducts = () => {
   const [products, setProducts] = useState<CatalogProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch cheap interroom doors sorted by price, take first 4 with different specs
-    fetchProducts({
-      category: 'mezhkomnatnye',
-      sort: 'price',
-      order: 'asc',
-      limit: 20,
-      page: 1,
-    })
-      .then((data) => {
+    let cancelled = false;
+    (async () => {
+      const curated = await fetchContent<{ slugs: string[] }>('popular_products');
+      if (curated && Array.isArray(curated.slugs) && curated.slugs.length > 0) {
+        const fetched = await Promise.all(
+          curated.slugs.slice(0, 8).map((s) => fetchProduct(s).catch(() => null)),
+        );
+        const cards = fetched.filter(Boolean).map((p) => apiProductToCard(p as any));
+        if (!cancelled && cards.length > 0) {
+          setProducts(cards);
+          setLoading(false);
+          return;
+        }
+      }
+
+      try {
+        const data = await fetchProducts({
+          category: 'mezhkomnatnye', sort: 'price', order: 'asc', limit: 20, page: 1,
+        });
         if (data.products.length > 0) {
-          // Pick 4 doors trying to diversify by manufacturer
           const seen = new Set<string>();
           const picked: CatalogProduct[] = [];
           for (const p of data.products) {
@@ -40,26 +41,23 @@ const PopularProducts = () => {
               picked.push(apiProductToCard(p));
             }
           }
-          // Fill remainder if not enough diversity
           if (picked.length < 4) {
             for (const p of data.products) {
               if (picked.length >= 4) break;
-              if (!picked.find(x => x.id === `dvercom-${p.source_sku}`)) {
-                picked.push(apiProductToCard(p));
-              }
+              if (!picked.find(x => x.id === `dvercom-${p.source_sku}`)) picked.push(apiProductToCard(p));
             }
           }
-          setProducts(picked);
-        } else {
-          // Fallback to mock
-          setProducts(catalogProducts.filter(p => p.tags.includes('popular')).slice(0, 4));
+          if (!cancelled) { setProducts(picked); setLoading(false); }
+          return;
         }
-        setLoading(false);
-      })
-      .catch(() => {
+      } catch {}
+
+      if (!cancelled) {
         setProducts(catalogProducts.filter(p => p.tags.includes('popular')).slice(0, 4));
         setLoading(false);
-      });
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   return (
