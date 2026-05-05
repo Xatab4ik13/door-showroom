@@ -8,16 +8,38 @@ export interface CartAccessory {
   quantity: number;
 }
 
+export interface CartService {
+  id: number;
+  name: string;
+  price: number; // total for this line
+}
+
+export interface CartPanelColor {
+  id: number;
+  name: string;
+  image_url: string | null;
+  price_modifier: number;
+}
+
 export interface CartItem {
   product: CatalogProduct;
   quantity: number;
   selectedSize?: string;
   accessories: CartAccessory[];
+  panelColor?: CartPanelColor | null;
+  services?: CartService[];
+}
+
+export interface AddItemExtras {
+  selectedSize?: string;
+  accessories?: CartAccessory[];
+  panelColor?: CartPanelColor | null;
+  services?: CartService[];
 }
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (product: CatalogProduct, quantity?: number, selectedSize?: string, accessories?: CartAccessory[]) => void;
+  addItem: (product: CatalogProduct, quantity?: number, extras?: AddItemExtras) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
