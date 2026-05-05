@@ -4,22 +4,19 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import banner01 from '@/assets/banners/banner-01.jpg';
 import banner03 from '@/assets/banners/banner-03.jpg';
+import { fetchContent } from '@/lib/api';
 
-const slides = [
-  {
-    image: banner01,
-    title: 'Двери для вашего дома',
-    subtitle: 'качество и стиль для каждого интерьера',
-    cta: 'Смотреть каталог',
-    href: '/catalog',
-  },
-  {
-    image: banner03,
-    title: 'Классические двери',
-    subtitle: 'элегантность в каждой детали',
-    cta: 'Выбрать дверь',
-    href: '/catalog',
-  },
+interface Slide {
+  image: string;
+  title: string;
+  subtitle: string;
+  cta: string;
+  href: string;
+}
+
+const defaultSlides: Slide[] = [
+  { image: banner01, title: 'Двери для вашего дома', subtitle: 'качество и стиль для каждого интерьера', cta: 'Смотреть каталог', href: '/catalog' },
+  { image: banner03, title: 'Классические двери', subtitle: 'элегантность в каждой детали', cta: 'Выбрать дверь', href: '/catalog' },
 ];
 
 const HeroBanner = () => {
