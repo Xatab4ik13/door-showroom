@@ -12,6 +12,10 @@ import customersRouter from './routes/customers.js';
 import customerAuthRouter from './routes/customer-auth.js';
 import paymentsRouter from './routes/payments.js';
 import productExtrasRouter from './routes/product-extras.js';
+import uploadsRouter from './routes/uploads.js';
+import contentRouter from './routes/content.js';
+import path from 'path';
+import express2 from 'express';
 import { syncDverCom } from './services/dvercom-sync.js';
 
 const app = express();
@@ -49,6 +53,12 @@ app.use('/api/customers', customersRouter);
 app.use('/api/customer-auth', customerAuthRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/product-extras', productExtrasRouter);
+app.use('/api/uploads', uploadsRouter);
+app.use('/api/content', contentRouter);
+
+// Static serve uploads (in case nginx doesn't handle it)
+const UPLOAD_DIR = process.env.UPLOAD_DIR || path.resolve(process.cwd(), 'uploads');
+app.use('/uploads', express2.static(UPLOAD_DIR, { maxAge: '7d' }));
 
 // CRON: sync dver.com every 6 hours
 cron.schedule('0 */6 * * *', async () => {
