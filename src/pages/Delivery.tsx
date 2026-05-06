@@ -1,6 +1,11 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import PageSEO from '@/components/PageSEO';
 import { Truck, CreditCard, Clock, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { fetchContent } from '@/lib/api';
+
+interface Block { title: string; text: string; images: string[]; }
+interface PageData { title: string; subtitle: string; blocks: Block[]; }
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
