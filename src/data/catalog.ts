@@ -16,8 +16,7 @@ export type Category =
   | 'vhodnye'
   | 'furnitura'
   | 'peregorodki'
-  | 'sistemy-otkryvaniya'
-  | 'specialnye';
+  | 'sistemy-otkryvaniya';
 
 export type SubCategory = string;
 
@@ -65,16 +64,6 @@ export const categories: CategoryDef[] = [
       { key: 'penaly', label: 'Пеналы' },
       { key: 'knizhniki', label: 'Книжники' },
       { key: 'roto-dveri', label: 'Рото двери' },
-    ],
-  },
-  {
-    key: 'specialnye',
-    label: 'Специальные двери',
-    subcategories: [
-      { key: 'kupe', label: 'Купе' },
-      { key: 'penaly-spec', label: 'Пеналы' },
-      { key: 'steklyannye', label: 'Стеклянные двери' },
-      { key: 'skrytogo-montazha', label: 'Скрытого монтажа' },
     ],
   },
   { key: 'peregorodki', label: 'Перегородки' },
@@ -214,7 +203,7 @@ export const catalogProducts: CatalogProduct[] = [
     colors: ['#A09070', '#908060', '#B0A080'],
   },
   {
-    id: '9', name: 'Invisible', category: 'specialnye', subcategory: 'skrytogo-montazha', tags: ['new'],
+    id: '9', name: 'Invisible', category: 'mezhkomnatnye', subcategory: 'skrytogo-montazha', tags: ['new'],
     price: 45000, image: door09,
     material: 'МДФ', finish: 'Серый', manufacturer: 'Sofia',
     colors: ['#D8D4CE', '#C8C4BE', '#E8E4DE'],

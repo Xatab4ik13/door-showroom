@@ -12,10 +12,21 @@ export function apiProductToCard(p: ApiProduct): CatalogProduct {
 
   const supplierSlug = p.supplier_slug || '';
   const catName = p.category_name?.toLowerCase() || '';
-  
+  const nameLower = (p.name || '').toLowerCase();
+
+  // Heuristic: furniture-type accessories often live as standalone products
+  // with door-like category labels. Detect by name keywords so the configurator
+  // doesn't mistakenly ask for "количество полотен" on a hinge or handle.
+  const FURNITURE_KEYWORDS = [
+    'петл', 'ручк', 'замо', 'защёлк', 'защелк', 'доводчик',
+    'цилиндр', 'броненакладк', 'упор', 'шпингалет', 'наличник',
+    'добор', 'коробк', 'порог', 'уплотнител', 'фурнитур',
+  ];
+  const looksLikeFurniture = FURNITURE_KEYWORDS.some(k => nameLower.includes(k) || catName.includes(k));
+
   let category: Category = 'mezhkomnatnye'; // default
-  if (catName.includes('входн')) category = 'vhodnye';
-  else if (catName.includes('фурнитур')) category = 'furnitura';
+  if (catName.includes('фурнитур') || looksLikeFurniture) category = 'furnitura';
+  else if (catName.includes('входн')) category = 'vhodnye';
   else if (catName.includes('перегород')) category = 'peregorodki';
 
   // Primary image
