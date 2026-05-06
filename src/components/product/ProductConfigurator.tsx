@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ShoppingCart, Check, Minus, Plus } from 'lucide-react';
 import { useCart, type CartAccessory, type CartService, type CartPanelColor } from '@/contexts/CartContext';
 import type { CatalogProduct } from '@/data/catalog';
-import type { PanelColor, ProductService } from '@/lib/api';
+import type { PanelColor, ProductService, RecommendedProduct } from '@/lib/api';
 
 interface Accessory {
   name: string;
@@ -21,6 +21,7 @@ interface ProductConfiguratorProps {
   apiSpecs?: Record<string, string | null> | null;
   panelColors?: PanelColor[];
   services?: ProductService[];
+  recommendations?: RecommendedProduct[];
 }
 
 const formatPrice = (price: number) =>
@@ -39,7 +40,7 @@ function getAccessoryDisplayName(raw: string): string {
   return words || raw;
 }
 
-const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [] }: ProductConfiguratorProps) => {
+const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [], recommendations = [] }: ProductConfiguratorProps) => {
   const [addedToCart, setAddedToCart] = useState(false);
   const { addItem } = useCart();
 
