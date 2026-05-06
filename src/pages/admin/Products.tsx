@@ -127,31 +127,59 @@ const Products = () => {
       price: String(p.price || ''),
       old_price: String(p.old_price || ''),
       description: p.description || '',
+      category_id: p.category_id ? String(p.category_id) : '',
+      manufacturer: p.manufacturer || '',
+      material: p.material || '',
+      color: p.color || '',
+      images: Array.isArray(p.images) ? p.images : [],
     });
   };
 
-  // Save edit
+  const openCreate = () => { setEditForm(blankForm); setCreateOpen(true); };
+
+  const closeDialog = () => { setEditProduct(null); setCreateOpen(false); setEditForm(blankForm); };
+
+  const handleAddImage = async (file: File) => {
+    if (!token) return;
+    setUploadingImg(true);
+    try {
+      const url = await uploadImage(file, token);
+      setEditForm(f => ({ ...f, images: [...f.images, url] }));
+    } catch {
+      toast({ title: 'Ошибка загрузки фото', variant: 'destructive' });
+    } finally { setUploadingImg(false); }
+  };
+  const handleRemoveImage = (i: number) =>
+    setEditForm(f => ({ ...f, images: f.images.filter((_, idx) => idx !== i) }));
+
+  // Save (create or edit)
   const handleSave = async () => {
-    if (!editProduct) return;
+    if (!token) return;
+    if (!editForm.name || !editForm.price) {
+      toast({ title: 'Укажите название и цену', variant: 'destructive' });
+      return;
+    }
     setSaving(true);
     try {
-      const token = localStorage.getItem('rusdoors_admin_token');
-      const res = await fetch(`${API_BASE}/api/products/${editProduct.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          name: editForm.name,
-          price: Number(editForm.price) || null,
-          old_price: Number(editForm.old_price) || null,
-          description: editForm.description || null,
-        }),
-      });
-      if (!res.ok) throw new Error();
-      toast({ title: 'Товар обновлён' });
-      setEditProduct(null);
+      const payload = {
+        name: editForm.name,
+        price: Number(editForm.price) || 0,
+        old_price: editForm.old_price ? Number(editForm.old_price) : null,
+        description: editForm.description || null,
+        category_id: editForm.category_id ? Number(editForm.category_id) : null,
+        manufacturer: editForm.manufacturer || null,
+        material: editForm.material || null,
+        color: editForm.color || null,
+        images: editForm.images,
+      };
+      if (editProduct) {
+        await updateProduct(editProduct.id, payload, token);
+        toast({ title: 'Товар обновлён' });
+      } else {
+        await createProduct(payload, token);
+        toast({ title: 'Товар создан' });
+      }
+      closeDialog();
       loadProducts();
     } catch {
       toast({ title: 'Ошибка сохранения', variant: 'destructive' });
