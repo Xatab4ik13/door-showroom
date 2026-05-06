@@ -96,6 +96,7 @@ const Delivery = () => {
 
         {/* Default delivery section — shown only if no CMS blocks defined */}
         {!cmsBlocks && (
+        <>
         <section className="pb-16 md:pb-24 px-4 md:px-8 lg:px-12">
           <div className="max-w-[1600px] mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
@@ -228,6 +229,7 @@ const Delivery = () => {
             </motion.div>
           </div>
         </section>
+        </>
         )}
       </main>
     </>
