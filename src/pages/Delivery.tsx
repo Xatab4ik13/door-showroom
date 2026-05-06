@@ -228,6 +228,7 @@ const Delivery = () => {
             </motion.div>
           </div>
         </section>
+        )}
       </main>
     </>
   );
