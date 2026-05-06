@@ -31,6 +31,11 @@ const whyUs = [
 ];
 
 const Delivery = () => {
+  const [cms, setCms] = useState<PageData | null>(null);
+  useEffect(() => { fetchContent<PageData>('page_delivery').then(setCms); }, []);
+  const cmsBlocks = cms?.blocks?.length ? cms.blocks : null;
+  const heroTitle = cms?.title;
+  const heroSubtitle = cms?.subtitle;
   return (
     <>
       <PageSEO
