@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ShoppingCart, Check, Minus, Plus } from 'lucide-react';
 import { useCart, type CartAccessory, type CartService, type CartPanelColor } from '@/contexts/CartContext';
 import type { CatalogProduct } from '@/data/catalog';
-import type { PanelColor, ProductService } from '@/lib/api';
+import type { PanelColor, ProductService, RecommendedProduct } from '@/lib/api';
 
 interface Accessory {
   name: string;
@@ -21,6 +21,7 @@ interface ProductConfiguratorProps {
   apiSpecs?: Record<string, string | null> | null;
   panelColors?: PanelColor[];
   services?: ProductService[];
+  recommendations?: RecommendedProduct[];
 }
 
 const formatPrice = (price: number) =>
@@ -39,7 +40,7 @@ function getAccessoryDisplayName(raw: string): string {
   return words || raw;
 }
 
-const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [] }: ProductConfiguratorProps) => {
+const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [], recommendations = [] }: ProductConfiguratorProps) => {
   const [addedToCart, setAddedToCart] = useState(false);
   const { addItem } = useCart();
 
@@ -76,6 +77,14 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
     panelColors.length > 0 ? panelColors[0].id : null
   );
   const [selectedServices, setSelectedServices] = useState<Set<number>>(new Set());
+  const [selectedRecos, setSelectedRecos] = useState<Set<number>>(new Set());
+
+  const recoTotal = useMemo(
+    () => recommendations.filter(r => selectedRecos.has(r.id)).reduce((s, r) => s + Number(r.price || 0), 0),
+    [recommendations, selectedRecos],
+  );
+  const toggleReco = (id: number) =>
+    setSelectedRecos(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
   const selectedPanel = panelColors.find(c => c.id === selectedColorId) || null;
   const panelMod = selectedPanel ? Number(selectedPanel.price_modifier) || 0 : 0;
@@ -94,8 +103,9 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
     let total = (product.price + panelMod) * doorQty;
     accessories.forEach(a => { total += a.price * (accessoryQtys[a.article] || 0); });
     total += servicesTotal;
+    total += recoTotal;
     return total;
-  }, [product.price, panelMod, doorQty, accessories, accessoryQtys, servicesTotal]);
+  }, [product.price, panelMod, doorQty, accessories, accessoryQtys, servicesTotal, recoTotal]);
 
   const setAccQty = (article: string, qty: number) => {
     setAccessoryQtys(prev => ({ ...prev, [article]: Math.max(0, qty) }));
@@ -227,6 +237,31 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
         </div>
       )}
 
+      {/* Recommended furniture quick-add */}
+      {recommendations.length > 0 && (
+        <div className="border-t border-border pt-3 space-y-2">
+          <h4 className="text-sm font-bold uppercase tracking-wider text-foreground" style={{ fontFamily: "'Oswald', sans-serif" }}>Добавить к заказу</h4>
+          {recommendations.slice(0, 6).map(r => {
+            const checked = selectedRecos.has(r.id);
+            const img = (r.images && r.images[0]) || '/placeholder.svg';
+            return (
+              <label key={r.id} className="flex items-center gap-3 cursor-pointer py-1 group">
+                <input type="checkbox" checked={checked} onChange={() => toggleReco(r.id)}
+                  className="w-4 h-4 rounded border-border accent-primary cursor-pointer" />
+                <div className="w-10 h-10 rounded bg-secondary flex items-center justify-center overflow-hidden shrink-0">
+                  <img src={img} alt="" className="max-w-full max-h-full object-contain"
+                    onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }} />
+                </div>
+                <div className="flex-1 min-w-0 flex items-baseline justify-between gap-2">
+                  <span className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{r.name}</span>
+                  <span className="text-sm font-bold text-primary whitespace-nowrap">+{formatPrice(Number(r.price))}</span>
+                </div>
+              </label>
+            );
+          })}
+        </div>
+      )}
+
       {/* Total + add */}
       <div className="border-t border-border pt-4">
         <div className="flex items-baseline justify-between mb-4">
@@ -243,9 +278,14 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
 
         <button
           onClick={() => {
-            const cartAccessories: CartAccessory[] = accessories
-              .filter(a => (accessoryQtys[a.article] || 0) > 0)
-              .map(a => ({ article: a.article, name: a.displayName, price: a.price, quantity: accessoryQtys[a.article] || 0 }));
+            const cartAccessories: CartAccessory[] = [
+              ...accessories
+                .filter(a => (accessoryQtys[a.article] || 0) > 0)
+                .map(a => ({ article: a.article, name: a.displayName, price: a.price, quantity: accessoryQtys[a.article] || 0 })),
+              ...recommendations
+                .filter(r => selectedRecos.has(r.id))
+                .map(r => ({ article: `reco-${r.id}`, name: r.name, price: Number(r.price), quantity: 1 })),
+            ];
             const cartServices: CartService[] = services
               .filter(s => selectedServices.has(s.id))
               .map(s => ({

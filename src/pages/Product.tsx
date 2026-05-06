@@ -181,6 +181,7 @@ const Product = () => {
               apiSpecs={apiProduct?.specs}
               panelColors={extras.panel_colors}
               services={extras.services}
+              recommendations={extras.recommendations}
             />
           </div>
         </div>

@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const navItems = [
   { label: 'Каталог', href: '/catalog' },
   { label: 'Доставка и оплата', href: '/delivery' },
+  { label: 'Замер и монтаж', href: '/installation' },
   { label: 'О компании', href: '/about' },
   { label: 'Новости', href: '/news' },
   { label: 'Контакты', href: '/contacts' },

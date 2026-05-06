@@ -1,6 +1,11 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import PageSEO from '@/components/PageSEO';
 import { Truck, CreditCard, Clock, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { fetchContent } from '@/lib/api';
+
+interface Block { title: string; text: string; images: string[]; }
+interface PageData { title: string; subtitle: string; blocks: Block[]; }
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -26,6 +31,11 @@ const whyUs = [
 ];
 
 const Delivery = () => {
+  const [cms, setCms] = useState<PageData | null>(null);
+  useEffect(() => { fetchContent<PageData>('page_delivery').then(setCms); }, []);
+  const cmsBlocks = cms?.blocks?.length ? cms.blocks : null;
+  const heroTitle = cms?.title;
+  const heroSubtitle = cms?.subtitle;
   return (
     <>
       <PageSEO
@@ -48,7 +58,7 @@ const Delivery = () => {
                 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-wide text-foreground leading-[1.1]"
                 style={{ fontFamily: "'Oswald', sans-serif" }}
               >
-                ДОСТА<span className="text-[hsl(205,85%,45%)]">В</span>КА И ОП<span className="text-[hsl(205,85%,45%)]">Л</span>АТА
+                {heroTitle ? heroTitle : <>ДОСТА<span className="text-[hsl(205,85%,45%)]">В</span>КА И ОП<span className="text-[hsl(205,85%,45%)]">Л</span>АТА</>}
               </motion.h1>
               <motion.p
                 custom={1}
@@ -56,13 +66,42 @@ const Delivery = () => {
                 className="mt-4 text-lg md:text-xl text-muted-foreground leading-relaxed"
                 style={{ fontFamily: "'Manrope', sans-serif" }}
               >
-                Двери, которые приходят вовремя
+                {heroSubtitle || 'Двери, которые приходят вовремя'}
               </motion.p>
             </motion.div>
           </div>
         </section>
 
-        {/* Delivery section */}
+        {/* CMS-overridable blocks */}
+        {cmsBlocks && (
+          <section className="pb-16 md:pb-24 px-4 md:px-8 lg:px-12">
+            <div className="max-w-[1600px] mx-auto space-y-12">
+              {cmsBlocks.map((b, i) => (
+                <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-50px' }}
+                  custom={i} variants={fadeUp}
+                  className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start border-t border-border pt-12 first:border-t-0 first:pt-0">
+                  <div>
+                    {b.title && <h2 className="text-2xl md:text-3xl font-bold uppercase tracking-wide text-foreground mb-4" style={{ fontFamily: "'Oswald', sans-serif" }}>{b.title}</h2>}
+                    {b.text && <p className="text-muted-foreground leading-relaxed whitespace-pre-line" style={{ fontFamily: "'Manrope', sans-serif" }}>{b.text}</p>}
+                  </div>
+                  {b.images && b.images.length > 0 && (
+                    <div className="grid grid-cols-2 gap-3">
+                      {b.images.map((img, ii) => (
+                        <div key={ii} className="aspect-square rounded-lg overflow-hidden bg-secondary">
+                          <img src={img} alt={b.title || ''} className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Default delivery section — shown only if no CMS blocks defined */}
+        {!cmsBlocks && (
+        <>
         <section className="pb-16 md:pb-24 px-4 md:px-8 lg:px-12">
           <div className="max-w-[1600px] mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
@@ -195,6 +234,8 @@ const Delivery = () => {
             </motion.div>
           </div>
         </section>
+        </>
+        )}
       </main>
     </>
   );
