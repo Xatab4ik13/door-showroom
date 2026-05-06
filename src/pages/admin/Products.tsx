@@ -64,10 +64,17 @@ const Products = () => {
   const [sortField, setSortField] = useState<'updated_at' | 'price' | 'name'>('updated_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  // Edit dialog
+  // Edit/Create dialog
+  const { token } = useAdminAuth();
   const [editProduct, setEditProduct] = useState<ApiProduct | null>(null);
-  const [editForm, setEditForm] = useState({ name: '', price: '', old_price: '', description: '' });
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editForm, setEditForm] = useState<EditForm>(blankForm);
   const [saving, setSaving] = useState(false);
+  const [uploadingImg, setUploadingImg] = useState(false);
+  const [allCategories, setAllCategories] = useState<AdminCategory[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { fetchCategories().then(setAllCategories).catch(() => {}); }, []);
 
   // Search debounce
   const [debouncedSearch, setDebouncedSearch] = useState('');
