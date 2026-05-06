@@ -278,9 +278,14 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
 
         <button
           onClick={() => {
-            const cartAccessories: CartAccessory[] = accessories
-              .filter(a => (accessoryQtys[a.article] || 0) > 0)
-              .map(a => ({ article: a.article, name: a.displayName, price: a.price, quantity: accessoryQtys[a.article] || 0 }));
+            const cartAccessories: CartAccessory[] = [
+              ...accessories
+                .filter(a => (accessoryQtys[a.article] || 0) > 0)
+                .map(a => ({ article: a.article, name: a.displayName, price: a.price, quantity: accessoryQtys[a.article] || 0 })),
+              ...recommendations
+                .filter(r => selectedRecos.has(r.id))
+                .map(r => ({ article: `reco-${r.id}`, name: r.name, price: Number(r.price), quantity: 1 })),
+            ];
             const cartServices: CartService[] = services
               .filter(s => selectedServices.has(s.id))
               .map(s => ({
