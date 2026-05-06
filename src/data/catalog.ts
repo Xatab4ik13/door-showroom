@@ -203,7 +203,7 @@ export const catalogProducts: CatalogProduct[] = [
     colors: ['#A09070', '#908060', '#B0A080'],
   },
   {
-    id: '9', name: 'Invisible', category: 'specialnye', subcategory: 'skrytogo-montazha', tags: ['new'],
+    id: '9', name: 'Invisible', category: 'mezhkomnatnye', subcategory: 'skrytogo-montazha', tags: ['new'],
     price: 45000, image: door09,
     material: 'МДФ', finish: 'Серый', manufacturer: 'Sofia',
     colors: ['#D8D4CE', '#C8C4BE', '#E8E4DE'],
