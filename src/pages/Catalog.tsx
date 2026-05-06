@@ -18,10 +18,10 @@ const categorySlugMap: Record<string, string> = {
   furnitura: 'furnitura',
   peregorodki: 'peregorodki',
   'sistemy-otkryvaniya': 'sistemy-otkryvaniya',
-  specialnye: 'specialnye',
+  
 };
 
-const validCategories = new Set<string>(['mezhkomnatnye', 'vhodnye', 'furnitura', 'peregorodki', 'sistemy-otkryvaniya', 'specialnye']);
+const validCategories = new Set<string>(['mezhkomnatnye', 'vhodnye', 'furnitura', 'peregorodki', 'sistemy-otkryvaniya']);
 
 const Catalog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -258,7 +258,6 @@ const Catalog = () => {
     vhodnye: 'Входные двери в Москве',
     furnitura: 'Фурнитура для дверей',
     peregorodki: 'Перегородки',
-    specialnye: 'Специальные двери',
   };
 
   const seoTitle = `${categoryTitles[category] || 'Каталог дверей'} — купить с доставкой | RUSDOORS`;

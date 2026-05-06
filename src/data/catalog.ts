@@ -16,8 +16,7 @@ export type Category =
   | 'vhodnye'
   | 'furnitura'
   | 'peregorodki'
-  | 'sistemy-otkryvaniya'
-  | 'specialnye';
+  | 'sistemy-otkryvaniya';
 
 export type SubCategory = string;
 
@@ -65,16 +64,6 @@ export const categories: CategoryDef[] = [
       { key: 'penaly', label: 'Пеналы' },
       { key: 'knizhniki', label: 'Книжники' },
       { key: 'roto-dveri', label: 'Рото двери' },
-    ],
-  },
-  {
-    key: 'specialnye',
-    label: 'Специальные двери',
-    subcategories: [
-      { key: 'kupe', label: 'Купе' },
-      { key: 'penaly-spec', label: 'Пеналы' },
-      { key: 'steklyannye', label: 'Стеклянные двери' },
-      { key: 'skrytogo-montazha', label: 'Скрытого монтажа' },
     ],
   },
   { key: 'peregorodki', label: 'Перегородки' },
