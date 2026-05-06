@@ -17,6 +17,7 @@ import Account from "./pages/Account";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Delivery from "./pages/Delivery";
+import Installation from "./pages/Installation";
 import About from "./pages/About";
 import News from "./pages/News";
 import Contacts from "./pages/Contacts";
@@ -32,6 +33,7 @@ import Customers from "./pages/admin/Customers";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminContent from "./pages/admin/Content";
 import AdminProductExtras from "./pages/admin/ProductExtras";
+import AdminPages from "./pages/admin/Pages";
 import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -57,6 +59,7 @@ const App = () => (
                   <Route path="/account" element={<Account />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/delivery" element={<Delivery />} />
+                  <Route path="/installation" element={<Installation />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/news" element={<News />} />
                   <Route path="/contacts" element={<Contacts />} />
@@ -76,6 +79,7 @@ const App = () => (
                   <Route path="settings" element={<AdminSettings />} />
                   <Route path="content" element={<AdminContent />} />
                   <Route path="extras" element={<AdminProductExtras />} />
+                  <Route path="pages" element={<AdminPages />} />
                 </Route>
 
                 <Route path="*" element={<NotFound />} />
