@@ -226,6 +226,9 @@ const Products = () => {
             {loading ? '...' : `${total} товаров в каталоге`}
           </p>
         </div>
+        <Button onClick={openCreate} className="bg-primary hover:bg-primary/90">
+          <Plus className="w-4 h-4 mr-1" /> Добавить товар
+        </Button>
       </div>
 
       {/* Filters row */}
