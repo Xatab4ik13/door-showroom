@@ -77,6 +77,14 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
     panelColors.length > 0 ? panelColors[0].id : null
   );
   const [selectedServices, setSelectedServices] = useState<Set<number>>(new Set());
+  const [selectedRecos, setSelectedRecos] = useState<Set<number>>(new Set());
+
+  const recoTotal = useMemo(
+    () => recommendations.filter(r => selectedRecos.has(r.id)).reduce((s, r) => s + Number(r.price || 0), 0),
+    [recommendations, selectedRecos],
+  );
+  const toggleReco = (id: number) =>
+    setSelectedRecos(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
   const selectedPanel = panelColors.find(c => c.id === selectedColorId) || null;
   const panelMod = selectedPanel ? Number(selectedPanel.price_modifier) || 0 : 0;
