@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Search, ChevronLeft, ChevronRight, Pencil, Trash2, Loader2, ExternalLink } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Search, ChevronLeft, ChevronRight, Pencil, Trash2, Loader2, ExternalLink, Plus, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,13 +20,34 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { fetchProducts, fetchFacets, type ApiProduct, type Facets, type ProductFilters } from '@/lib/api';
+import {
+  fetchProducts, fetchFacets, type ApiProduct, type Facets, type ProductFilters,
+  createProduct, updateProduct, uploadImage, fetchCategories, type AdminCategory,
+} from '@/lib/api';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://api.rusdoors.su';
 const LIMIT = 20;
 
 const formatPrice = (p: number | null) =>
   p ? p.toLocaleString('ru-RU') + ' ₽' : '—';
+
+interface EditForm {
+  name: string;
+  price: string;
+  old_price: string;
+  description: string;
+  category_id: string;
+  manufacturer: string;
+  material: string;
+  color: string;
+  images: string[];
+}
+
+const blankForm: EditForm = {
+  name: '', price: '', old_price: '', description: '',
+  category_id: '', manufacturer: '', material: '', color: '', images: [],
+};
 
 const Products = () => {
   const { toast } = useToast();
