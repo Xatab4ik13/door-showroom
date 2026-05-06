@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Search, ChevronLeft, ChevronRight, Pencil, Trash2, Loader2, ExternalLink } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Search, ChevronLeft, ChevronRight, Pencil, Trash2, Loader2, ExternalLink, Plus, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,13 +20,34 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { fetchProducts, fetchFacets, type ApiProduct, type Facets, type ProductFilters } from '@/lib/api';
+import {
+  fetchProducts, fetchFacets, type ApiProduct, type Facets, type ProductFilters,
+  createProduct, updateProduct, uploadImage, fetchCategories, type AdminCategory,
+} from '@/lib/api';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://api.rusdoors.su';
 const LIMIT = 20;
 
 const formatPrice = (p: number | null) =>
   p ? p.toLocaleString('ru-RU') + ' ₽' : '—';
+
+interface EditForm {
+  name: string;
+  price: string;
+  old_price: string;
+  description: string;
+  category_id: string;
+  manufacturer: string;
+  material: string;
+  color: string;
+  images: string[];
+}
+
+const blankForm: EditForm = {
+  name: '', price: '', old_price: '', description: '',
+  category_id: '', manufacturer: '', material: '', color: '', images: [],
+};
 
 const Products = () => {
   const { toast } = useToast();
@@ -43,10 +64,17 @@ const Products = () => {
   const [sortField, setSortField] = useState<'updated_at' | 'price' | 'name'>('updated_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  // Edit dialog
+  // Edit/Create dialog
+  const { token } = useAdminAuth();
   const [editProduct, setEditProduct] = useState<ApiProduct | null>(null);
-  const [editForm, setEditForm] = useState({ name: '', price: '', old_price: '', description: '' });
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editForm, setEditForm] = useState<EditForm>(blankForm);
   const [saving, setSaving] = useState(false);
+  const [uploadingImg, setUploadingImg] = useState(false);
+  const [allCategories, setAllCategories] = useState<AdminCategory[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { fetchCategories().then(setAllCategories).catch(() => {}); }, []);
 
   // Search debounce
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -99,31 +127,59 @@ const Products = () => {
       price: String(p.price || ''),
       old_price: String(p.old_price || ''),
       description: p.description || '',
+      category_id: p.category_id ? String(p.category_id) : '',
+      manufacturer: p.manufacturer || '',
+      material: p.material || '',
+      color: p.color || '',
+      images: Array.isArray(p.images) ? p.images : [],
     });
   };
 
-  // Save edit
+  const openCreate = () => { setEditForm(blankForm); setCreateOpen(true); };
+
+  const closeDialog = () => { setEditProduct(null); setCreateOpen(false); setEditForm(blankForm); };
+
+  const handleAddImage = async (file: File) => {
+    if (!token) return;
+    setUploadingImg(true);
+    try {
+      const url = await uploadImage(file, token);
+      setEditForm(f => ({ ...f, images: [...f.images, url] }));
+    } catch {
+      toast({ title: 'Ошибка загрузки фото', variant: 'destructive' });
+    } finally { setUploadingImg(false); }
+  };
+  const handleRemoveImage = (i: number) =>
+    setEditForm(f => ({ ...f, images: f.images.filter((_, idx) => idx !== i) }));
+
+  // Save (create or edit)
   const handleSave = async () => {
-    if (!editProduct) return;
+    if (!token) return;
+    if (!editForm.name || !editForm.price) {
+      toast({ title: 'Укажите название и цену', variant: 'destructive' });
+      return;
+    }
     setSaving(true);
     try {
-      const token = localStorage.getItem('rusdoors_admin_token');
-      const res = await fetch(`${API_BASE}/api/products/${editProduct.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          name: editForm.name,
-          price: Number(editForm.price) || null,
-          old_price: Number(editForm.old_price) || null,
-          description: editForm.description || null,
-        }),
-      });
-      if (!res.ok) throw new Error();
-      toast({ title: 'Товар обновлён' });
-      setEditProduct(null);
+      const payload = {
+        name: editForm.name,
+        price: Number(editForm.price) || 0,
+        old_price: editForm.old_price ? Number(editForm.old_price) : null,
+        description: editForm.description || null,
+        category_id: editForm.category_id ? Number(editForm.category_id) : null,
+        manufacturer: editForm.manufacturer || null,
+        material: editForm.material || null,
+        color: editForm.color || null,
+        images: editForm.images,
+      };
+      if (editProduct) {
+        await updateProduct(editProduct.id, payload, token);
+        toast({ title: 'Товар обновлён' });
+      } else {
+        await createProduct(payload, token);
+        toast({ title: 'Товар создан' });
+      }
+      closeDialog();
       loadProducts();
     } catch {
       toast({ title: 'Ошибка сохранения', variant: 'destructive' });
@@ -170,6 +226,9 @@ const Products = () => {
             {loading ? '...' : `${total} товаров в каталоге`}
           </p>
         </div>
+        <Button onClick={openCreate} className="bg-primary hover:bg-primary/90">
+          <Plus className="w-4 h-4 mr-1" /> Добавить товар
+        </Button>
       </div>
 
       {/* Filters row */}
@@ -385,55 +444,100 @@ const Products = () => {
         </div>
       )}
 
-      {/* Edit dialog */}
-      <Dialog open={!!editProduct} onOpenChange={(open) => !open && setEditProduct(null)}>
-        <DialogContent className="sm:max-w-lg">
+      {/* Create/Edit dialog */}
+      <Dialog open={!!editProduct || createOpen} onOpenChange={(open) => !open && closeDialog()}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle style={{ fontFamily: "'Oswald', sans-serif" }} className="uppercase tracking-wider">
-              Редактировать товар
+              {editProduct ? 'Редактировать товар' : 'Новый товар'}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
-              <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Название</Label>
-              <Input
-                value={editForm.name}
-                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                className="mt-1"
-              />
+              <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Название *</Label>
+              <Input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="mt-1" />
             </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Цена (₽)</Label>
-                <Input
-                  type="number"
-                  value={editForm.price}
-                  onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
-                  className="mt-1"
-                />
+                <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Цена (₽) *</Label>
+                <Input type="number" value={editForm.price}
+                  onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} className="mt-1" />
               </div>
               <div>
                 <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Старая цена (₽)</Label>
-                <Input
-                  type="number"
-                  value={editForm.old_price}
-                  onChange={(e) => setEditForm({ ...editForm, old_price: e.target.value })}
-                  className="mt-1"
-                />
+                <Input type="number" value={editForm.old_price}
+                  onChange={(e) => setEditForm({ ...editForm, old_price: e.target.value })} className="mt-1" />
               </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Категория</Label>
+                <Select value={editForm.category_id || 'none'} onValueChange={(v) => setEditForm({ ...editForm, category_id: v === 'none' ? '' : v })}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— Без категории —</SelectItem>
+                    {allCategories.map(c => (
+                      <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Производитель</Label>
+                <Input value={editForm.manufacturer}
+                  onChange={(e) => setEditForm({ ...editForm, manufacturer: e.target.value })} className="mt-1" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Материал</Label>
+                <Input value={editForm.material}
+                  onChange={(e) => setEditForm({ ...editForm, material: e.target.value })} className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Цвет</Label>
+                <Input value={editForm.color}
+                  onChange={(e) => setEditForm({ ...editForm, color: e.target.value })} className="mt-1" />
+              </div>
+            </div>
+
             <div>
               <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Описание</Label>
-              <Textarea
-                value={editForm.description}
-                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                className="mt-1"
-                rows={4}
-              />
+              <Textarea value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} className="mt-1" rows={4} />
+            </div>
+
+            <div>
+              <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Фотографии (до 10)</Label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {editForm.images.map((img, i) => (
+                  <div key={i} className="relative w-20 h-20 rounded overflow-hidden border border-border bg-secondary">
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => handleRemoveImage(i)}
+                      className="absolute top-0.5 right-0.5 p-0.5 bg-black/60 text-white rounded-full hover:bg-black/80">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+                {editForm.images.length < 10 && (
+                  <>
+                    <input ref={fileRef} type="file" accept="image/*" hidden
+                      onChange={(e) => e.target.files?.[0] && handleAddImage(e.target.files[0])} />
+                    <button type="button" onClick={() => fileRef.current?.click()} disabled={uploadingImg}
+                      className="w-20 h-20 rounded border-2 border-dashed border-border hover:border-primary hover:text-primary text-xs text-muted-foreground flex flex-col items-center justify-center gap-1 disabled:opacity-50">
+                      {uploadingImg ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                      Фото
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditProduct(null)}>Отмена</Button>
+            <Button variant="outline" onClick={closeDialog}>Отмена</Button>
             <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-primary/90">
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Сохранить

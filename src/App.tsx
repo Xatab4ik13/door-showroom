@@ -34,6 +34,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import AdminContent from "./pages/admin/Content";
 import AdminProductExtras from "./pages/admin/ProductExtras";
 import AdminPages from "./pages/admin/Pages";
+import AdminCategories from "./pages/admin/Categories";
 import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -80,6 +81,7 @@ const App = () => (
                   <Route path="content" element={<AdminContent />} />
                   <Route path="extras" element={<AdminProductExtras />} />
                   <Route path="pages" element={<AdminPages />} />
+                  <Route path="categories" element={<AdminCategories />} />
                 </Route>
 
                 <Route path="*" element={<NotFound />} />
