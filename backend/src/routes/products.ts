@@ -174,16 +174,77 @@ router.get('/:slug', async (req, res) => {
   res.json(product);
 });
 
+// Helpers
+function slugify(s: string): string {
+  const map: Record<string, string> = {
+    а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',
+    п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'ts',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya',
+  };
+  return s.toLowerCase().split('').map(c => map[c] ?? c).join('')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 200) || 'item';
+}
+
+// POST /api/products  (admin — manual create)
+router.post('/', requireAuth, async (req, res) => {
+  const {
+    name, price, old_price = null, description = null,
+    category_id = null, manufacturer = null, material = null, color = null,
+    width = null, height = null, in_stock = true, images = [], specs = {},
+    supplier_slug = 'manual', source_sku = null,
+  } = req.body;
+
+  if (!name || price == null) return res.status(400).json({ error: 'name and price required' });
+
+  // Ensure manual supplier exists
+  let supplierId: number;
+  const supRes = await pool.query('SELECT id FROM suppliers WHERE slug = $1', [supplier_slug]);
+  if (supRes.rows[0]) supplierId = supRes.rows[0].id;
+  else {
+    const ins = await pool.query(
+      `INSERT INTO suppliers (slug, name, format, sync_enabled) VALUES ($1, $2, 'manual', false) RETURNING id`,
+      [supplier_slug, supplier_slug],
+    );
+    supplierId = ins.rows[0].id;
+  }
+
+  // Unique slug
+  const baseSlug = slugify(name);
+  let slug = baseSlug;
+  for (let n = 1; n < 50; n++) {
+    const exists = await pool.query('SELECT 1 FROM products WHERE slug = $1', [slug]);
+    if (!exists.rows[0]) break;
+    slug = `${baseSlug}-${n}`;
+  }
+
+  const sku = source_sku || `manual-${Date.now()}`;
+  const r = await pool.query(
+    `INSERT INTO products (supplier_id, source_sku, name, slug, category_id, description,
+      price, old_price, manufacturer, material, color, width, height, in_stock, images, specs, sync_status)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,$16::jsonb,'active') RETURNING *`,
+    [supplierId, sku, name, slug, category_id, description, price, old_price, manufacturer, material, color,
+     width, height, in_stock, JSON.stringify(images), JSON.stringify(specs)],
+  );
+  res.json(r.rows[0]);
+});
+
 // PATCH /api/products/:id (admin — edit product)
 router.patch('/:id', requireAuth, async (req, res) => {
-  const { name, price, old_price, description } = req.body;
+  const allowed = ['name','price','old_price','description','category_id','manufacturer',
+    'material','color','width','height','in_stock','images'];
   const fields: string[] = [];
   const params: any[] = [];
 
-  if (name !== undefined) { params.push(name); fields.push(`name = $${params.length}`); }
-  if (price !== undefined) { params.push(price); fields.push(`price = $${params.length}`); }
-  if (old_price !== undefined) { params.push(old_price); fields.push(`old_price = $${params.length}`); }
-  if (description !== undefined) { params.push(description); fields.push(`description = $${params.length}`); }
+  for (const key of allowed) {
+    if (req.body[key] === undefined) continue;
+    let val = req.body[key];
+    if (key === 'images') {
+      params.push(JSON.stringify(val || []));
+      fields.push(`images = $${params.length}::jsonb`);
+    } else {
+      params.push(val);
+      fields.push(`${key} = $${params.length}`);
+    }
+  }
 
   if (fields.length === 0) return res.status(400).json({ error: 'No fields to update' });
 
