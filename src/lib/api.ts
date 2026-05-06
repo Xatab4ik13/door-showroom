@@ -158,3 +158,66 @@ export async function uploadImage(file: File, token: string): Promise<string> {
   // Convert relative /uploads/... to absolute backend URL
   return data.url.startsWith('http') ? data.url : `${API_BASE}${data.url}`;
 }
+
+// ==== Categories admin ====
+export interface AdminCategory {
+  id: number;
+  slug: string;
+  name: string;
+  parent_id: number | null;
+  sort_order: number;
+  product_count: number;
+}
+
+export async function fetchCategories(): Promise<AdminCategory[]> {
+  const res = await fetch(`${API_BASE}/api/categories`);
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function createCategory(data: { slug: string; name: string; parent_id?: number | null; sort_order?: number }, token: string): Promise<AdminCategory> {
+  const res = await fetch(`${API_BASE}/api/categories`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error((await res.json()).error || 'Create failed');
+  return res.json();
+}
+
+export async function updateCategory(id: number, data: Partial<AdminCategory>, token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/categories/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Update failed');
+}
+
+export async function deleteCategory(id: number, token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/categories/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error((await res.json()).error || 'Delete failed');
+}
+
+// ==== Products admin ====
+export async function createProduct(data: any, token: string): Promise<any> {
+  const res = await fetch(`${API_BASE}/api/products`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error((await res.json()).error || 'Create failed');
+  return res.json();
+}
+
+export async function updateProduct(id: number, data: any, token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/products/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Update failed');
+}
