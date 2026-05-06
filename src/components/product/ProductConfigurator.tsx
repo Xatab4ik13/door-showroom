@@ -237,6 +237,31 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
         </div>
       )}
 
+      {/* Recommended furniture quick-add */}
+      {recommendations.length > 0 && (
+        <div className="border-t border-border pt-3 space-y-2">
+          <h4 className="text-sm font-bold uppercase tracking-wider text-foreground" style={{ fontFamily: "'Oswald', sans-serif" }}>Добавить к заказу</h4>
+          {recommendations.slice(0, 6).map(r => {
+            const checked = selectedRecos.has(r.id);
+            const img = (r.images && r.images[0]) || '/placeholder.svg';
+            return (
+              <label key={r.id} className="flex items-center gap-3 cursor-pointer py-1 group">
+                <input type="checkbox" checked={checked} onChange={() => toggleReco(r.id)}
+                  className="w-4 h-4 rounded border-border accent-primary cursor-pointer" />
+                <div className="w-10 h-10 rounded bg-secondary flex items-center justify-center overflow-hidden shrink-0">
+                  <img src={img} alt="" className="max-w-full max-h-full object-contain"
+                    onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }} />
+                </div>
+                <div className="flex-1 min-w-0 flex items-baseline justify-between gap-2">
+                  <span className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{r.name}</span>
+                  <span className="text-sm font-bold text-primary whitespace-nowrap">+{formatPrice(Number(r.price))}</span>
+                </div>
+              </label>
+            );
+          })}
+        </div>
+      )}
+
       {/* Total + add */}
       <div className="border-t border-border pt-4">
         <div className="flex items-baseline justify-between mb-4">
