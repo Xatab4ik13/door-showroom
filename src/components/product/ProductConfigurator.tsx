@@ -103,8 +103,9 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
     let total = (product.price + panelMod) * doorQty;
     accessories.forEach(a => { total += a.price * (accessoryQtys[a.article] || 0); });
     total += servicesTotal;
+    total += recoTotal;
     return total;
-  }, [product.price, panelMod, doorQty, accessories, accessoryQtys, servicesTotal]);
+  }, [product.price, panelMod, doorQty, accessories, accessoryQtys, servicesTotal, recoTotal]);
 
   const setAccQty = (article: string, qty: number) => {
     setAccessoryQtys(prev => ({ ...prev, [article]: Math.max(0, qty) }));
