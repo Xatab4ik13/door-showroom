@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, FolderPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface FormState { id?: number; slug: string; name: string; parent_id: string; sort_order: string; }
@@ -25,7 +25,10 @@ const Categories = () => {
   const load = () => { setLoading(true); fetchCategories().then((d) => { setItems(d); setLoading(false); }); };
   useEffect(load, []);
 
-  const openNew = () => { setForm(blank); setOpen(true); };
+  const openNew = (parentId?: number) => {
+    setForm({ ...blank, parent_id: parentId ? String(parentId) : '' });
+    setOpen(true);
+  };
   const openEdit = (c: AdminCategory) => {
     setForm({ id: c.id, slug: c.slug, name: c.name,
       parent_id: c.parent_id ? String(c.parent_id) : '', sort_order: String(c.sort_order || 0) });
@@ -70,7 +73,7 @@ const Categories = () => {
           </h1>
           <p className="text-sm text-muted-foreground mt-1">{items.length} всего</p>
         </div>
-        <Button onClick={openNew} className="bg-primary hover:bg-primary/90">
+        <Button onClick={() => openNew()} className="bg-primary hover:bg-primary/90">
           <Plus className="w-4 h-4 mr-1" /> Новая категория
         </Button>
       </div>
@@ -93,7 +96,7 @@ const Categories = () => {
               </thead>
               <tbody>
                 {roots.map(root => (
-                  <Row key={root.id} cat={root} depth={0} childrenOf={childrenOf} onEdit={openEdit} onDelete={remove} />
+                  <Row key={root.id} cat={root} depth={0} childrenOf={childrenOf} onEdit={openEdit} onDelete={remove} onAddChild={openNew} />
                 ))}
               </tbody>
             </table>
@@ -125,9 +128,13 @@ const Categories = () => {
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">— Корневая —</SelectItem>
-                    {items.filter(c => c.id !== form.id && !c.parent_id).map(c => (
-                      <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
-                    ))}
+                    {items
+                      .filter(c => c.id !== form.id)
+                      .map(c => (
+                        <SelectItem key={c.id} value={String(c.id)}>
+                          {c.parent_id ? '— ' : ''}{c.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -150,32 +157,36 @@ const Categories = () => {
   );
 };
 
-const Row = ({ cat, depth, childrenOf, onEdit, onDelete }: {
+const Row = ({ cat, depth, childrenOf, onEdit, onDelete, onAddChild }: {
   cat: AdminCategory; depth: number;
   childrenOf: (id: number) => AdminCategory[];
   onEdit: (c: AdminCategory) => void;
   onDelete: (c: AdminCategory) => void;
+  onAddChild: (parentId: number) => void;
 }) => {
   const kids = childrenOf(cat.id);
   return (
     <>
       <tr className="border-b border-border/50 hover:bg-muted/30">
         <td className="p-3" style={{ paddingLeft: 12 + depth * 24 }}>
-          <span className="text-foreground">{cat.name}</span>
+          <span className="text-foreground">{depth > 0 && '└ '}{cat.name}</span>
         </td>
         <td className="p-3 font-mono text-xs text-muted-foreground">{cat.slug}</td>
         <td className="p-3 text-xs text-muted-foreground">{cat.product_count}</td>
         <td className="p-3 text-xs text-muted-foreground">{cat.sort_order}</td>
-        <td className="p-3 text-right">
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(cat)}>
+        <td className="p-3 text-right whitespace-nowrap">
+          <Button variant="ghost" size="icon" className="h-7 w-7 hover:text-primary" title="Добавить подкатегорию" onClick={() => onAddChild(cat.id)}>
+            <FolderPlus className="w-3.5 h-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7" title="Редактировать" onClick={() => onEdit(cat)}>
             <Pencil className="w-3.5 h-3.5" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7 hover:text-destructive" onClick={() => onDelete(cat)}>
+          <Button variant="ghost" size="icon" className="h-7 w-7 hover:text-destructive" title="Удалить" onClick={() => onDelete(cat)}>
             <Trash2 className="w-3.5 h-3.5" />
           </Button>
         </td>
       </tr>
-      {kids.map(k => <Row key={k.id} cat={k} depth={depth + 1} childrenOf={childrenOf} onEdit={onEdit} onDelete={onDelete} />)}
+      {kids.map(k => <Row key={k.id} cat={k} depth={depth + 1} childrenOf={childrenOf} onEdit={onEdit} onDelete={onDelete} onAddChild={onAddChild} />)}
     </>
   );
 };
