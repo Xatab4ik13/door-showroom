@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   fetchProducts, fetchFacets, type ApiProduct, type Facets, type ProductFilters,
   createProduct, updateProduct, uploadImage, fetchCategories, type AdminCategory,
+  fetchSuppliers, type AdminSupplier,
 } from '@/lib/api';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
@@ -41,12 +42,14 @@ interface EditForm {
   manufacturer: string;
   material: string;
   color: string;
+  supplier_slug: string;
   images: string[];
 }
 
 const blankForm: EditForm = {
   name: '', price: '', old_price: '', description: '',
-  category_id: '', manufacturer: '', material: '', color: '', images: [],
+  category_id: '', manufacturer: '', material: '', color: '',
+  supplier_slug: 'manual', images: [],
 };
 
 const Products = () => {
@@ -72,9 +75,13 @@ const Products = () => {
   const [saving, setSaving] = useState(false);
   const [uploadingImg, setUploadingImg] = useState(false);
   const [allCategories, setAllCategories] = useState<AdminCategory[]>([]);
+  const [allSuppliers, setAllSuppliers] = useState<AdminSupplier[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { fetchCategories().then(setAllCategories).catch(() => {}); }, []);
+  useEffect(() => {
+    if (token) fetchSuppliers(token).then(setAllSuppliers).catch(() => {});
+  }, [token]);
 
   // Search debounce
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -131,6 +138,7 @@ const Products = () => {
       manufacturer: p.manufacturer || '',
       material: p.material || '',
       color: p.color || '',
+      supplier_slug: p.supplier_slug || 'manual',
       images: Array.isArray(p.images) ? p.images : [],
     });
   };
@@ -161,7 +169,7 @@ const Products = () => {
     }
     setSaving(true);
     try {
-      const payload = {
+      const payload: any = {
         name: editForm.name,
         price: Number(editForm.price) || 0,
         old_price: editForm.old_price ? Number(editForm.old_price) : null,
@@ -173,9 +181,17 @@ const Products = () => {
         images: editForm.images,
       };
       if (editProduct) {
+        // On edit, switch supplier by id (PATCH endpoint accepts supplier_id)
+        const targetSlug = editForm.supplier_slug || 'manual';
+        if (targetSlug !== (editProduct.supplier_slug || 'manual')) {
+          const sup = allSuppliers.find(s => s.slug === targetSlug);
+          if (sup) payload.supplier_id = sup.id;
+        }
         await updateProduct(editProduct.id, payload, token);
         toast({ title: 'Товар обновлён' });
       } else {
+        // On create, backend looks up / auto-creates supplier by slug
+        payload.supplier_slug = editForm.supplier_slug || 'manual';
         await createProduct(payload, token);
         toast({ title: 'Товар создан' });
       }
@@ -204,12 +220,10 @@ const Products = () => {
     }
   };
 
-  // Supplier labels
+  // Supplier filter options (dynamic from DB + "all")
   const supplierOptions = [
     { value: 'all', label: 'Все поставщики' },
-    { value: 'dvercom', label: 'Скамбио Порте' },
-    { value: 'supplier2', label: 'Поставщик 2' },
-    { value: 'supplier3', label: 'Поставщик 3' },
+    ...allSuppliers.map(s => ({ value: s.slug, label: s.name })),
   ];
 
   return (
@@ -489,6 +503,19 @@ const Products = () => {
                 <Input value={editForm.manufacturer}
                   onChange={(e) => setEditForm({ ...editForm, manufacturer: e.target.value })} className="mt-1" />
               </div>
+            </div>
+
+            <div>
+              <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Поставщик</Label>
+              <Select value={editForm.supplier_slug || 'manual'} onValueChange={(v) => setEditForm({ ...editForm, supplier_slug: v })}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manual">Ручной (без поставщика)</SelectItem>
+                  {allSuppliers.filter(s => s.slug !== 'manual').map(s => (
+                    <SelectItem key={s.id} value={s.slug}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

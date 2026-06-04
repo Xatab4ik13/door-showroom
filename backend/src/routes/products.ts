@@ -239,7 +239,7 @@ router.post('/', requireAuth, async (req, res) => {
 // PATCH /api/products/:id (admin — edit product)
 router.patch('/:id', requireAuth, async (req, res) => {
   const allowed = ['name','price','old_price','description','category_id','manufacturer',
-    'material','color','width','height','in_stock','images'];
+    'material','color','width','height','in_stock','images','supplier_id'];
   const fields: string[] = [];
   const params: any[] = [];
 
