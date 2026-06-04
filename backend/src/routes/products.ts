@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { pool } from '../db/pool.js';
 import { requireAuth } from '../middleware/auth.js';
+import { normalizeManufacturer } from '../lib/normalize.js';
 
 const router = Router();
 
@@ -39,11 +40,11 @@ router.get('/', async (req, res) => {
     conditions.push(`p.price <= $${params.length}`);
   }
   if (manufacturer) {
-    const mfrs = String(manufacturer).split(',').map(s => s.trim()).filter(Boolean);
+    const mfrs = String(manufacturer).split(',').map(s => normalizeManufacturer(s)).filter(Boolean) as string[];
     if (mfrs.length === 1) {
       params.push(mfrs[0]);
       conditions.push(`p.manufacturer = $${params.length}`);
-    } else {
+    } else if (mfrs.length > 1) {
       params.push(mfrs);
       conditions.push(`p.manufacturer = ANY($${params.length})`);
     }
@@ -146,8 +147,15 @@ router.get('/facets', async (_req, res) => {
     ),
   ]);
 
+  // Group manufacturers by normalized name (collapses casing / ё-е / extra space dupes)
+  const mfrMap = new Map<string, string>();
+  for (const row of mfr.rows) {
+    const norm = normalizeManufacturer(row.manufacturer);
+    if (norm && !mfrMap.has(norm)) mfrMap.set(norm, norm);
+  }
+
   res.json({
-    manufacturers: mfr.rows.map(r => r.manufacturer),
+    manufacturers: [...mfrMap.values()].sort((a, b) => a.localeCompare(b, 'ru')),
     materials: mat.rows.map(r => r.material),
     colors: col.rows.map(r => r.color),
     categories: cat.rows,
@@ -217,11 +225,12 @@ router.post('/', requireAuth, async (req, res) => {
   }
 
   const sku = source_sku || `manual-${Date.now()}`;
+  const normalizedMfr = normalizeManufacturer(manufacturer);
   const r = await pool.query(
     `INSERT INTO products (supplier_id, source_sku, name, slug, category_id, description,
       price, old_price, manufacturer, material, color, width, height, in_stock, images, specs, sync_status)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,$16::jsonb,'active') RETURNING *`,
-    [supplierId, sku, name, slug, category_id, description, price, old_price, manufacturer, material, color,
+    [supplierId, sku, name, slug, category_id, description, price, old_price, normalizedMfr, material, color,
      width, height, in_stock, JSON.stringify(images), JSON.stringify(specs)],
   );
   res.json(r.rows[0]);
@@ -237,6 +246,7 @@ router.patch('/:id', requireAuth, async (req, res) => {
   for (const key of allowed) {
     if (req.body[key] === undefined) continue;
     let val = req.body[key];
+    if (key === 'manufacturer') val = normalizeManufacturer(val);
     if (key === 'images') {
       params.push(JSON.stringify(val || []));
       fields.push(`images = $${params.length}::jsonb`);

@@ -6,6 +6,7 @@ import { pool } from '../db/pool.js';
 import { requireAuth } from '../middleware/auth.js';
 import { syncDverCom } from '../services/dvercom-sync.js';
 import { scrapeAllProducts } from '../services/dvercom-scraper.js';
+import { normalizeManufacturer } from '../lib/normalize.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
@@ -43,7 +44,7 @@ router.post('/csv', requireAuth, upload.single('file'), async (req, res) => {
          RETURNING (xmax = 0) as is_new`,
         [
           supplier.rows[0].id, sku, name, slug, price,
-          row[mapping.manufacturer || 'Производитель'] || null,
+          normalizeManufacturer(row[mapping.manufacturer || 'Производитель']),
           row[mapping.material || 'Материал'] || null,
           row[mapping.color || 'Цвет'] || null,
         ],
