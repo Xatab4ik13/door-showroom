@@ -16,6 +16,7 @@ const formatPrice = (price: number) =>
 
 const Product = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [selectedColor, setSelectedColor] = useState(0);
   const [loading, setLoading] = useState(true);
   const [apiProduct, setApiProduct] = useState<ApiProduct | null>(null);
