@@ -44,7 +44,7 @@ router.post('/csv', requireAuth, upload.single('file'), async (req, res) => {
          RETURNING (xmax = 0) as is_new`,
         [
           supplier.rows[0].id, sku, name, slug, price,
-          row[mapping.manufacturer || 'Производитель'] || null,
+          normalizeManufacturer(row[mapping.manufacturer || 'Производитель']),
           row[mapping.material || 'Материал'] || null,
           row[mapping.color || 'Цвет'] || null,
         ],
