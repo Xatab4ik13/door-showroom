@@ -42,12 +42,14 @@ interface EditForm {
   manufacturer: string;
   material: string;
   color: string;
+  supplier_slug: string;
   images: string[];
 }
 
 const blankForm: EditForm = {
   name: '', price: '', old_price: '', description: '',
-  category_id: '', manufacturer: '', material: '', color: '', images: [],
+  category_id: '', manufacturer: '', material: '', color: '',
+  supplier_slug: 'manual', images: [],
 };
 
 const Products = () => {
