@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { pool } from '../db/pool.js';
 import { requireAuth } from '../middleware/auth.js';
+import { normalizeManufacturer } from '../lib/normalize.js';
 
 const router = Router();
 
