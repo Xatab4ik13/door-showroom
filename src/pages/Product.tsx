@@ -72,13 +72,19 @@ const Product = () => {
     <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto">
       <ProductSEO product={product} apiProduct={apiProduct} />
       {/* Breadcrumb */}
-      <Link
-        to="/catalog"
+      <button
+        type="button"
+        onClick={() => {
+          // If there is a history entry, go back (preserves catalog page & scroll via POP).
+          // Otherwise fall back to a plain catalog link.
+          if (window.history.length > 1) navigate(-1);
+          else navigate('/catalog');
+        }}
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
         Назад в каталог
-      </Link>
+      </button>
 
       {/* Top section: Gallery + Info + Configurator */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
