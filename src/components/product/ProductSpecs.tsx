@@ -82,7 +82,7 @@ const ProductSpecs = ({ product, apiSpecs }: ProductSpecsProps) => {
       addRow('Материал', product.material, 9);
     }
     if (product.finish && product.finish !== 'Не указан') {
-      addRow('Покрытие', product.finish, 16);
+      addRow('Цвет', product.finish, 5);
     }
   } else {
     if (product.manufacturer && product.manufacturer !== 'Не указан') {
@@ -92,7 +92,7 @@ const ProductSpecs = ({ product, apiSpecs }: ProductSpecsProps) => {
       addRow('Материал', product.material, 9);
     }
     if (product.finish && product.finish !== 'Не указан') {
-      addRow('Покрытие', product.finish, 16);
+      addRow('Цвет', product.finish, 5);
     }
   }
 
