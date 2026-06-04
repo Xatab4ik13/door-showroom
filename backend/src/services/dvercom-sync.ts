@@ -1,5 +1,6 @@
 import { pool } from '../db/pool.js';
 import { parseStringPromise } from 'xml2js';
+import { normalizeManufacturer } from '../lib/normalize.js';
 
 // Public YML feed — no auth required
 const DVERCOM_YML_URL = process.env.DVERCOM_YML_URL || 'https://dver.com/xml/dver_yml.xml';
