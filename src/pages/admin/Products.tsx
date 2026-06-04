@@ -169,7 +169,7 @@ const Products = () => {
     }
     setSaving(true);
     try {
-      const payload = {
+      const payload: any = {
         name: editForm.name,
         price: Number(editForm.price) || 0,
         old_price: editForm.old_price ? Number(editForm.old_price) : null,
@@ -181,9 +181,17 @@ const Products = () => {
         images: editForm.images,
       };
       if (editProduct) {
+        // On edit, switch supplier by id (PATCH endpoint accepts supplier_id)
+        const targetSlug = editForm.supplier_slug || 'manual';
+        if (targetSlug !== (editProduct.supplier_slug || 'manual')) {
+          const sup = allSuppliers.find(s => s.slug === targetSlug);
+          if (sup) payload.supplier_id = sup.id;
+        }
         await updateProduct(editProduct.id, payload, token);
         toast({ title: 'Товар обновлён' });
       } else {
+        // On create, backend looks up / auto-creates supplier by slug
+        payload.supplier_slug = editForm.supplier_slug || 'manual';
         await createProduct(payload, token);
         toast({ title: 'Товар создан' });
       }
