@@ -225,11 +225,12 @@ router.post('/', requireAuth, async (req, res) => {
   }
 
   const sku = source_sku || `manual-${Date.now()}`;
+  const normalizedMfr = normalizeManufacturer(manufacturer);
   const r = await pool.query(
     `INSERT INTO products (supplier_id, source_sku, name, slug, category_id, description,
       price, old_price, manufacturer, material, color, width, height, in_stock, images, specs, sync_status)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,$16::jsonb,'active') RETURNING *`,
-    [supplierId, sku, name, slug, category_id, description, price, old_price, manufacturer, material, color,
+    [supplierId, sku, name, slug, category_id, description, price, old_price, normalizedMfr, material, color,
      width, height, in_stock, JSON.stringify(images), JSON.stringify(specs)],
   );
   res.json(r.rows[0]);
