@@ -147,8 +147,15 @@ router.get('/facets', async (_req, res) => {
     ),
   ]);
 
+  // Group manufacturers by normalized name (collapses casing / ё-е / extra space dupes)
+  const mfrMap = new Map<string, string>();
+  for (const row of mfr.rows) {
+    const norm = normalizeManufacturer(row.manufacturer);
+    if (norm && !mfrMap.has(norm)) mfrMap.set(norm, norm);
+  }
+
   res.json({
-    manufacturers: mfr.rows.map(r => r.manufacturer),
+    manufacturers: [...mfrMap.values()].sort((a, b) => a.localeCompare(b, 'ru')),
     materials: mat.rows.map(r => r.material),
     colors: col.rows.map(r => r.color),
     categories: cat.rows,
