@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   fetchProducts, fetchFacets, type ApiProduct, type Facets, type ProductFilters,
   createProduct, updateProduct, uploadImage, fetchCategories, type AdminCategory,
+  fetchSuppliers, type AdminSupplier,
 } from '@/lib/api';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
