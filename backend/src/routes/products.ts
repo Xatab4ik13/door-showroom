@@ -246,6 +246,7 @@ router.patch('/:id', requireAuth, async (req, res) => {
   for (const key of allowed) {
     if (req.body[key] === undefined) continue;
     let val = req.body[key];
+    if (key === 'manufacturer') val = normalizeManufacturer(val);
     if (key === 'images') {
       params.push(JSON.stringify(val || []));
       fields.push(`images = $${params.length}::jsonb`);
