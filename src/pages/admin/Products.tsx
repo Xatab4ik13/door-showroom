@@ -75,9 +75,13 @@ const Products = () => {
   const [saving, setSaving] = useState(false);
   const [uploadingImg, setUploadingImg] = useState(false);
   const [allCategories, setAllCategories] = useState<AdminCategory[]>([]);
+  const [allSuppliers, setAllSuppliers] = useState<AdminSupplier[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { fetchCategories().then(setAllCategories).catch(() => {}); }, []);
+  useEffect(() => {
+    if (token) fetchSuppliers(token).then(setAllSuppliers).catch(() => {});
+  }, [token]);
 
   // Search debounce
   const [debouncedSearch, setDebouncedSearch] = useState('');
