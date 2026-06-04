@@ -205,7 +205,7 @@ export async function syncDverCom() {
              RETURNING (xmax = 0) as is_new`,
             [
               supplierId, vendorCode, name, slug, dbCategoryId,
-              description, price, vendor, material, color,
+              description, price, normalizeManufacturer(vendor), material, color,
               JSON.stringify([picture]),
               available,
               specs,
