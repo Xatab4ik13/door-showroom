@@ -29,6 +29,7 @@ const Catalog = () => {
   // Read initial state from URL — by default show interior doors first (not all/furniture)
   const urlCategory = searchParams.get('category') || 'mezhkomnatnye';
   const urlSubcategory = searchParams.get('sub') || null;
+  const urlPage = Math.max(1, Number(searchParams.get('page')) || 1);
 
   const [category, setCategory] = useState<Category | 'all'>(
     validCategories.has(urlCategory) ? urlCategory as Category : 'mezhkomnatnye'
@@ -41,22 +42,24 @@ const Catalog = () => {
   const [selectedManufacturers, setSelectedManufacturers] = useState<string[]>([]);
   const [mobileFilters, setMobileFilters] = useState(false);
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(urlPage);
   const [sort, setSort] = useState<'updated_at' | 'price' | 'name'>('updated_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  // Sync URL params when category/subcategory change
+  // Sync URL params when category/subcategory/page change
   useEffect(() => {
     const params: Record<string, string> = {};
     if (category !== 'all') params.category = category;
     if (subcategory) params.sub = subcategory;
+    if (page > 1) params.page = String(page);
     setSearchParams(params, { replace: true });
-  }, [category, subcategory, setSearchParams]);
+  }, [category, subcategory, page, setSearchParams]);
 
   // Sync state when URL changes externally (e.g. browser back/forward)
   useEffect(() => {
     const urlCat = searchParams.get('category') || 'all';
     const urlSub = searchParams.get('sub') || null;
+    const urlPg = Math.max(1, Number(searchParams.get('page')) || 1);
     if (validCategories.has(urlCat) && urlCat !== category) {
       setCategory(urlCat as Category);
     } else if (urlCat === 'all' && category !== 'all') {
@@ -64,6 +67,9 @@ const Catalog = () => {
     }
     if (urlSub !== subcategory) {
       setSubcategory(urlSub);
+    }
+    if (urlPg !== page) {
+      setPage(urlPg);
     }
   }, [searchParams]);
 
