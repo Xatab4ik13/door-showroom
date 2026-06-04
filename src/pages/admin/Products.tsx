@@ -220,12 +220,10 @@ const Products = () => {
     }
   };
 
-  // Supplier labels
+  // Supplier filter options (dynamic from DB + "all")
   const supplierOptions = [
     { value: 'all', label: 'Все поставщики' },
-    { value: 'dvercom', label: 'Скамбио Порте' },
-    { value: 'supplier2', label: 'Поставщик 2' },
-    { value: 'supplier3', label: 'Поставщик 3' },
+    ...allSuppliers.map(s => ({ value: s.slug, label: s.name })),
   ];
 
   return (
