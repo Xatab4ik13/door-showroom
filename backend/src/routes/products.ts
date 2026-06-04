@@ -40,11 +40,11 @@ router.get('/', async (req, res) => {
     conditions.push(`p.price <= $${params.length}`);
   }
   if (manufacturer) {
-    const mfrs = String(manufacturer).split(',').map(s => s.trim()).filter(Boolean);
+    const mfrs = String(manufacturer).split(',').map(s => normalizeManufacturer(s)).filter(Boolean) as string[];
     if (mfrs.length === 1) {
       params.push(mfrs[0]);
       conditions.push(`p.manufacturer = $${params.length}`);
-    } else {
+    } else if (mfrs.length > 1) {
       params.push(mfrs);
       conditions.push(`p.manufacturer = ANY($${params.length})`);
     }
