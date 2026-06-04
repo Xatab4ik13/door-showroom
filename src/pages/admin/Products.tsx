@@ -138,6 +138,7 @@ const Products = () => {
       manufacturer: p.manufacturer || '',
       material: p.material || '',
       color: p.color || '',
+      supplier_slug: p.supplier_slug || 'manual',
       images: Array.isArray(p.images) ? p.images : [],
     });
   };
