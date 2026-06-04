@@ -505,6 +505,19 @@ const Products = () => {
               </div>
             </div>
 
+            <div>
+              <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Поставщик</Label>
+              <Select value={editForm.supplier_slug || 'manual'} onValueChange={(v) => setEditForm({ ...editForm, supplier_slug: v })}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manual">Ручной (без поставщика)</SelectItem>
+                  {allSuppliers.filter(s => s.slug !== 'manual').map(s => (
+                    <SelectItem key={s.id} value={s.slug}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Материал</Label>
