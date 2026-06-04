@@ -221,3 +221,21 @@ export async function updateProduct(id: number, data: any, token: string): Promi
   });
   if (!res.ok) throw new Error('Update failed');
 }
+
+// ==== Suppliers admin ====
+export interface AdminSupplier {
+  id: number;
+  slug: string;
+  name: string;
+  format: string;
+  sync_enabled: boolean;
+  product_count: number;
+}
+
+export async function fetchSuppliers(token: string): Promise<AdminSupplier[]> {
+  const res = await fetch(`${API_BASE}/api/suppliers`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
