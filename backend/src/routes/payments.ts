@@ -60,10 +60,17 @@ router.post('/init', async (req, res) => {
     // Amount in kopeks
     const amountKopeks = Math.round(Number(order.total) * 100);
 
+    // T-Bank rejects re-using the same OrderId for a new payment session
+    // ("Неверный статус транзакции"). Append a short attempt suffix so each
+    // Init call is treated as a fresh transaction while still tying back to
+    // the human-readable order_number in the description / webhook lookup.
+    const attemptSuffix = Date.now().toString(36).slice(-5);
+    const tbankOrderId = `${order.order_number}-${attemptSuffix}`;
+
     const initData: Record<string, string | number> = {
       TerminalKey: TBANK_TERMINAL_KEY,
       Amount: amountKopeks,
-      OrderId: order.order_number,
+      OrderId: tbankOrderId,
       Description: `Оплата заказа ${order.order_number}`,
       SuccessURL: `${FRONTEND_URL}/account?payment=success&order=${order.order_number}`,
       FailURL: `${FRONTEND_URL}/account?payment=fail&order=${order.order_number}`,
