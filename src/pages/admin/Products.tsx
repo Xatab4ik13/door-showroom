@@ -114,10 +114,38 @@ const Products = () => {
   const [allSuppliers, setAllSuppliers] = useState<AdminSupplier[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // Per-product extras overrides (excludes)
+  const [categoryColors, setCategoryColors] = useState<AdminPanelColor[]>([]);
+  const [categoryServices, setCategoryServices] = useState<AdminService[]>([]);
+  const [excludedColorIds, setExcludedColorIds] = useState<Set<number>>(new Set());
+  const [excludedServiceIds, setExcludedServiceIds] = useState<Set<number>>(new Set());
+
   useEffect(() => { fetchCategories().then(setAllCategories).catch(() => {}); }, []);
   useEffect(() => {
     if (token) fetchSuppliers(token).then(setAllSuppliers).catch(() => {});
   }, [token]);
+
+  // Load category-level extras + product excludes when editing a product
+  useEffect(() => {
+    if (!editProduct || !token) {
+      setCategoryColors([]); setCategoryServices([]);
+      setExcludedColorIds(new Set()); setExcludedServiceIds(new Set());
+      return;
+    }
+    const cat = allCategories.find(c => c.id === editProduct.category_id);
+    const slug = cat?.slug;
+    Promise.all([
+      slug ? fetchAdminColors({ category_slug: slug }, token) : Promise.resolve([]),
+      slug ? fetchAdminServices({ category_slug: slug }, token) : Promise.resolve([]),
+      fetchProductExcludes(editProduct.id, token),
+    ]).then(([colors, services, excl]) => {
+      // Only category-level (product_id IS NULL) — product-specific extras are separate
+      setCategoryColors(colors.filter(c => !c.product_id));
+      setCategoryServices(services.filter(s => !s.product_id));
+      setExcludedColorIds(new Set(excl.colors));
+      setExcludedServiceIds(new Set(excl.services));
+    }).catch(() => {});
+  }, [editProduct, token, allCategories]);
 
   // Search debounce
   const [debouncedSearch, setDebouncedSearch] = useState('');
