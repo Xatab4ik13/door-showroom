@@ -239,3 +239,69 @@ export async function fetchSuppliers(token: string): Promise<AdminSupplier[]> {
   if (!res.ok) return [];
   return res.json();
 }
+
+// ==== Product extras admin (per-product overrides) ====
+export interface AdminPanelColor {
+  id: number;
+  name: string;
+  image_url: string | null;
+  price_modifier: number;
+  sort_order: number;
+  category_slug: string | null;
+  product_id: number | null;
+}
+
+export interface AdminService {
+  id: number;
+  name: string;
+  description: string | null;
+  price: number;
+  price_type: 'fixed' | 'per_door';
+  sort_order: number;
+  category_slug: string | null;
+  product_id: number | null;
+}
+
+export async function fetchAdminColors(params: { category_slug?: string; product_id?: number }, token: string): Promise<AdminPanelColor[]> {
+  const sp = new URLSearchParams();
+  if (params.category_slug) sp.set('category_slug', params.category_slug);
+  if (params.product_id) sp.set('product_id', String(params.product_id));
+  const res = await fetch(`${API_BASE}/api/product-extras/admin/colors?${sp}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function fetchAdminServices(params: { category_slug?: string; product_id?: number }, token: string): Promise<AdminService[]> {
+  const sp = new URLSearchParams();
+  if (params.category_slug) sp.set('category_slug', params.category_slug);
+  if (params.product_id) sp.set('product_id', String(params.product_id));
+  const res = await fetch(`${API_BASE}/api/product-extras/admin/services?${sp}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export interface ProductExcludes {
+  services: number[];
+  colors: number[];
+}
+
+export async function fetchProductExcludes(productId: number, token: string): Promise<ProductExcludes> {
+  const res = await fetch(`${API_BASE}/api/product-extras/admin/excludes/${productId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return { services: [], colors: [] };
+  return res.json();
+}
+
+export async function saveProductExcludes(productId: number, data: ProductExcludes, token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/product-extras/admin/excludes/${productId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Save failed');
+}
