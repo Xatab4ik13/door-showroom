@@ -33,6 +33,8 @@ const LIMIT = 20;
 const formatPrice = (p: number | null) =>
   p ? p.toLocaleString('ru-RU') + ' ₽' : '—';
 
+interface SpecPair { key: string; value: string }
+
 interface EditForm {
   name: string;
   price: string;
@@ -44,12 +46,43 @@ interface EditForm {
   color: string;
   supplier_slug: string;
   images: string[];
+  specs: SpecPair[];
 }
 
 const blankForm: EditForm = {
   name: '', price: '', old_price: '', description: '',
   category_id: '', manufacturer: '', material: '', color: '',
-  supplier_slug: 'manual', images: [],
+  supplier_slug: 'manual', images: [], specs: [],
+};
+
+// Internal keys never shown in the structured editor (preserved on save via backend merge)
+const HIDDEN_SPEC_KEYS = new Set([
+  '_sizes', '_accessories',
+  'source_url', 'supplier_url', 'xml_url', 'import_url', 'sync_id',
+]);
+
+// Suggested spec keys for quick add
+const SPEC_SUGGESTIONS = [
+  'Артикул', 'Модель', 'Коллекция', 'Тип полотна', 'Тип покрытия',
+  'Толщина', 'Стиль', 'Серия', 'Размер', 'Покрытие', 'Страна', 'Вес', 'Гарантия',
+];
+
+const specsObjToPairs = (specs: Record<string, string | null> | null | undefined): SpecPair[] => {
+  if (!specs || typeof specs !== 'object') return [];
+  return Object.entries(specs)
+    .filter(([k, v]) => !HIDDEN_SPEC_KEYS.has(k) && !k.startsWith('_') && v != null && String(v).length > 0)
+    .map(([k, v]) => ({ key: k, value: String(v) }));
+};
+
+const pairsToSpecsObj = (pairs: SpecPair[]): Record<string, string> => {
+  const out: Record<string, string> = {};
+  for (const { key, value } of pairs) {
+    const k = key.trim();
+    const v = value.trim();
+    if (!k || !v) continue;
+    out[k] = v;
+  }
+  return out;
 };
 
 const Products = () => {
