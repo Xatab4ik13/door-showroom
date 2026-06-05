@@ -130,14 +130,12 @@ router.post('/notification', async (req, res) => {
 
     const { OrderId, Status, PaymentId } = data;
 
-    // OrderId may carry our attempt suffix (e.g. "RD-1007-x9k2t"); strip it
-    // back to the canonical order_number before lookup.
-    const canonicalOrderId = String(OrderId).replace(/-[a-z0-9]{1,8}$/i, (m) => (
-      /^RD-\d+$/i.test(String(OrderId)) ? m : ''
-    )) || String(OrderId);
-    const lookupOrderId = /^RD-\d+-/i.test(String(OrderId))
-      ? String(OrderId).replace(/-[a-z0-9]+$/i, '')
-      : String(OrderId);
+    // OrderId may carry our re-attempt suffix (e.g. "RD-1007-x9k2t");
+    // strip it back to the canonical RD-XXXX order_number before lookup.
+    const rawOrderId = String(OrderId);
+    const lookupOrderId = /^RD-\d+-[a-z0-9]+$/i.test(rawOrderId)
+      ? rawOrderId.replace(/-[a-z0-9]+$/i, '')
+      : rawOrderId;
 
     // Find order by order_number
     const orderRes = await pool.query(
