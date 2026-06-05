@@ -1,7 +1,14 @@
 import { Router } from 'express';
 import { pool } from '../db/pool.js';
 import { requireAuth } from '../middleware/auth.js';
-import { normalizeManufacturer } from '../lib/normalize.js';
+import { normalizeManufacturer, normalizeProductName, normalizeProductDescription } from '../lib/normalize.js';
+
+function cleanProduct<T extends { name?: any; description?: any }>(row: T): T {
+  if (row && row.name != null) (row as any).name = normalizeProductName(row.name) ?? row.name;
+  if (row && row.description != null) (row as any).description = normalizeProductDescription(row.description);
+  return row;
+}
+
 
 const router = Router();
 
@@ -96,7 +103,15 @@ router.get('/', async (req, res) => {
        LEFT JOIN suppliers s ON s.id = p.supplier_id
        LEFT JOIN categories c ON c.id = p.category_id
        ${where}
-       ORDER BY p.pinned_order ASC NULLS LAST, ${sortCol} ${sortOrder}
+       ORDER BY p.pinned_order ASC NULLS LAST,
+                CASE c.slug
+                  WHEN 'vhodnye' THEN 1
+                  WHEN 'mezhkomnatnye' THEN 2
+                  WHEN 'biometricheskiy-zamok' THEN 3
+                  WHEN 'furnitura' THEN 9
+                  ELSE 5
+                END,
+                ${sortCol} ${sortOrder}
        LIMIT $${params.length - 1} OFFSET $${params.length}`,
       params,
     ),
@@ -115,7 +130,7 @@ router.get('/', async (req, res) => {
       const { source_url, supplier_url, xml_url, import_url, sync_id, ...cleanSpecs } = row.specs;
       row.specs = cleanSpecs;
     }
-    return row;
+    return cleanProduct(row);
   });
 
   res.json({
@@ -179,7 +194,7 @@ router.get('/:slug', async (req, res) => {
     const { source_url, supplier_url, xml_url, import_url, sync_id, ...cleanSpecs } = product.specs;
     product.specs = cleanSpecs;
   }
-  res.json(product);
+  res.json(cleanProduct(product));
 });
 
 // Helpers

@@ -77,13 +77,18 @@ const Catalog = () => {
   const { facets } = useFacets();
 
   // Build API params
-  const apiCategory = category !== 'all' ? categorySlugMap[category] : undefined;
+  // Subcategory may map directly to a real DB category slug (e.g. "biometricheskiy-zamok").
+  // Detect that against facets so we filter by category= instead of a (less reliable) text search.
+  const subcategoryIsRealSlug = !!(subcategory && facets?.categories?.some((c: any) => c.slug === subcategory));
+  const apiCategory = subcategoryIsRealSlug
+    ? subcategory!
+    : (category !== 'all' ? categorySlugMap[category] : undefined);
 
   // Build search query: combine user search with subcategory label for API filtering
   const buildSearch = () => {
     const parts: string[] = [];
     if (search) parts.push(search);
-    if (subcategory) {
+    if (subcategory && !subcategoryIsRealSlug) {
       // Find subcategory label to use as search term
       const catDef = categories.find(c => c.key === category);
       if (catDef?.subcategories) {
@@ -201,6 +206,7 @@ const Catalog = () => {
     dynamicManufacturers,
     dynamicMaterials,
     dynamicColors,
+    categoryCounts: facets?.categories ?? [],
   };
 
   // Pagination controls

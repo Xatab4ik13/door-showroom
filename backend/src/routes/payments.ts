@@ -60,10 +60,17 @@ router.post('/init', async (req, res) => {
     // Amount in kopeks
     const amountKopeks = Math.round(Number(order.total) * 100);
 
+    // T-Bank rejects re-using the same OrderId for a new payment session
+    // ("Неверный статус транзакции"). Append a short attempt suffix so each
+    // Init call is treated as a fresh transaction while still tying back to
+    // the human-readable order_number in the description / webhook lookup.
+    const attemptSuffix = Date.now().toString(36).slice(-5);
+    const tbankOrderId = `${order.order_number}-${attemptSuffix}`;
+
     const initData: Record<string, string | number> = {
       TerminalKey: TBANK_TERMINAL_KEY,
       Amount: amountKopeks,
-      OrderId: order.order_number,
+      OrderId: tbankOrderId,
       Description: `Оплата заказа ${order.order_number}`,
       SuccessURL: `${FRONTEND_URL}/account?payment=success&order=${order.order_number}`,
       FailURL: `${FRONTEND_URL}/account?payment=fail&order=${order.order_number}`,
@@ -123,10 +130,17 @@ router.post('/notification', async (req, res) => {
 
     const { OrderId, Status, PaymentId } = data;
 
+    // OrderId may carry our re-attempt suffix (e.g. "RD-1007-x9k2t");
+    // strip it back to the canonical RD-XXXX order_number before lookup.
+    const rawOrderId = String(OrderId);
+    const lookupOrderId = /^RD-\d+-[a-z0-9]+$/i.test(rawOrderId)
+      ? rawOrderId.replace(/-[a-z0-9]+$/i, '')
+      : rawOrderId;
+
     // Find order by order_number
     const orderRes = await pool.query(
       'SELECT id, status, customer_email, customer_name, total FROM orders WHERE order_number = $1',
-      [OrderId],
+      [lookupOrderId],
     );
     if (!orderRes.rows.length) {
       console.error('[PAYMENTS] Order not found for notification:', OrderId);

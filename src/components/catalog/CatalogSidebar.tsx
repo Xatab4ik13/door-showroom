@@ -22,6 +22,8 @@ interface CatalogSidebarProps {
   dynamicManufacturers?: string[];
   dynamicMaterials?: string[];
   dynamicColors?: string[];
+  /** Per-category product counts from /facets — used to hide empty subcategories whose key matches a real DB slug. */
+  categoryCounts?: { slug: string; count: number }[];
 }
 
 const FilterSection = ({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) => {
@@ -64,6 +66,7 @@ const CatalogSidebar = ({
   dynamicManufacturers,
   dynamicMaterials,
   dynamicColors,
+  categoryCounts,
 }: CatalogSidebarProps) => {
 
   // Use dynamic values from API if available, otherwise defaults
@@ -73,6 +76,15 @@ const CatalogSidebar = ({
     ? dynamicMaterials : defaultMaterials;
   const colorsList = dynamicColors && dynamicColors.length > 0
     ? dynamicColors : defaultFinishes;
+
+  // Map of slug → count for empty-subcategory hiding.
+  // A subcategory is hidden only when its key matches a real DB category slug
+  // AND that slug reports 0 products. Subcategories that are search-based
+  // (no matching slug) are always shown.
+  const countsBySlug = new Map<string, number>(
+    (categoryCounts ?? []).map(c => [c.slug, Number(c.count) || 0])
+  );
+  const isHiddenSub = (key: string) => countsBySlug.has(key) && countsBySlug.get(key) === 0;
 
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [expandedSubs, setExpandedSubs] = useState<Set<string>>(new Set());
@@ -174,7 +186,7 @@ const CatalogSidebar = ({
                       className="overflow-hidden"
                     >
                       <div className="pl-4 border-l-2 border-border ml-4 mt-1 mb-2 space-y-0.5">
-                        {cat.subcategories!.map((sub) => {
+                        {cat.subcategories!.filter(sub => !isHiddenSub(sub.key)).map((sub) => {
                           const isSubActive = selectedSubcategory === sub.key;
                           const hasChildren = sub.children && sub.children.length > 0;
                           const isSubExpanded = expandedSubs.has(sub.key);
@@ -217,7 +229,7 @@ const CatalogSidebar = ({
                                     className="overflow-hidden"
                                   >
                                     <div className="pl-3 border-l border-border/50 ml-3 mt-0.5 mb-1 space-y-0.5">
-                                      {sub.children!.map((child) => {
+                                      {sub.children!.filter(child => !isHiddenSub(child.key)).map((child) => {
                                         const isChildActive = selectedSubcategory === child.key;
                                         return (
                                           <button

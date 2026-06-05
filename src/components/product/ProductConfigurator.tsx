@@ -265,7 +265,7 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
       {/* Total + add */}
       <div className="border-t border-border pt-4">
         <div className="flex items-baseline justify-between mb-4">
-          <span className="text-sm text-muted-foreground">{hasConfigurator ? 'Комплект:' : 'Итого:'}</span>
+          <span className="text-sm text-muted-foreground">Итого:</span>
           <span className="text-2xl font-bold text-foreground">{formatPrice(totalPrice)}</span>
         </div>
 
