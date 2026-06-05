@@ -173,6 +173,7 @@ const Products = () => {
       color: p.color || '',
       supplier_slug: p.supplier_slug || 'manual',
       images: Array.isArray(p.images) ? p.images : [],
+      specs: specsObjToPairs(p.specs),
     });
   };
 
