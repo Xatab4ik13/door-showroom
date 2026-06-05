@@ -254,6 +254,11 @@ const Products = () => {
           if (sup) payload.supplier_id = sup.id;
         }
         await updateProduct(editProduct.id, payload, token);
+        // Save extras excludes (per-product overrides)
+        await saveProductExcludes(editProduct.id, {
+          services: Array.from(excludedServiceIds),
+          colors: Array.from(excludedColorIds),
+        }, token).catch(() => {});
         toast({ title: 'Товар обновлён' });
       } else {
         // On create, backend looks up / auto-creates supplier by slug
