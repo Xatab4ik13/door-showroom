@@ -24,7 +24,10 @@ import {
   fetchProducts, fetchFacets, type ApiProduct, type Facets, type ProductFilters,
   createProduct, updateProduct, uploadImage, fetchCategories, type AdminCategory,
   fetchSuppliers, type AdminSupplier,
+  fetchAdminColors, fetchAdminServices, fetchProductExcludes, saveProductExcludes,
+  type AdminPanelColor, type AdminService,
 } from '@/lib/api';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://api.rusdoors.su';
@@ -111,10 +114,38 @@ const Products = () => {
   const [allSuppliers, setAllSuppliers] = useState<AdminSupplier[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // Per-product extras overrides (excludes)
+  const [categoryColors, setCategoryColors] = useState<AdminPanelColor[]>([]);
+  const [categoryServices, setCategoryServices] = useState<AdminService[]>([]);
+  const [excludedColorIds, setExcludedColorIds] = useState<Set<number>>(new Set());
+  const [excludedServiceIds, setExcludedServiceIds] = useState<Set<number>>(new Set());
+
   useEffect(() => { fetchCategories().then(setAllCategories).catch(() => {}); }, []);
   useEffect(() => {
     if (token) fetchSuppliers(token).then(setAllSuppliers).catch(() => {});
   }, [token]);
+
+  // Load category-level extras + product excludes when editing a product
+  useEffect(() => {
+    if (!editProduct || !token) {
+      setCategoryColors([]); setCategoryServices([]);
+      setExcludedColorIds(new Set()); setExcludedServiceIds(new Set());
+      return;
+    }
+    const cat = allCategories.find(c => c.id === editProduct.category_id);
+    const slug = cat?.slug;
+    Promise.all([
+      slug ? fetchAdminColors({ category_slug: slug }, token) : Promise.resolve([]),
+      slug ? fetchAdminServices({ category_slug: slug }, token) : Promise.resolve([]),
+      fetchProductExcludes(editProduct.id, token),
+    ]).then(([colors, services, excl]) => {
+      // Only category-level (product_id IS NULL) — product-specific extras are separate
+      setCategoryColors(colors.filter(c => !c.product_id));
+      setCategoryServices(services.filter(s => !s.product_id));
+      setExcludedColorIds(new Set(excl.colors));
+      setExcludedServiceIds(new Set(excl.services));
+    }).catch(() => {});
+  }, [editProduct, token, allCategories]);
 
   // Search debounce
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -223,6 +254,11 @@ const Products = () => {
           if (sup) payload.supplier_id = sup.id;
         }
         await updateProduct(editProduct.id, payload, token);
+        // Save extras excludes (per-product overrides)
+        await saveProductExcludes(editProduct.id, {
+          services: Array.from(excludedServiceIds),
+          colors: Array.from(excludedColorIds),
+        }, token).catch(() => {});
         toast({ title: 'Товар обновлён' });
       } else {
         // On create, backend looks up / auto-creates supplier by slug
@@ -636,6 +672,73 @@ const Products = () => {
                 {SPEC_SUGGESTIONS.map(s => <option key={s} value={s} />)}
               </datalist>
             </div>
+
+            {editProduct && (categoryColors.length > 0 || categoryServices.length > 0) && (
+              <div className="border border-border rounded-md p-3 bg-secondary/30">
+                <Label className="text-xs uppercase tracking-wider block mb-2" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                  Доп. опции этого товара
+                </Label>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Отметьте, какие категорийные опции скрыть на карточке именно этого товара.
+                </p>
+
+                {categoryColors.length > 0 && (
+                  <div className="mb-3">
+                    <div className="text-xs font-semibold text-foreground mb-1.5">Цвета панелей</div>
+                    <div className="space-y-1.5">
+                      {categoryColors.map(c => {
+                        const checked = excludedColorIds.has(c.id);
+                        return (
+                          <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={(v) => {
+                                setExcludedColorIds(prev => {
+                                  const n = new Set(prev);
+                                  if (v) n.add(c.id); else n.delete(c.id);
+                                  return n;
+                                });
+                              }}
+                            />
+                            <span className={checked ? 'line-through text-muted-foreground' : ''}>{c.name}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {categoryServices.length > 0 && (
+                  <div>
+                    <div className="text-xs font-semibold text-foreground mb-1.5">Доп. услуги</div>
+                    <div className="space-y-1.5">
+                      {categoryServices.map(s => {
+                        const checked = excludedServiceIds.has(s.id);
+                        return (
+                          <label key={s.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={(v) => {
+                                setExcludedServiceIds(prev => {
+                                  const n = new Set(prev);
+                                  if (v) n.add(s.id); else n.delete(s.id);
+                                  return n;
+                                });
+                              }}
+                            />
+                            <span className={checked ? 'line-through text-muted-foreground' : ''}>
+                              {s.name}
+                              {s.price > 0 && <span className="text-muted-foreground"> · {s.price.toLocaleString('ru-RU')} ₽</span>}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
 
             <div>
               <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Фотографии (до 10)</Label>

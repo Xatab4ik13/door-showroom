@@ -23,7 +23,7 @@ router.get('/:productId', async (req, res) => {
   if (!product) return res.status(404).json({ error: 'Product not found' });
   const categorySlug = product.category_slug as string | null;
 
-  const [colorsRes, servicesRes, excludesRes, recoProdRes, recoCatRes] = await Promise.all([
+  const [colorsRes, servicesRes, svcExclRes, colorExclRes, recoProdRes, recoCatRes] = await Promise.all([
     pool.query(
       `SELECT id, name, image_url, price_modifier, sort_order
        FROM panel_colors
@@ -39,6 +39,7 @@ router.get('/:productId', async (req, res) => {
       [productId, categorySlug],
     ),
     pool.query(`SELECT service_id FROM product_service_excludes WHERE product_id = $1`, [productId]),
+    pool.query(`SELECT color_id FROM product_color_excludes WHERE product_id = $1`, [productId]),
     pool.query(
       `SELECT p.id, p.name, p.slug, p.price, p.images
        FROM product_recommendations r
@@ -59,8 +60,10 @@ router.get('/:productId', async (req, res) => {
       : Promise.resolve({ rows: [] as any[] }),
   ]);
 
-  const excludeSet = new Set(excludesRes.rows.map(r => r.service_id));
-  const services = servicesRes.rows.filter(s => !excludeSet.has(s.id));
+  const svcExcludeSet = new Set(svcExclRes.rows.map(r => r.service_id));
+  const colorExcludeSet = new Set(colorExclRes.rows.map(r => r.color_id));
+  const services = servicesRes.rows.filter(s => !svcExcludeSet.has(s.id));
+  const panel_colors = colorsRes.rows.filter(c => !colorExcludeSet.has(c.id));
 
   // Merge recommendations: product-level first, then category-level (deduped)
   const seen = new Set<number>();
@@ -71,10 +74,58 @@ router.get('/:productId', async (req, res) => {
   });
 
   res.json({
-    panel_colors: colorsRes.rows,
+    panel_colors,
     services,
     recommendations,
   });
+});
+
+// GET admin excludes for a product
+router.get('/admin/excludes/:productId', requireAuth, async (req, res) => {
+  const productId = Number(req.params.productId);
+  if (!productId) return res.status(400).json({ error: 'Bad product id' });
+  const [svc, col] = await Promise.all([
+    pool.query(`SELECT service_id FROM product_service_excludes WHERE product_id = $1`, [productId]),
+    pool.query(`SELECT color_id FROM product_color_excludes WHERE product_id = $1`, [productId]),
+  ]);
+  res.json({
+    services: svc.rows.map(r => r.service_id),
+    colors: col.rows.map(r => r.color_id),
+  });
+});
+
+// PUT admin excludes (replace) — body: { services: number[], colors: number[] }
+router.put('/admin/excludes/:productId', requireAuth, async (req, res) => {
+  const productId = Number(req.params.productId);
+  if (!productId) return res.status(400).json({ error: 'Bad product id' });
+  const services: number[] = Array.isArray(req.body?.services) ? req.body.services.map(Number).filter(Boolean) : [];
+  const colors: number[] = Array.isArray(req.body?.colors) ? req.body.colors.map(Number).filter(Boolean) : [];
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query('DELETE FROM product_service_excludes WHERE product_id = $1', [productId]);
+    await client.query('DELETE FROM product_color_excludes WHERE product_id = $1', [productId]);
+    for (const sid of services) {
+      await client.query(
+        'INSERT INTO product_service_excludes (product_id, service_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        [productId, sid],
+      );
+    }
+    for (const cid of colors) {
+      await client.query(
+        'INSERT INTO product_color_excludes (product_id, color_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        [productId, cid],
+      );
+    }
+    await client.query('COMMIT');
+    res.json({ ok: true });
+  } catch (e) {
+    await client.query('ROLLBACK');
+    res.status(500).json({ error: 'Save failed' });
+  } finally {
+    client.release();
+  }
 });
 
 // ============== ADMIN CRUD ==============

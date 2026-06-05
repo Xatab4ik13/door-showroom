@@ -196,6 +196,13 @@ export async function initDatabase() {
         PRIMARY KEY (product_id, service_id)
       );
 
+      -- Per-product panel-color excludes (hide a category-level color on a specific product)
+      CREATE TABLE IF NOT EXISTS product_color_excludes (
+        product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+        color_id INTEGER NOT NULL REFERENCES panel_colors(id) ON DELETE CASCADE,
+        PRIMARY KEY (product_id, color_id)
+      );
+
       -- Recommended products (per product and/or per category)
       CREATE TABLE IF NOT EXISTS product_recommendations (
         id SERIAL PRIMARY KEY,
