@@ -24,7 +24,10 @@ import {
   fetchProducts, fetchFacets, type ApiProduct, type Facets, type ProductFilters,
   createProduct, updateProduct, uploadImage, fetchCategories, type AdminCategory,
   fetchSuppliers, type AdminSupplier,
+  fetchAdminColors, fetchAdminServices, fetchProductExcludes, saveProductExcludes,
+  type AdminPanelColor, type AdminService,
 } from '@/lib/api';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://api.rusdoors.su';
