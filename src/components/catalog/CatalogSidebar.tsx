@@ -66,6 +66,7 @@ const CatalogSidebar = ({
   dynamicManufacturers,
   dynamicMaterials,
   dynamicColors,
+  categoryCounts,
 }: CatalogSidebarProps) => {
 
   // Use dynamic values from API if available, otherwise defaults
@@ -75,6 +76,15 @@ const CatalogSidebar = ({
     ? dynamicMaterials : defaultMaterials;
   const colorsList = dynamicColors && dynamicColors.length > 0
     ? dynamicColors : defaultFinishes;
+
+  // Map of slug → count for empty-subcategory hiding.
+  // A subcategory is hidden only when its key matches a real DB category slug
+  // AND that slug reports 0 products. Subcategories that are search-based
+  // (no matching slug) are always shown.
+  const countsBySlug = new Map<string, number>(
+    (categoryCounts ?? []).map(c => [c.slug, Number(c.count) || 0])
+  );
+  const isHiddenSub = (key: string) => countsBySlug.has(key) && countsBySlug.get(key) === 0;
 
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [expandedSubs, setExpandedSubs] = useState<Set<string>>(new Set());
