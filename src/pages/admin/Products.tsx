@@ -247,6 +247,7 @@ const Products = () => {
         color: editForm.color || null,
         images: editForm.images,
         specs: pairsToSpecsObj(editForm.specs),
+        pinned_order: editForm.pinned_order === '' ? null : Number(editForm.pinned_order),
       };
       if (editProduct) {
         // On edit, switch supplier by id (PATCH endpoint accepts supplier_id)
