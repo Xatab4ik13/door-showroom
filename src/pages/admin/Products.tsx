@@ -673,6 +673,73 @@ const Products = () => {
               </datalist>
             </div>
 
+            {editProduct && (categoryColors.length > 0 || categoryServices.length > 0) && (
+              <div className="border border-border rounded-md p-3 bg-secondary/30">
+                <Label className="text-xs uppercase tracking-wider block mb-2" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                  Доп. опции этого товара
+                </Label>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Отметьте, какие категорийные опции скрыть на карточке именно этого товара.
+                </p>
+
+                {categoryColors.length > 0 && (
+                  <div className="mb-3">
+                    <div className="text-xs font-semibold text-foreground mb-1.5">Цвета панелей</div>
+                    <div className="space-y-1.5">
+                      {categoryColors.map(c => {
+                        const checked = excludedColorIds.has(c.id);
+                        return (
+                          <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={(v) => {
+                                setExcludedColorIds(prev => {
+                                  const n = new Set(prev);
+                                  if (v) n.add(c.id); else n.delete(c.id);
+                                  return n;
+                                });
+                              }}
+                            />
+                            <span className={checked ? 'line-through text-muted-foreground' : ''}>{c.name}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {categoryServices.length > 0 && (
+                  <div>
+                    <div className="text-xs font-semibold text-foreground mb-1.5">Доп. услуги</div>
+                    <div className="space-y-1.5">
+                      {categoryServices.map(s => {
+                        const checked = excludedServiceIds.has(s.id);
+                        return (
+                          <label key={s.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={(v) => {
+                                setExcludedServiceIds(prev => {
+                                  const n = new Set(prev);
+                                  if (v) n.add(s.id); else n.delete(s.id);
+                                  return n;
+                                });
+                              }}
+                            />
+                            <span className={checked ? 'line-through text-muted-foreground' : ''}>
+                              {s.name}
+                              {s.price > 0 && <span className="text-muted-foreground"> · {s.price.toLocaleString('ru-RU')} ₽</span>}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+
             <div>
               <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Фотографии (до 10)</Label>
               <div className="flex flex-wrap gap-2 mt-2">
