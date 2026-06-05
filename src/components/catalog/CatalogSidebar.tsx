@@ -22,6 +22,8 @@ interface CatalogSidebarProps {
   dynamicManufacturers?: string[];
   dynamicMaterials?: string[];
   dynamicColors?: string[];
+  /** Per-category product counts from /facets — used to hide empty subcategories whose key matches a real DB slug. */
+  categoryCounts?: { slug: string; count: number }[];
 }
 
 const FilterSection = ({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) => {
