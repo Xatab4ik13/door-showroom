@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Search, ChevronLeft, ChevronRight, Pencil, Trash2, Loader2, ExternalLink, Plus, Upload, X } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Pencil, Trash2, Loader2, ExternalLink, Plus, Upload, X, Pin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -50,12 +50,13 @@ interface EditForm {
   supplier_slug: string;
   images: string[];
   specs: SpecPair[];
+  pinned_order: string;
 }
 
 const blankForm: EditForm = {
   name: '', price: '', old_price: '', description: '',
   category_id: '', manufacturer: '', material: '', color: '',
-  supplier_slug: 'manual', images: [], specs: [],
+  supplier_slug: 'manual', images: [], specs: [], pinned_order: '',
 };
 
 // Internal keys never shown in the structured editor (preserved on save via backend merge)
@@ -205,6 +206,7 @@ const Products = () => {
       supplier_slug: p.supplier_slug || 'manual',
       images: Array.isArray(p.images) ? p.images : [],
       specs: specsObjToPairs(p.specs),
+      pinned_order: p.pinned_order != null ? String(p.pinned_order) : '',
     });
   };
 
@@ -245,6 +247,7 @@ const Products = () => {
         color: editForm.color || null,
         images: editForm.images,
         specs: pairsToSpecsObj(editForm.specs),
+        pinned_order: editForm.pinned_order === '' ? null : Number(editForm.pinned_order),
       };
       if (editProduct) {
         // On edit, switch supplier by id (PATCH endpoint accepts supplier_id)
@@ -414,7 +417,18 @@ const Products = () => {
                         </div>
                       </td>
                       <td className="p-3 max-w-[250px]">
-                        <p className="font-medium text-foreground text-xs leading-tight truncate">{p.name}</p>
+                        <p className="font-medium text-foreground text-xs leading-tight truncate flex items-center gap-1.5">
+                          {p.pinned_order != null && (
+                            <span
+                              title={`Закреплён, позиция ${p.pinned_order}`}
+                              className="inline-flex items-center gap-0.5 text-[9px] uppercase tracking-wider text-primary px-1.5 py-0.5 rounded bg-primary/10 font-bold shrink-0"
+                              style={{ fontFamily: "'Oswald', sans-serif" }}
+                            >
+                              <Pin className="w-2.5 h-2.5" /> {p.pinned_order}
+                            </span>
+                          )}
+                          <span className="truncate">{p.name}</span>
+                        </p>
                         {p.manufacturer && (
                           <p className="text-[10px] text-muted-foreground mt-0.5">{p.manufacturer}</p>
                         )}
@@ -587,6 +601,23 @@ const Products = () => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                Закрепить (позиция)
+              </Label>
+              <Input
+                type="number"
+                min="0"
+                placeholder="Пусто = не закреплён. 1 — самый верх, 2 — следующий и т.д."
+                value={editForm.pinned_order}
+                onChange={(e) => setEditForm({ ...editForm, pinned_order: e.target.value.replace(/[^0-9]/g, '') })}
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Закреплённые товары всегда сверху каталога и категории, по возрастанию позиции. Синхронизация поставщика это поле не сбрасывает.
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

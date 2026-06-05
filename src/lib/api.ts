@@ -21,6 +21,7 @@ export interface ApiProduct {
   supplier_name: string;
   supplier_slug: string;
   category_name: string | null;
+  pinned_order: number | null;
   created_at: string;
   updated_at: string;
 }

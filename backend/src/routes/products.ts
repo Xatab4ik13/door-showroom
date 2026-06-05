@@ -96,7 +96,7 @@ router.get('/', async (req, res) => {
        LEFT JOIN suppliers s ON s.id = p.supplier_id
        LEFT JOIN categories c ON c.id = p.category_id
        ${where}
-       ORDER BY ${sortCol} ${sortOrder}
+       ORDER BY p.pinned_order ASC NULLS LAST, ${sortCol} ${sortOrder}
        LIMIT $${params.length - 1} OFFSET $${params.length}`,
       params,
     ),
@@ -239,7 +239,7 @@ router.post('/', requireAuth, async (req, res) => {
 // PATCH /api/products/:id (admin — edit product)
 router.patch('/:id', requireAuth, async (req, res) => {
   const allowed = ['name','price','old_price','description','category_id','manufacturer',
-    'material','color','width','height','in_stock','images','supplier_id','specs'];
+    'material','color','width','height','in_stock','images','supplier_id','specs','pinned_order'];
   const fields: string[] = [];
   const params: any[] = [];
 
@@ -247,6 +247,10 @@ router.patch('/:id', requireAuth, async (req, res) => {
     if (req.body[key] === undefined) continue;
     let val = req.body[key];
     if (key === 'manufacturer') val = normalizeManufacturer(val);
+    if (key === 'pinned_order') {
+      val = (val === '' || val === null || val === undefined) ? null : Number(val);
+      if (val !== null && (!Number.isFinite(val) || val < 0)) val = null;
+    }
     if (key === 'images') {
       params.push(JSON.stringify(val || []));
       fields.push(`images = $${params.length}::jsonb`);

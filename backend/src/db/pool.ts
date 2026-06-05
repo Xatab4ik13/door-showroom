@@ -81,10 +81,13 @@ export async function initDatabase() {
         images JSONB DEFAULT '[]',
         specs JSONB DEFAULT '{}',
         sync_status VARCHAR(20) DEFAULT 'active',
+        pinned_order INTEGER,
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW(),
         UNIQUE(supplier_id, source_sku)
       );
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS pinned_order INTEGER;
+      CREATE INDEX IF NOT EXISTS idx_products_pinned ON products(pinned_order) WHERE pinned_order IS NOT NULL;
 
       -- Sync log
       CREATE TABLE IF NOT EXISTS sync_log (
