@@ -206,6 +206,7 @@ const Catalog = () => {
     dynamicManufacturers,
     dynamicMaterials,
     dynamicColors,
+    categoryCounts: facets?.categories ?? [],
   };
 
   // Pagination controls
