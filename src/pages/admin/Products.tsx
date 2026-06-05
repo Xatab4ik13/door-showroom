@@ -50,12 +50,13 @@ interface EditForm {
   supplier_slug: string;
   images: string[];
   specs: SpecPair[];
+  pinned_order: string;
 }
 
 const blankForm: EditForm = {
   name: '', price: '', old_price: '', description: '',
   category_id: '', manufacturer: '', material: '', color: '',
-  supplier_slug: 'manual', images: [], specs: [],
+  supplier_slug: 'manual', images: [], specs: [], pinned_order: '',
 };
 
 // Internal keys never shown in the structured editor (preserved on save via backend merge)
