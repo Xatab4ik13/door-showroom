@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Search, ChevronLeft, ChevronRight, Pencil, Trash2, Loader2, ExternalLink, Plus, Upload, X } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Pencil, Trash2, Loader2, ExternalLink, Plus, Upload, X, Pin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
