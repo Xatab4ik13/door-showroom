@@ -186,7 +186,7 @@ const CatalogSidebar = ({
                       className="overflow-hidden"
                     >
                       <div className="pl-4 border-l-2 border-border ml-4 mt-1 mb-2 space-y-0.5">
-                        {cat.subcategories!.map((sub) => {
+                        {cat.subcategories!.filter(sub => !isHiddenSub(sub.key)).map((sub) => {
                           const isSubActive = selectedSubcategory === sub.key;
                           const hasChildren = sub.children && sub.children.length > 0;
                           const isSubExpanded = expandedSubs.has(sub.key);
