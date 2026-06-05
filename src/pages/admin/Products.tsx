@@ -206,6 +206,7 @@ const Products = () => {
       supplier_slug: p.supplier_slug || 'manual',
       images: Array.isArray(p.images) ? p.images : [],
       specs: specsObjToPairs(p.specs),
+      pinned_order: p.pinned_order != null ? String(p.pinned_order) : '',
     });
   };
 
