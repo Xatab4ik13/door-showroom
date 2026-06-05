@@ -229,7 +229,7 @@ const CatalogSidebar = ({
                                     className="overflow-hidden"
                                   >
                                     <div className="pl-3 border-l border-border/50 ml-3 mt-0.5 mb-1 space-y-0.5">
-                                      {sub.children!.map((child) => {
+                                      {sub.children!.filter(child => !isHiddenSub(child.key)).map((child) => {
                                         const isChildActive = selectedSubcategory === child.key;
                                         return (
                                           <button
