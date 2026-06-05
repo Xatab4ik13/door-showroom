@@ -573,6 +573,71 @@ const Products = () => {
             </div>
 
             <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                  Характеристики
+                </Label>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setEditForm(f => ({ ...f, specs: [...f.specs, { key: '', value: '' }] }))}
+                >
+                  <Plus className="w-3.5 h-3.5 mr-1" /> Добавить
+                </Button>
+              </div>
+
+              {editForm.specs.length === 0 ? (
+                <p className="text-xs text-muted-foreground mb-2">
+                  Пока пусто. Добавьте пары «название — значение» (например, Артикул — 12345).
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {editForm.specs.map((pair, i) => (
+                    <div key={i} className="flex gap-2 items-center">
+                      <Input
+                        list="spec-key-suggestions"
+                        placeholder="Название"
+                        value={pair.key}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setEditForm(f => ({
+                            ...f,
+                            specs: f.specs.map((p, idx) => idx === i ? { ...p, key: v } : p),
+                          }));
+                        }}
+                        className="flex-1"
+                      />
+                      <Input
+                        placeholder="Значение"
+                        value={pair.value}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setEditForm(f => ({
+                            ...f,
+                            specs: f.specs.map((p, idx) => idx === i ? { ...p, value: v } : p),
+                          }));
+                        }}
+                        className="flex-[1.5]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setEditForm(f => ({ ...f, specs: f.specs.filter((_, idx) => idx !== i) }))}
+                        className="p-2 text-muted-foreground hover:text-destructive"
+                        aria-label="Удалить характеристику"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <datalist id="spec-key-suggestions">
+                {SPEC_SUGGESTIONS.map(s => <option key={s} value={s} />)}
+              </datalist>
+            </div>
+
+            <div>
               <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Фотографии (до 10)</Label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {editForm.images.map((img, i) => (
