@@ -213,6 +213,7 @@ const Products = () => {
         material: editForm.material || null,
         color: editForm.color || null,
         images: editForm.images,
+        specs: pairsToSpecsObj(editForm.specs),
       };
       if (editProduct) {
         // On edit, switch supplier by id (PATCH endpoint accepts supplier_id)
