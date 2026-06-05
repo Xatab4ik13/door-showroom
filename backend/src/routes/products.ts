@@ -1,7 +1,14 @@
 import { Router } from 'express';
 import { pool } from '../db/pool.js';
 import { requireAuth } from '../middleware/auth.js';
-import { normalizeManufacturer } from '../lib/normalize.js';
+import { normalizeManufacturer, normalizeProductName, normalizeProductDescription } from '../lib/normalize.js';
+
+function cleanProduct<T extends { name?: any; description?: any }>(row: T): T {
+  if (row && row.name != null) (row as any).name = normalizeProductName(row.name) ?? row.name;
+  if (row && row.description != null) (row as any).description = normalizeProductDescription(row.description);
+  return row;
+}
+
 
 const router = Router();
 
