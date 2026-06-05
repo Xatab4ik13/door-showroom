@@ -70,10 +70,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
       {/* Info */}
       <div className="p-4">
-        {product.manufacturer && <p className="text-xs text-muted-foreground mb-1">{product.manufacturer}</p>}
+        {product.manufacturer && <p className="text-xs text-muted-foreground mb-1 truncate">{product.manufacturer}</p>}
         <h3
-          className="text-base font-semibold text-foreground uppercase tracking-wide mb-2"
+          className="text-base font-semibold text-foreground uppercase tracking-wide mb-2 line-clamp-2 min-h-[2.75rem]"
           style={{ fontFamily: "'Oswald', sans-serif" }}
+          title={product.name}
         >
           {product.name}
         </h3>
@@ -84,7 +85,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           )}
         </div>
         {(product.material || product.finish) && (
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-1 truncate">
             {[product.material, product.finish].filter(Boolean).join(' · ')}
           </p>
         )}
