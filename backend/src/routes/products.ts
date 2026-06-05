@@ -194,7 +194,7 @@ router.get('/:slug', async (req, res) => {
     const { source_url, supplier_url, xml_url, import_url, sync_id, ...cleanSpecs } = product.specs;
     product.specs = cleanSpecs;
   }
-  res.json(product);
+  res.json(cleanProduct(product));
 });
 
 // Helpers
