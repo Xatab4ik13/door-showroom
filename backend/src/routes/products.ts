@@ -247,6 +247,10 @@ router.patch('/:id', requireAuth, async (req, res) => {
     if (req.body[key] === undefined) continue;
     let val = req.body[key];
     if (key === 'manufacturer') val = normalizeManufacturer(val);
+    if (key === 'pinned_order') {
+      val = (val === '' || val === null || val === undefined) ? null : Number(val);
+      if (val !== null && (!Number.isFinite(val) || val < 0)) val = null;
+    }
     if (key === 'images') {
       params.push(JSON.stringify(val || []));
       fields.push(`images = $${params.length}::jsonb`);
