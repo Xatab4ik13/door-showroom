@@ -239,7 +239,7 @@ router.post('/', requireAuth, async (req, res) => {
 // PATCH /api/products/:id (admin — edit product)
 router.patch('/:id', requireAuth, async (req, res) => {
   const allowed = ['name','price','old_price','description','category_id','manufacturer',
-    'material','color','width','height','in_stock','images','supplier_id'];
+    'material','color','width','height','in_stock','images','supplier_id','specs'];
   const fields: string[] = [];
   const params: any[] = [];
 
@@ -250,6 +250,10 @@ router.patch('/:id', requireAuth, async (req, res) => {
     if (key === 'images') {
       params.push(JSON.stringify(val || []));
       fields.push(`images = $${params.length}::jsonb`);
+    } else if (key === 'specs') {
+      // Merge with existing specs to preserve internal fields (_sizes, _accessories, source_url, etc.)
+      params.push(JSON.stringify(val || {}));
+      fields.push(`specs = COALESCE(specs, '{}'::jsonb) || $${params.length}::jsonb`);
     } else {
       params.push(val);
       fields.push(`${key} = $${params.length}`);
