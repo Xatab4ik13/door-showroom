@@ -130,10 +130,19 @@ router.post('/notification', async (req, res) => {
 
     const { OrderId, Status, PaymentId } = data;
 
+    // OrderId may carry our attempt suffix (e.g. "RD-1007-x9k2t"); strip it
+    // back to the canonical order_number before lookup.
+    const canonicalOrderId = String(OrderId).replace(/-[a-z0-9]{1,8}$/i, (m) => (
+      /^RD-\d+$/i.test(String(OrderId)) ? m : ''
+    )) || String(OrderId);
+    const lookupOrderId = /^RD-\d+-/i.test(String(OrderId))
+      ? String(OrderId).replace(/-[a-z0-9]+$/i, '')
+      : String(OrderId);
+
     // Find order by order_number
     const orderRes = await pool.query(
       'SELECT id, status, customer_email, customer_name, total FROM orders WHERE order_number = $1',
-      [OrderId],
+      [lookupOrderId],
     );
     if (!orderRes.rows.length) {
       console.error('[PAYMENTS] Order not found for notification:', OrderId);
