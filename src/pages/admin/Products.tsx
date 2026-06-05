@@ -417,7 +417,18 @@ const Products = () => {
                         </div>
                       </td>
                       <td className="p-3 max-w-[250px]">
-                        <p className="font-medium text-foreground text-xs leading-tight truncate">{p.name}</p>
+                        <p className="font-medium text-foreground text-xs leading-tight truncate flex items-center gap-1.5">
+                          {p.pinned_order != null && (
+                            <span
+                              title={`Закреплён, позиция ${p.pinned_order}`}
+                              className="inline-flex items-center gap-0.5 text-[9px] uppercase tracking-wider text-primary px-1.5 py-0.5 rounded bg-primary/10 font-bold shrink-0"
+                              style={{ fontFamily: "'Oswald', sans-serif" }}
+                            >
+                              <Pin className="w-2.5 h-2.5" /> {p.pinned_order}
+                            </span>
+                          )}
+                          <span className="truncate">{p.name}</span>
+                        </p>
                         {p.manufacturer && (
                           <p className="text-[10px] text-muted-foreground mt-0.5">{p.manufacturer}</p>
                         )}
