@@ -33,6 +33,8 @@ const LIMIT = 20;
 const formatPrice = (p: number | null) =>
   p ? p.toLocaleString('ru-RU') + ' ₽' : '—';
 
+interface SpecPair { key: string; value: string }
+
 interface EditForm {
   name: string;
   price: string;
@@ -44,12 +46,43 @@ interface EditForm {
   color: string;
   supplier_slug: string;
   images: string[];
+  specs: SpecPair[];
 }
 
 const blankForm: EditForm = {
   name: '', price: '', old_price: '', description: '',
   category_id: '', manufacturer: '', material: '', color: '',
-  supplier_slug: 'manual', images: [],
+  supplier_slug: 'manual', images: [], specs: [],
+};
+
+// Internal keys never shown in the structured editor (preserved on save via backend merge)
+const HIDDEN_SPEC_KEYS = new Set([
+  '_sizes', '_accessories',
+  'source_url', 'supplier_url', 'xml_url', 'import_url', 'sync_id',
+]);
+
+// Suggested spec keys for quick add
+const SPEC_SUGGESTIONS = [
+  'Артикул', 'Модель', 'Коллекция', 'Тип полотна', 'Тип покрытия',
+  'Толщина', 'Стиль', 'Серия', 'Размер', 'Покрытие', 'Страна', 'Вес', 'Гарантия',
+];
+
+const specsObjToPairs = (specs: Record<string, string | null> | null | undefined): SpecPair[] => {
+  if (!specs || typeof specs !== 'object') return [];
+  return Object.entries(specs)
+    .filter(([k, v]) => !HIDDEN_SPEC_KEYS.has(k) && !k.startsWith('_') && v != null && String(v).length > 0)
+    .map(([k, v]) => ({ key: k, value: String(v) }));
+};
+
+const pairsToSpecsObj = (pairs: SpecPair[]): Record<string, string> => {
+  const out: Record<string, string> = {};
+  for (const { key, value } of pairs) {
+    const k = key.trim();
+    const v = value.trim();
+    if (!k || !v) continue;
+    out[k] = v;
+  }
+  return out;
 };
 
 const Products = () => {
@@ -140,6 +173,7 @@ const Products = () => {
       color: p.color || '',
       supplier_slug: p.supplier_slug || 'manual',
       images: Array.isArray(p.images) ? p.images : [],
+      specs: specsObjToPairs(p.specs),
     });
   };
 
@@ -179,6 +213,7 @@ const Products = () => {
         material: editForm.material || null,
         color: editForm.color || null,
         images: editForm.images,
+        specs: pairsToSpecsObj(editForm.specs),
       };
       if (editProduct) {
         // On edit, switch supplier by id (PATCH endpoint accepts supplier_id)
@@ -535,6 +570,71 @@ const Products = () => {
               <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Описание</Label>
               <Textarea value={editForm.description}
                 onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} className="mt-1" rows={4} />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                  Характеристики
+                </Label>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setEditForm(f => ({ ...f, specs: [...f.specs, { key: '', value: '' }] }))}
+                >
+                  <Plus className="w-3.5 h-3.5 mr-1" /> Добавить
+                </Button>
+              </div>
+
+              {editForm.specs.length === 0 ? (
+                <p className="text-xs text-muted-foreground mb-2">
+                  Пока пусто. Добавьте пары «название — значение» (например, Артикул — 12345).
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {editForm.specs.map((pair, i) => (
+                    <div key={i} className="flex gap-2 items-center">
+                      <Input
+                        list="spec-key-suggestions"
+                        placeholder="Название"
+                        value={pair.key}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setEditForm(f => ({
+                            ...f,
+                            specs: f.specs.map((p, idx) => idx === i ? { ...p, key: v } : p),
+                          }));
+                        }}
+                        className="flex-1"
+                      />
+                      <Input
+                        placeholder="Значение"
+                        value={pair.value}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setEditForm(f => ({
+                            ...f,
+                            specs: f.specs.map((p, idx) => idx === i ? { ...p, value: v } : p),
+                          }));
+                        }}
+                        className="flex-[1.5]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setEditForm(f => ({ ...f, specs: f.specs.filter((_, idx) => idx !== i) }))}
+                        className="p-2 text-muted-foreground hover:text-destructive"
+                        aria-label="Удалить характеристику"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <datalist id="spec-key-suggestions">
+                {SPEC_SUGGESTIONS.map(s => <option key={s} value={s} />)}
+              </datalist>
             </div>
 
             <div>
