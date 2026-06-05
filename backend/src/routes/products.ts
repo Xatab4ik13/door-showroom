@@ -96,7 +96,7 @@ router.get('/', async (req, res) => {
        LEFT JOIN suppliers s ON s.id = p.supplier_id
        LEFT JOIN categories c ON c.id = p.category_id
        ${where}
-       ORDER BY ${sortCol} ${sortOrder}
+       ORDER BY p.pinned_order ASC NULLS LAST, ${sortCol} ${sortOrder}
        LIMIT $${params.length - 1} OFFSET $${params.length}`,
       params,
     ),
