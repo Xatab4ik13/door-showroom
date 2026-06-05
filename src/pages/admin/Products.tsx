@@ -592,6 +592,23 @@ const Products = () => {
               </Select>
             </div>
 
+            <div>
+              <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                Закрепить (позиция)
+              </Label>
+              <Input
+                type="number"
+                min="0"
+                placeholder="Пусто = не закреплён. 1 — самый верх, 2 — следующий и т.д."
+                value={editForm.pinned_order}
+                onChange={(e) => setEditForm({ ...editForm, pinned_order: e.target.value.replace(/[^0-9]/g, '') })}
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Закреплённые товары всегда сверху каталога и категории, по возрастанию позиции. Синхронизация поставщика это поле не сбрасывает.
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Материал</Label>
