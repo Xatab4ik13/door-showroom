@@ -29,10 +29,11 @@ export function apiProductToCard(p: ApiProduct): CatalogProduct {
   else if (catName.includes('входн')) category = 'vhodnye';
   else if (catName.includes('перегород')) category = 'peregorodki';
 
-  // Primary image
-  const image = Array.isArray(p.images) && p.images.length > 0
-    ? p.images[0]
-    : `https://dver.com/xml/images/${p.source_sku}.jpeg`;
+  // Primary image — only use a real supplier image; fall back to local SVG placeholder
+  // (avoids the solid-blue "image not found" stub returned by dver.com for missing assets).
+  const rawImage = Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : null;
+  const isPlaceholderUrl = typeof rawImage === 'string' && /dver\.com\/xml\/images\//i.test(rawImage);
+  const image = rawImage && !isPlaceholderUrl ? rawImage : '/placeholder.svg';
 
   // Tags based on price/availability/recency
   const tags: Tag[] = [];
