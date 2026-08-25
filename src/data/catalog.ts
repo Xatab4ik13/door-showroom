@@ -26,7 +26,7 @@ export interface SubCategoryDef {
   key: string;
   label: string;
   backendSlug?: string;
-  children?: { key: string; label: string }[];
+  children?: { key: string; label: string; backendSlug?: string }[];
 }
 
 export interface CategoryDef {

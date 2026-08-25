@@ -73,14 +73,12 @@ const Catalog = () => {
 
 
   // Fetch facets for dynamic filter options
-  const { facets } = useFacets();
+  const { facets } = useFacets(category !== 'all' ? categorySlugMap[category] : undefined);
 
   const selectedCategoryDef = categories.find(c => c.key === category);
   const selectedSubcategoryDef = selectedCategoryDef?.subcategories?.find(s => s.key === subcategory)
     ?? selectedCategoryDef?.subcategories?.flatMap(s => s.children ?? []).find(s => s.key === subcategory);
-  const subcategoryBackendSlug = selectedSubcategoryDef && 'backendSlug' in selectedSubcategoryDef
-    ? selectedSubcategoryDef.backendSlug
-    : undefined;
+  const subcategoryBackendSlug = selectedSubcategoryDef?.backendSlug;
   const apiCategory = subcategoryBackendSlug
     ?? (subcategory && facets?.categories?.some(c => c.slug === subcategory) ? subcategory : undefined)
     ?? (category !== 'all' ? categorySlugMap[category] : undefined);
