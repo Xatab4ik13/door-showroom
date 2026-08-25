@@ -32,7 +32,10 @@ router.get('/', async (req, res) => {
   }
   if (category) {
     params.push(category);
-    conditions.push(`c.slug = $${params.length}`);
+    conditions.push(`(
+      c.slug = $${params.length}
+      OR c.parent_id = (SELECT id FROM categories WHERE slug = $${params.length})
+    )`);
   }
   if (search) {
     params.push(`%${search}%`);
@@ -142,22 +145,53 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/products/facets — distinct filter values
-router.get('/facets', async (_req, res) => {
+router.get('/facets', async (req, res) => {
+  const category = typeof req.query.category === 'string' ? req.query.category : null;
+  const facetParams: any[] = [];
+  let facetCategoryJoin = '';
+  let facetCategoryWhere = '';
+
+  if (category) {
+    facetParams.push(category);
+    facetCategoryJoin = 'LEFT JOIN categories fc ON fc.id = p.category_id';
+    facetCategoryWhere = `AND (fc.slug = $1 OR fc.parent_id = (SELECT id FROM categories WHERE slug = $1))`;
+  }
+
   const [mfr, mat, col, cat] = await Promise.all([
     pool.query(
-      `SELECT DISTINCT manufacturer FROM products WHERE sync_status = 'active' AND manufacturer IS NOT NULL ORDER BY manufacturer`
+      `SELECT DISTINCT p.manufacturer FROM products p ${facetCategoryJoin}
+       WHERE p.sync_status = 'active' AND p.manufacturer IS NOT NULL ${facetCategoryWhere}
+       ORDER BY p.manufacturer`,
+      facetParams,
     ),
     pool.query(
-      `SELECT DISTINCT material FROM products WHERE sync_status = 'active' AND material IS NOT NULL ORDER BY material`
+      `SELECT DISTINCT p.material FROM products p ${facetCategoryJoin}
+       WHERE p.sync_status = 'active' AND p.material IS NOT NULL ${facetCategoryWhere}
+       ORDER BY p.material`,
+      facetParams,
     ),
     pool.query(
-      `SELECT DISTINCT color FROM products WHERE sync_status = 'active' AND color IS NOT NULL ORDER BY color`
+      `SELECT DISTINCT p.color FROM products p ${facetCategoryJoin}
+       WHERE p.sync_status = 'active' AND p.color IS NOT NULL ${facetCategoryWhere}
+       ORDER BY p.color`,
+      facetParams,
     ),
     pool.query(
-      `SELECT c.slug, c.name, COUNT(p.id)::int as count
-       FROM categories c
-       JOIN products p ON p.category_id = c.id AND p.sync_status = 'active'
-       GROUP BY c.slug, c.name
+      `WITH direct_counts AS (
+         SELECT c.slug, c.name, COUNT(p.id)::int AS count
+         FROM categories c
+         JOIN products p ON p.category_id = c.id AND p.sync_status = 'active'
+         GROUP BY c.slug, c.name
+       ), parent_counts AS (
+         SELECT parent.slug, parent.name, COUNT(p.id)::int AS count
+         FROM categories parent
+         JOIN categories child ON child.parent_id = parent.id
+         JOIN products p ON p.category_id = child.id AND p.sync_status = 'active'
+         GROUP BY parent.slug, parent.name
+       )
+       SELECT slug, name, SUM(count)::int AS count
+       FROM (SELECT * FROM direct_counts UNION ALL SELECT * FROM parent_counts) counts
+       GROUP BY slug, name
        ORDER BY count DESC`
     ),
   ]);

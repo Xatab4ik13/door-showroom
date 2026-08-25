@@ -16,6 +16,25 @@ const CATEGORY_MAP: Record<string, string> = {
   '6': 'sistemy-otkryvaniya',
 };
 
+// Supplier feed groups are kept as precise child categories while also being
+// attached to one of the public top-level catalog sections.
+const CATEGORY_PARENT_MAP: Record<string, string> = {
+  '10': 'mezhkomnatnye',
+  '11': 'mezhkomnatnye',
+  '12': 'mezhkomnatnye',
+  '13': 'mezhkomnatnye',
+  '14': 'mezhkomnatnye',
+  '20': 'vhodnye',
+  '21': 'vhodnye',
+  '22': 'vhodnye',
+  '30': 'furnitura',
+  '31': 'furnitura',
+  '32': 'furnitura',
+  '33': 'furnitura',
+  '34': 'furnitura',
+  '35': 'furnitura',
+};
+
 interface YmlOffer {
   $: { id: string; available?: string };
   url?: string[];
@@ -103,9 +122,14 @@ export async function syncDverCom() {
     // Ensure categories exist in our DB
     for (const [dvercomId, catName] of Object.entries(categoryIdMap)) {
       const slug = CATEGORY_MAP[dvercomId] || `dvercom-cat-${dvercomId}`;
+      const parentSlug = CATEGORY_PARENT_MAP[dvercomId] || null;
       await pool.query(
-        `INSERT INTO categories (slug, name) VALUES ($1, $2) ON CONFLICT (slug) DO NOTHING`,
-        [slug, catName],
+        `INSERT INTO categories (slug, name, parent_id)
+         VALUES ($1, $2, (SELECT id FROM categories WHERE slug = $3))
+         ON CONFLICT (slug) DO UPDATE SET
+           name = EXCLUDED.name,
+           parent_id = COALESCE(EXCLUDED.parent_id, categories.parent_id)`,
+        [slug, catName, parentSlug],
       );
     }
 

@@ -73,21 +73,21 @@ const Catalog = () => {
 
 
   // Fetch facets for dynamic filter options
-  const { facets } = useFacets();
+  const { facets } = useFacets(category !== 'all' ? categorySlugMap[category] : undefined);
 
-  // Build API params
-  // Subcategory may map directly to a real DB category slug (e.g. "biometricheskiy-zamok").
-  // Detect that against facets so we filter by category= instead of a (less reliable) text search.
-  const subcategoryIsRealSlug = !!(subcategory && facets?.categories?.some((c: any) => c.slug === subcategory));
-  const apiCategory = subcategoryIsRealSlug
-    ? subcategory!
-    : (category !== 'all' ? categorySlugMap[category] : undefined);
+  const selectedCategoryDef = categories.find(c => c.key === category);
+  const selectedSubcategoryDef = selectedCategoryDef?.subcategories?.find(s => s.key === subcategory)
+    ?? selectedCategoryDef?.subcategories?.flatMap(s => s.children ?? []).find(s => s.key === subcategory);
+  const subcategoryBackendSlug = selectedSubcategoryDef?.backendSlug;
+  const apiCategory = subcategoryBackendSlug
+    ?? (subcategory && facets?.categories?.some(c => c.slug === subcategory) ? subcategory : undefined)
+    ?? (category !== 'all' ? categorySlugMap[category] : undefined);
 
   // Build search query: combine user search with subcategory label for API filtering
   const buildSearch = () => {
     const parts: string[] = [];
     if (search) parts.push(search);
-    if (subcategory && !subcategoryIsRealSlug) {
+    if (subcategory && !subcategoryBackendSlug && !facets?.categories?.some(c => c.slug === subcategory)) {
       // Find subcategory label to use as search term
       const catDef = categories.find(c => c.key === category);
       if (catDef?.subcategories) {

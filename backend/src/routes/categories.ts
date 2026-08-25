@@ -8,7 +8,11 @@ const router = Router();
 router.get('/', async (_req, res) => {
   const r = await pool.query(
     `SELECT c.id, c.slug, c.name, c.parent_id, c.sort_order,
-       (SELECT COUNT(*)::int FROM products p WHERE p.category_id = c.id AND p.sync_status='active') AS product_count
+       (SELECT COUNT(*)::int
+        FROM products p
+        LEFT JOIN categories child ON child.id = p.category_id
+        WHERE p.sync_status='active'
+          AND (p.category_id = c.id OR child.parent_id = c.id)) AS product_count
      FROM categories c
      ORDER BY c.parent_id NULLS FIRST, c.sort_order, c.name`,
   );

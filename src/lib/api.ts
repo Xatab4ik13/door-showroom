@@ -75,8 +75,9 @@ export interface Facets {
   categories: { slug: string; name: string; count: number }[];
 }
 
-export async function fetchFacets(): Promise<Facets> {
-  const res = await fetch(`${API_BASE}/api/products/facets`);
+export async function fetchFacets(category?: string): Promise<Facets> {
+  const query = category ? `?category=${encodeURIComponent(category)}` : '';
+  const res = await fetch(`${API_BASE}/api/products/facets${query}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
 }
