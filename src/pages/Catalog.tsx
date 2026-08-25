@@ -57,13 +57,11 @@ const Catalog = () => {
 
   // Sync state when URL changes externally (e.g. browser back/forward)
   useEffect(() => {
-    const urlCat = searchParams.get('category') || 'all';
+    const urlCat = searchParams.get('category') || 'mezhkomnatnye';
     const urlSub = searchParams.get('sub') || null;
     const urlPg = Math.max(1, Number(searchParams.get('page')) || 1);
     if (validCategories.has(urlCat) && urlCat !== category) {
       setCategory(urlCat as Category);
-    } else if (urlCat === 'all' && category !== 'all') {
-      setCategory('all');
     }
     if (urlSub !== subcategory) {
       setSubcategory(urlSub);
@@ -72,6 +70,7 @@ const Catalog = () => {
       setPage(urlPg);
     }
   }, [searchParams]);
+
 
   // Fetch facets for dynamic filter options
   const { facets } = useFacets();
@@ -118,14 +117,12 @@ const Catalog = () => {
 
   // Convert API products to card format, or use mock data as fallback
   const products = useMemo(() => {
-    if (isApi && apiProducts.length > 0) {
+    if (isApi) {
       return apiProducts.map(apiProductToCard);
     }
-    if (isApi && apiProducts.length === 0 && !loading) {
-      return []; // API returned empty — don't show mocks
-    }
+    if (loading || !error) return [];
     return mockProducts;
-  }, [apiProducts, isApi, loading]);
+  }, [apiProducts, isApi, loading, error]);
 
   const totalProducts = isApi ? total : products.length;
   const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE);
@@ -136,6 +133,7 @@ const Catalog = () => {
     const start = (page - 1) * ITEMS_PER_PAGE;
     return products.slice(start, start + ITEMS_PER_PAGE);
   }, [products, isApi, page]);
+
 
   // Dynamic filter values from facets or fallback
   const dynamicManufacturers = facets?.manufacturers ?? [];
