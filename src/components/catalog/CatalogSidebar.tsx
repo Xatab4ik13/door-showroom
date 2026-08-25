@@ -84,7 +84,10 @@ const CatalogSidebar = ({
   const countsBySlug = new Map<string, number>(
     (categoryCounts ?? []).map(c => [c.slug, Number(c.count) || 0])
   );
-  const isHiddenSub = (key: string) => countsBySlug.has(key) && countsBySlug.get(key) === 0;
+  const isHiddenSub = (sub: { key: string; backendSlug?: string }) => {
+    const slug = sub.backendSlug ?? sub.key;
+    return !!sub.backendSlug && !countsBySlug.has(slug);
+  };
 
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [expandedSubs, setExpandedSubs] = useState<Set<string>>(new Set());
@@ -186,7 +189,7 @@ const CatalogSidebar = ({
                       className="overflow-hidden"
                     >
                       <div className="pl-4 border-l-2 border-border ml-4 mt-1 mb-2 space-y-0.5">
-                        {cat.subcategories!.filter(sub => !isHiddenSub(sub.key)).map((sub) => {
+                        {cat.subcategories!.filter(sub => !isHiddenSub(sub)).map((sub) => {
                           const isSubActive = selectedSubcategory === sub.key;
                           const hasChildren = sub.children && sub.children.length > 0;
                           const isSubExpanded = expandedSubs.has(sub.key);
@@ -229,7 +232,7 @@ const CatalogSidebar = ({
                                     className="overflow-hidden"
                                   >
                                     <div className="pl-3 border-l border-border/50 ml-3 mt-0.5 mb-1 space-y-0.5">
-                                      {sub.children!.filter(child => !isHiddenSub(child.key)).map((child) => {
+                                      {sub.children!.filter(child => !isHiddenSub(child)).map((child) => {
                                         const isChildActive = selectedSubcategory === child.key;
                                         return (
                                           <button

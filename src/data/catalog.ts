@@ -25,6 +25,7 @@ export type Tag = 'popular' | 'new' | 'sale';
 export interface SubCategoryDef {
   key: string;
   label: string;
+  backendSlug?: string;
   children?: { key: string; label: string }[];
 }
 
@@ -40,21 +41,22 @@ export const categories: CategoryDef[] = [
     key: 'mezhkomnatnye',
     label: 'Межкомнатные двери',
     subcategories: [
-      { key: 'massiv', label: 'Массив' },
-      { key: 'emal', label: 'Эмаль' },
-      { key: 'plenka', label: 'Плёнка' },
-      { key: 'ekoshpon', label: 'Экошпон' },
-      { key: 'pod-pokrasku', label: 'Под покраску' },
-      { key: 's-framugoy', label: 'С фрамугой' },
+      { key: 'massiv', label: 'Массив', backendSlug: 'massiv' },
+      { key: 'emal', label: 'Эмаль', backendSlug: 'dvercom-cat-12' },
+      { key: 'ekoshpon', label: 'Экошпон / ПВХ', backendSlug: 'dvercom-cat-14' },
+      { key: 'shpon', label: 'Шпон', backendSlug: 'dvercom-cat-13' },
+      { key: 'dlya-stroyki', label: 'Для стройки', backendSlug: 'dvercom-cat-10' },
+      { key: 'tekona', label: 'Текона', backendSlug: 'dvercom-cat-11' },
     ],
   },
   {
     key: 'vhodnye',
     label: 'Входные двери',
     subcategories: [
-      { key: 'dlya-kvartiry', label: 'Для квартиры' },
-      { key: 'dlya-doma', label: 'Для уличного дома' },
-      { key: 'biometricheskiy-zamok', label: 'С биометрическим замком' },
+      { key: 'smenniye-paneli', label: 'Со сменными панелями', backendSlug: 'dvercom-cat-20' },
+      { key: 'gotovye-vhodnye', label: 'Готовые входные', backendSlug: 'dvercom-cat-21' },
+      { key: 'metallicheskie', label: 'Металлические', backendSlug: 'dvercom-cat-22' },
+      { key: 'biometricheskiy-zamok', label: 'С биометрическим замком', backendSlug: 'biometricheskiy-zamok' },
     ],
   },
   {
@@ -81,8 +83,9 @@ export const categories: CategoryDef[] = [
           { key: 'ruchki-kupe', label: 'Для купе' },
         ],
       },
-      { key: 'zamki', label: 'Замки' },
-      { key: 'zavertki', label: 'Завёртки / цилиндры' },
+      { key: 'zamki', label: 'Замки', backendSlug: 'dvercom-cat-30' },
+      { key: 'nakladki', label: 'Накладки под цилиндр', backendSlug: 'dvercom-cat-31' },
+      { key: 'zavertki', label: 'Завёртки / цилиндры', backendSlug: 'dvercom-cat-35' },
       { key: 'mekhanizmy', label: 'Механизмы' },
       { key: 'rigeli', label: 'Ригеля' },
       { key: 'ogranichiteli', label: 'Ограничители' },
@@ -90,6 +93,7 @@ export const categories: CategoryDef[] = [
       {
         key: 'petli',
         label: 'Петли',
+        backendSlug: 'dvercom-cat-32',
         children: [
           { key: 'petli-universalnye', label: 'Универсальные' },
           { key: 'petli-skrytye', label: 'Скрытые' },
@@ -97,7 +101,8 @@ export const categories: CategoryDef[] = [
           { key: 'petli-kartochnaya', label: 'Карточная' },
         ],
       },
-      { key: 'dlya-stekla', label: 'Для стеклянных дверей — комплекты' },
+      { key: 'fiksatory', label: 'Сантехнические фиксаторы', backendSlug: 'dvercom-cat-34' },
+      { key: 'ruchki-dvernye', label: 'Ручки дверные', backendSlug: 'dvercom-cat-33' },
     ],
   },
 ];
