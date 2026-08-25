@@ -358,7 +358,7 @@ const Catalog = () => {
         )}
 
         {/* Product grid */}
-        <div className="flex-1">
+        <div className="flex-1 min-h-[80vh]">
           <p className="text-sm text-muted-foreground mb-4">
             {loading ? 'Загрузка...' : `Найдено: ${totalProducts} товаров`}
             {totalPages > 1 && !loading && ` · Страница ${page} из ${totalPages}`}
@@ -368,6 +368,7 @@ const Catalog = () => {
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
+
           ) : displayProducts.length > 0 ? (
             <>
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
