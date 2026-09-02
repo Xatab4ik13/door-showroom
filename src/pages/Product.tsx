@@ -214,7 +214,10 @@ const Product = () => {
               panelColors={extras.panel_colors}
               services={extras.services}
               recommendations={extras.recommendations}
+              variants={variants}
+              kit={parsedDesc.kit}
             />
+
           </div>
         </div>
       </div>
