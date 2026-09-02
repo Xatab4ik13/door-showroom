@@ -223,6 +223,9 @@ const Product = () => {
         </div>
       </div>
 
+      {/* Opening systems — only for doors, not furniture/accessories */}
+      {/двер/i.test(String(apiProduct?.specs?.['Тип товара'] || '')) && <ProductOpeningTypes />}
+
       <ProductRecommendations items={extras.recommendations} />
     </div>
   );
