@@ -59,15 +59,6 @@ export const categories: CategoryDef[] = [
       { key: 'biometricheskiy-zamok', label: 'С биометрическим замком', backendSlug: 'biometricheskiy-zamok' },
     ],
   },
-  {
-    key: 'sistemy-otkryvaniya',
-    label: 'Системы открывания',
-    subcategories: [
-      { key: 'penaly', label: 'Пеналы' },
-      { key: 'knizhniki', label: 'Книжники' },
-      { key: 'roto-dveri', label: 'Рото двери' },
-    ],
-  },
   { key: 'peregorodki', label: 'Перегородки' },
   {
     key: 'furnitura',
