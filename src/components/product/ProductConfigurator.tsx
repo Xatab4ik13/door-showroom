@@ -114,12 +114,12 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
   }, [services, selectedServices, doorQty]);
 
   const totalPrice = useMemo(() => {
-    let total = (product.price + panelMod) * doorQty;
+    let total = (product.price + panelMod + (withKit ? kitExtra : 0)) * doorQty;
     accessories.forEach(a => { total += a.price * (accessoryQtys[a.article] || 0); });
     total += servicesTotal;
     total += recoTotal;
     return total;
-  }, [product.price, panelMod, doorQty, accessories, accessoryQtys, servicesTotal, recoTotal]);
+  }, [product.price, panelMod, withKit, kitExtra, doorQty, accessories, accessoryQtys, servicesTotal, recoTotal]);
 
   const setAccQty = (article: string, qty: number) => {
     setAccessoryQtys(prev => ({ ...prev, [article]: Math.max(0, qty) }));
