@@ -6,6 +6,7 @@ import ProductSpecs from '@/components/product/ProductSpecs';
 import ProductConfigurator, { type SizeVariant } from '@/components/product/ProductConfigurator';
 import ProductSEO from '@/components/product/ProductSEO';
 import ProductRecommendations from '@/components/product/ProductRecommendations';
+import ProductOpeningTypes from '@/components/product/ProductOpeningTypes';
 
 import { catalogProducts } from '@/data/catalog';
 import { fetchProduct, fetchProducts, fetchProductExtras, type ApiProduct, type ProductExtras } from '@/lib/api';
@@ -221,6 +222,9 @@ const Product = () => {
           </div>
         </div>
       </div>
+
+      {/* Opening systems — only for doors, not furniture/accessories */}
+      {/двер/i.test(String(apiProduct?.specs?.['Тип товара'] || '')) && <ProductOpeningTypes />}
 
       <ProductRecommendations items={extras.recommendations} />
     </div>
