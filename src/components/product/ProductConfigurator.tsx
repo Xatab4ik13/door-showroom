@@ -50,8 +50,12 @@ function getAccessoryDisplayName(raw: string): string {
   return words || raw;
 }
 
-const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [], recommendations = [] }: ProductConfiguratorProps) => {
+const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [], recommendations = [], variants = [], kit = [] }: ProductConfiguratorProps) => {
   const [addedToCart, setAddedToCart] = useState(false);
+  const navigate = useNavigate();
+  const [withKit, setWithKit] = useState(false);
+  useEffect(() => { setWithKit(false); }, [product.id]);
+  const kitExtra = useMemo(() => kit.reduce((s, k) => s + k.price * k.qty, 0), [kit]);
   const { addItem } = useCart();
 
   const isFurniture = product.category === 'furnitura';
