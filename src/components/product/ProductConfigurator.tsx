@@ -362,6 +362,9 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
         <button
           onClick={() => {
             const cartAccessories: CartAccessory[] = [
+              ...(withKit
+                ? kit.map((k, i) => ({ article: `kit-${i}`, name: k.label, price: k.price, quantity: k.qty * doorQty }))
+                : []),
               ...accessories
                 .filter(a => (accessoryQtys[a.article] || 0) > 0)
                 .map(a => ({ article: a.article, name: a.displayName, price: a.price, quantity: accessoryQtys[a.article] || 0 })),
