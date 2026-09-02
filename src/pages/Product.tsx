@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import ProductGallery from '@/components/product/ProductGallery';
 import ProductSpecs from '@/components/product/ProductSpecs';
-import ProductConfigurator from '@/components/product/ProductConfigurator';
+import ProductConfigurator, { type SizeVariant } from '@/components/product/ProductConfigurator';
 import ProductSEO from '@/components/product/ProductSEO';
 import ProductRecommendations from '@/components/product/ProductRecommendations';
 
 import { catalogProducts } from '@/data/catalog';
-import { fetchProduct, fetchProductExtras, type ApiProduct, type ProductExtras } from '@/lib/api';
+import { fetchProduct, fetchProducts, fetchProductExtras, type ApiProduct, type ProductExtras } from '@/lib/api';
 import { apiProductToCard } from '@/lib/productAdapter';
+import { parseDescription, stripSize, extractSize } from '@/lib/description';
 
 const formatPrice = (price: number) =>
   new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(price);
@@ -21,15 +22,36 @@ const Product = () => {
   const [loading, setLoading] = useState(true);
   const [apiProduct, setApiProduct] = useState<ApiProduct | null>(null);
   const [extras, setExtras] = useState<ProductExtras>({ panel_colors: [], services: [], recommendations: [] });
+  const [variants, setVariants] = useState<SizeVariant[]>([]);
 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
+    setVariants([]);
     fetchProduct(id)
       .then((data) => {
         setApiProduct(data);
         setLoading(false);
         fetchProductExtras(data.id).then(setExtras).catch(() => {});
+
+        // Size grid: sibling products that share the same model name
+        const base = stripSize(data.name);
+        if (base && base !== data.name) {
+          fetchProducts({ search: base, limit: 60 })
+            .then((res) => {
+              const list = res.products
+                .filter((p) => stripSize(p.name) === base && extractSize(p.name))
+                .map((p) => ({
+                  slug: p.slug,
+                  size: extractSize(p.name) as string,
+                  price: Number(p.price),
+                }))
+                .sort((a, b) => parseInt(a.size) - parseInt(b.size));
+              const unique = list.filter((v, i) => list.findIndex((x) => x.size === v.size) === i);
+              setVariants(unique.length > 1 ? unique : []);
+            })
+            .catch(() => {});
+        }
       })
       .catch(() => {
         setApiProduct(null);
@@ -40,6 +62,8 @@ const Product = () => {
   const product = apiProduct
     ? apiProductToCard(apiProduct)
     : catalogProducts.find((p) => p.id === id) || null;
+
+  const parsedDesc = useMemo(() => parseDescription(apiProduct?.description), [apiProduct?.description]);
 
   const apiImages = apiProduct?.images && apiProduct.images.length > 0
     ? apiProduct.images
