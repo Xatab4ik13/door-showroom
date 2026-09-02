@@ -307,3 +307,40 @@ export async function saveProductExcludes(productId: number, data: ProductExclud
   });
   if (!res.ok) throw new Error('Save failed');
 }
+
+// ==== Заявки на замер ====
+export interface MeasureLead {
+  id: number;
+  name: string;
+  phone: string;
+  address: string | null;
+  comment: string | null;
+  status: string;
+  created_at: string;
+}
+
+export async function submitMeasureRequest(data: {
+  name: string; phone: string; address?: string; comment?: string;
+}): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/leads`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Request failed');
+}
+
+export async function fetchLeads(token: string): Promise<MeasureLead[]> {
+  const res = await fetch(`${API_BASE}/api/leads`, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function updateLeadStatus(id: number, status: string, token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/leads/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) throw new Error('Update failed');
+}
