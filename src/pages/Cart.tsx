@@ -55,7 +55,7 @@ const Cart = () => {
           {/* Items list */}
           <div className="lg:col-span-2 space-y-4">
             <AnimatePresence>
-              {items.map(({ product, quantity, selectedSize, accessories, panelColor, services }) => {
+              {items.map(({ product, quantity, selectedSize, openingSide, accessories, panelColor, services }) => {
                 const accTotal = accessories.reduce((s, a) => s + a.price * a.quantity, 0);
                 const svcTotal = (services || []).reduce((s, x) => s + x.price, 0);
                 const panelMod = panelColor?.price_modifier || 0;
