@@ -10,8 +10,7 @@ interface PageData { title: string; subtitle: string; blocks: Block[]; }
 
 const defaults: { title: string; desc: string }[] = [
   { title: 'Бесплатный замер', desc: 'Выезд мастера' },
-  { title: 'Доставка 24ч', desc: 'По Москве и МО' },
-  { title: 'Гарантия 5 лет', desc: 'На изделия и монтаж' },
+  { title: 'Доставка по Москве и МО', desc: 'В согласованный день' },
   { title: 'Монтаж под ключ', desc: 'Профессиональный' },
   { title: 'Оплата частями', desc: 'Сплит без переплат' },
 ];
