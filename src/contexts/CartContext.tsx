@@ -81,16 +81,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     quantity = 1,
     extras: AddItemExtras = {},
   ) => {
-    const { selectedSize, accessories = [], panelColor = null, services = [] } = extras;
+    const { selectedSize, openingSide, accessories = [], panelColor = null, services = [] } = extras;
     setItems((prev) => {
       const existing = prev.find((i) => i.product.id === product.id);
-      const isSimple = accessories.length === 0 && !panelColor && services.length === 0;
+      const isSimple = accessories.length === 0 && !panelColor && services.length === 0 && !openingSide;
       if (existing && isSimple) {
         return prev.map((i) =>
           i.product.id === product.id ? { ...i, quantity: i.quantity + quantity } : i,
         );
       }
-      return [...prev, { product, quantity, selectedSize, accessories, panelColor, services }];
+      return [...prev, { product, quantity, selectedSize, openingSide, accessories, panelColor, services }];
     });
   };
 
