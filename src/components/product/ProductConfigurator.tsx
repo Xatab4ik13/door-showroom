@@ -78,6 +78,18 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
     } catch { return []; }
   }, [apiSpecs, product.id, product.price, isFurniture]);
 
+  const openingSides: string[] = useMemo(() => {
+    if (isFurniture) return [];
+    if (!apiSpecs?._opening_sides) return [];
+    try {
+      const parsed = JSON.parse(apiSpecs._opening_sides);
+      return Array.isArray(parsed) ? parsed.filter(s => typeof s === 'string' && s.trim()) : [];
+    } catch { return []; }
+  }, [apiSpecs, isFurniture]);
+
+  const [selectedSide, setSelectedSide] = useState('');
+  useEffect(() => { setSelectedSide(openingSides[0] || ''); }, [openingSides]);
+
   const [selectedSize, setSelectedSize] = useState(
     sizes.length > 0 ? (sizes.find(s => s.includes('200') && s.includes('70')) || sizes[0]) : ''
   );
