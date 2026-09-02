@@ -10,6 +10,7 @@ import {
   Sparkles,
   FileText,
   FolderTree,
+  ClipboardList,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
@@ -37,6 +38,7 @@ const mainNav = [
   { title: 'Расширения товара', url: '/admin/extras', icon: Sparkles },
   { title: 'Контент сайта', url: '/admin/content', icon: Image },
   { title: 'Страницы', url: '/admin/pages', icon: FileText },
+  { title: 'Заявки на замер', url: '/admin/leads', icon: ClipboardList },
   { title: 'Поставщики', url: '/admin/suppliers', icon: Truck },
   { title: 'Клиенты', url: '/admin/customers', icon: Users },
 ];

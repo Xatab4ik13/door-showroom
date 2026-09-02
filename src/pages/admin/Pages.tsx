@@ -27,6 +27,11 @@ const PAGES: { key: string; label: string; defaults: PageData }[] = [
     defaults: { title: 'Доставка и оплата', subtitle: 'Двери, которые приходят вовремя', blocks: [] },
   },
   {
+    key: 'page_works',
+    label: 'Наши двери и работы (фото монтажей)',
+    defaults: { title: 'Наши двери и работы', subtitle: 'Фото с наших объектов и монтажей', blocks: [] },
+  },
+  {
     key: 'page_installation',
     label: 'Замер и монтаж',
     defaults: { title: 'Замер и монтаж', subtitle: 'Профессиональная установка дверей под ключ', blocks: [] },
@@ -146,13 +151,92 @@ const PageEditor = ({ k, label, defaults }: { k: string; label: string; defaults
   );
 };
 
+interface PriceRow { name: string; unit: string; price: string }
+interface PricingData { title: string; note: string; rows: PriceRow[] }
+
+const InstallationPricingEditor = () => {
+  const { token } = useAdminAuth();
+  const [data, setData] = useState<PricingData>({ title: 'Смета монтажных работ', note: '', rows: [] });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetchContent<PricingData>('installation_pricing').then((d) => {
+      if (d && Array.isArray(d.rows)) setData({ title: d.title || 'Смета монтажных работ', note: d.note || '', rows: d.rows });
+      setLoading(false);
+    });
+  }, []);
+
+  const updateRow = (i: number, patch: Partial<PriceRow>) =>
+    setData((d) => ({ ...d, rows: d.rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)) }));
+
+  const save = async () => {
+    if (!token) return;
+    setSaving(true);
+    try { await saveContent('installation_pricing', data, token); toast.success('Смета сохранена'); }
+    catch { toast.error('Ошибка сохранения'); }
+    setSaving(false);
+  };
+
+  if (loading) return <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>;
+
+  return (
+    <section className="bg-card border border-border rounded-lg p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold uppercase tracking-wide" style={{ fontFamily: "'Oswald', sans-serif" }}>
+          Смета монтажа (Замер и монтаж)
+        </h2>
+        <div className="flex gap-2">
+          <button onClick={() => setData((d) => ({ ...d, rows: [...d.rows, { name: '', unit: 'шт.', price: '' }] }))}
+            className="inline-flex items-center gap-1 text-sm px-3 py-1.5 rounded border border-border hover:bg-accent">
+            <Plus className="w-4 h-4" /> Добавить работу
+          </button>
+          <button onClick={save} disabled={saving}
+            className="inline-flex items-center gap-1 text-sm px-3 py-1.5 rounded bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Сохранить
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+        <input value={data.title} onChange={(e) => setData({ ...data, title: e.target.value })}
+          placeholder="Заголовок сметы" className="px-3 py-2 text-sm rounded border border-border bg-background" />
+        <input value={data.note} onChange={(e) => setData({ ...data, note: e.target.value })}
+          placeholder="Примечание под таблицей" className="px-3 py-2 text-sm rounded border border-border bg-background" />
+      </div>
+
+      <div className="space-y-2">
+        {data.rows.map((r, i) => (
+          <div key={i} className="flex gap-2 items-center">
+            <input value={r.name} onChange={(e) => updateRow(i, { name: e.target.value })} placeholder="Название работы"
+              className="flex-1 px-3 py-2 text-sm rounded border border-border bg-background" />
+            <input value={r.unit} onChange={(e) => updateRow(i, { unit: e.target.value })} placeholder="Ед."
+              className="w-24 px-3 py-2 text-sm rounded border border-border bg-background" />
+            <input value={r.price} onChange={(e) => updateRow(i, { price: e.target.value })} placeholder="Цена, ₽"
+              className="w-32 px-3 py-2 text-sm rounded border border-border bg-background" />
+            <button onClick={() => setData((d) => ({ ...d, rows: d.rows.filter((_, idx) => idx !== i) }))}
+              className="p-2 text-destructive hover:bg-destructive/10 rounded">
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+        {data.rows.length === 0 && (
+          <p className="text-sm text-muted-foreground">Пока пусто — на сайте показывается стандартный список работ с пометкой «по запросу».</p>
+        )}
+      </div>
+    </section>
+  );
+};
+
 const PagesPage = () => (
   <div className="p-6 space-y-6 max-w-5xl">
     <h1 className="text-3xl font-bold uppercase tracking-wide" style={{ fontFamily: "'Oswald', sans-serif" }}>
       Страницы сайта
     </h1>
     {PAGES.map((p) => <PageEditor key={p.key} k={p.key} label={p.label} defaults={p.defaults} />)}
+    <InstallationPricingEditor />
   </div>
 );
 
 export default PagesPage;
+
