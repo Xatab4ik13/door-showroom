@@ -10,6 +10,7 @@ const navItems = [
   { label: 'Каталог', href: '/catalog' },
   { label: 'Доставка и оплата', href: '/delivery' },
   { label: 'Замер и монтаж', href: '/installation' },
+  { label: 'Наши работы', href: '/works' },
   { label: 'О компании', href: '/about' },
   { label: 'Новости', href: '/news' },
   { label: 'Контакты', href: '/contacts' },

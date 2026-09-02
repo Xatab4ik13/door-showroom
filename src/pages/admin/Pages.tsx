@@ -27,6 +27,11 @@ const PAGES: { key: string; label: string; defaults: PageData }[] = [
     defaults: { title: 'Доставка и оплата', subtitle: 'Двери, которые приходят вовремя', blocks: [] },
   },
   {
+    key: 'page_works',
+    label: 'Наши двери и работы (фото монтажей)',
+    defaults: { title: 'Наши двери и работы', subtitle: 'Фото с наших объектов и монтажей', blocks: [] },
+  },
+  {
     key: 'page_installation',
     label: 'Замер и монтаж',
     defaults: { title: 'Замер и монтаж', subtitle: 'Профессиональная установка дверей под ключ', blocks: [] },

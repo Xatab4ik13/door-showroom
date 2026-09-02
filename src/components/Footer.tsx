@@ -17,6 +17,7 @@ const footerLinks = [
       { label: 'О компании', to: '/about' },
       { label: 'Доставка и оплата', to: '/delivery' },
       { label: 'Замер и монтаж', to: '/installation' },
+      { label: 'Наши работы', to: '/works' },
       { label: 'Новости', to: '/news' },
       { label: 'Контакты', to: '/contacts' },
     ],

@@ -18,6 +18,7 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Delivery from "./pages/Delivery";
 import Installation from "./pages/Installation";
+import Works from "./pages/Works";
 import About from "./pages/About";
 import News from "./pages/News";
 import Contacts from "./pages/Contacts";
@@ -34,6 +35,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import AdminContent from "./pages/admin/Content";
 import AdminProductExtras from "./pages/admin/ProductExtras";
 import AdminPages from "./pages/admin/Pages";
+import AdminLeads from "./pages/admin/Leads";
 import AdminCategories from "./pages/admin/Categories";
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -61,6 +63,7 @@ const App = () => (
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/delivery" element={<Delivery />} />
                   <Route path="/installation" element={<Installation />} />
+                  <Route path="/works" element={<Works />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/news" element={<News />} />
                   <Route path="/contacts" element={<Contacts />} />
@@ -81,6 +84,7 @@ const App = () => (
                   <Route path="content" element={<AdminContent />} />
                   <Route path="extras" element={<AdminProductExtras />} />
                   <Route path="pages" element={<AdminPages />} />
+                  <Route path="leads" element={<AdminLeads />} />
                   <Route path="categories" element={<AdminCategories />} />
                 </Route>
 
