@@ -84,6 +84,9 @@ const Cart = () => {
                     {selectedSize && (
                       <p className="text-xs text-primary mt-0.5">Размер: {selectedSize}</p>
                     )}
+                    {openingSide && (
+                      <p className="text-xs text-primary mt-0.5">Открывание: {openingSide}</p>
+                    )}
                     {panelColor && (
                       <p className="text-xs text-primary mt-0.5">
                         Цвет панели: {panelColor.name}{panelMod ? ` (+${formatPrice(panelMod)})` : ''}
