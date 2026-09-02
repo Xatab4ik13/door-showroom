@@ -386,7 +386,8 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
               price_modifier: Number(selectedPanel.price_modifier) || 0,
             } : null;
             addItem(product, doorQty, {
-              selectedSize, accessories: cartAccessories, panelColor: cartPanel, services: cartServices,
+              selectedSize: selectedSize || variants.find(v => v.slug === product.id)?.size || '',
+              accessories: cartAccessories, panelColor: cartPanel, services: cartServices,
             });
             setAddedToCart(true);
             setTimeout(() => setAddedToCart(false), 2000);
