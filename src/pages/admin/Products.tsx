@@ -51,12 +51,24 @@ interface EditForm {
   images: string[];
   specs: SpecPair[];
   pinned_order: string;
+  sizes_text: string;
+  opening_left: boolean;
+  opening_right: boolean;
 }
 
 const blankForm: EditForm = {
   name: '', price: '', old_price: '', description: '',
   category_id: '', manufacturer: '', material: '', color: '',
   supplier_slug: 'manual', images: [], specs: [], pinned_order: '',
+  sizes_text: '', opening_left: false, opening_right: false,
+};
+
+const parseJsonArray = (raw: unknown): string[] => {
+  if (typeof raw !== 'string' || !raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map(String).filter(Boolean) : [];
+  } catch { return []; }
 };
 
 // Internal keys never shown in the structured editor (preserved on save via backend merge)
@@ -207,6 +219,9 @@ const Products = () => {
       images: Array.isArray(p.images) ? p.images : [],
       specs: specsObjToPairs(p.specs),
       pinned_order: p.pinned_order != null ? String(p.pinned_order) : '',
+      sizes_text: parseJsonArray(p.specs?._sizes).join(', '),
+      opening_left: parseJsonArray(p.specs?._opening_sides).includes('Левое'),
+      opening_right: parseJsonArray(p.specs?._opening_sides).includes('Правое'),
     });
   };
 
@@ -246,7 +261,14 @@ const Products = () => {
         material: editForm.material || null,
         color: editForm.color || null,
         images: editForm.images,
-        specs: pairsToSpecsObj(editForm.specs),
+        specs: (() => {
+          const obj: Record<string, string> = pairsToSpecsObj(editForm.specs);
+          const sizeList = editForm.sizes_text.split(',').map(s => s.trim()).filter(Boolean);
+          if (sizeList.length > 0) obj._sizes = JSON.stringify(sizeList);
+          const sides = [editForm.opening_left && 'Левое', editForm.opening_right && 'Правое'].filter(Boolean) as string[];
+          if (sides.length > 0) obj._opening_sides = JSON.stringify(sides);
+          return obj;
+        })(),
         pinned_order: editForm.pinned_order === '' ? null : Number(editForm.pinned_order),
       };
       if (editProduct) {
