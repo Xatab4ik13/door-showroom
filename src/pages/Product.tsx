@@ -150,10 +150,11 @@ const Product = () => {
           )}
 
           {/* Description from API */}
-          {apiProduct?.description && (
-            <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-              {apiProduct.description}
-            </p>
+          {parsedDesc.html && (
+            <div
+              className="text-sm text-muted-foreground mb-4 leading-relaxed space-y-2 [&_b]:text-foreground [&_b]:font-semibold [&_li]:list-disc [&_ul]:pl-5"
+              dangerouslySetInnerHTML={{ __html: parsedDesc.html }}
+            />
           )}
 
           {/* Price */}
