@@ -1,8 +1,16 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Check, Minus, Plus } from 'lucide-react';
 import { useCart, type CartAccessory, type CartService, type CartPanelColor } from '@/contexts/CartContext';
 import type { CatalogProduct } from '@/data/catalog';
 import type { PanelColor, ProductService, RecommendedProduct } from '@/lib/api';
+import type { KitItem } from '@/lib/description';
+
+export interface SizeVariant {
+  slug: string;
+  size: string;
+  price: number;
+}
 
 interface Accessory {
   name: string;
@@ -22,6 +30,8 @@ interface ProductConfiguratorProps {
   panelColors?: PanelColor[];
   services?: ProductService[];
   recommendations?: RecommendedProduct[];
+  variants?: SizeVariant[];
+  kit?: KitItem[];
 }
 
 const formatPrice = (price: number) =>
@@ -40,8 +50,12 @@ function getAccessoryDisplayName(raw: string): string {
   return words || raw;
 }
 
-const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [], recommendations = [] }: ProductConfiguratorProps) => {
+const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [], recommendations = [], variants = [], kit = [] }: ProductConfiguratorProps) => {
   const [addedToCart, setAddedToCart] = useState(false);
+  const navigate = useNavigate();
+  const [withKit, setWithKit] = useState(false);
+  useEffect(() => { setWithKit(false); }, [product.id]);
+  const kitExtra = useMemo(() => kit.reduce((s, k) => s + k.price * k.qty, 0), [kit]);
   const { addItem } = useCart();
 
   const isFurniture = product.category === 'furnitura';
@@ -100,12 +114,12 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
   }, [services, selectedServices, doorQty]);
 
   const totalPrice = useMemo(() => {
-    let total = (product.price + panelMod) * doorQty;
+    let total = (product.price + panelMod + (withKit ? kitExtra : 0)) * doorQty;
     accessories.forEach(a => { total += a.price * (accessoryQtys[a.article] || 0); });
     total += servicesTotal;
     total += recoTotal;
     return total;
-  }, [product.price, panelMod, doorQty, accessories, accessoryQtys, servicesTotal, recoTotal]);
+  }, [product.price, panelMod, withKit, kitExtra, doorQty, accessories, accessoryQtys, servicesTotal, recoTotal]);
 
   const setAccQty = (article: string, qty: number) => {
     setAccessoryQtys(prev => ({ ...prev, [article]: Math.max(0, qty) }));
@@ -122,6 +136,75 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
 
   return (
     <div className="space-y-5">
+      {/* Size grid from sibling variants */}
+      {variants.length > 1 && (
+        <div>
+          <h4 className="text-sm font-bold uppercase tracking-wider text-foreground mb-3" style={{ fontFamily: "'Oswald', sans-serif" }}>
+            Размер полотна, мм
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {variants.map(v => {
+              const active = v.slug === product.id;
+              return (
+                <button
+                  key={v.slug}
+                  onClick={() => { if (!active) navigate(`/product/${v.slug}`); }}
+                  title={formatPrice(v.price)}
+                  className={`px-3 py-1.5 text-sm rounded border transition-all ${
+                    active
+                      ? 'border-primary bg-primary text-primary-foreground font-medium'
+                      : 'border-border bg-background text-foreground hover:border-primary/50'
+                  }`}
+                >
+                  {v.size}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Полотно / Комплект */}
+      {kit.length > 0 && (
+        <div>
+          <h4 className="text-sm font-bold uppercase tracking-wider text-foreground mb-3" style={{ fontFamily: "'Oswald', sans-serif" }}>
+            Комплектация
+          </h4>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setWithKit(false)}
+              className={`px-3 py-2 text-sm rounded border text-left transition-all ${
+                !withKit ? 'border-primary bg-primary/5 text-foreground font-medium' : 'border-border bg-background text-muted-foreground hover:border-primary/50'
+              }`}
+            >
+              Только полотно
+              <span className="block text-xs text-primary font-bold">{formatPrice(product.price + panelMod)}</span>
+            </button>
+            <button
+              onClick={() => setWithKit(true)}
+              className={`px-3 py-2 text-sm rounded border text-left transition-all ${
+                withKit ? 'border-primary bg-primary/5 text-foreground font-medium' : 'border-border bg-background text-muted-foreground hover:border-primary/50'
+              }`}
+            >
+              Комплект
+              <span className="block text-xs text-primary font-bold">{formatPrice(product.price + panelMod + kitExtra)}</span>
+            </button>
+          </div>
+          <ul className="mt-3 space-y-1">
+            <li className="text-xs text-muted-foreground flex justify-between gap-2">
+              <span>Полотно × 1</span>
+              <span>{formatPrice(product.price)}</span>
+            </li>
+            {kit.map((k, i) => (
+              <li key={i} className={`text-xs flex justify-between gap-2 ${withKit ? 'text-muted-foreground' : 'text-muted-foreground/50 line-through'}`}>
+                <span className="truncate" title={k.name}>{k.label} × {k.qty}</span>
+                <span className="whitespace-nowrap">{formatPrice(k.price * k.qty)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Sizes */}
       {sizes.length > 0 && (
         <div>
@@ -279,6 +362,9 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
         <button
           onClick={() => {
             const cartAccessories: CartAccessory[] = [
+              ...(withKit
+                ? kit.map((k, i) => ({ article: `kit-${i}`, name: k.label, price: k.price, quantity: k.qty * doorQty }))
+                : []),
               ...accessories
                 .filter(a => (accessoryQtys[a.article] || 0) > 0)
                 .map(a => ({ article: a.article, name: a.displayName, price: a.price, quantity: accessoryQtys[a.article] || 0 })),
@@ -300,7 +386,8 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
               price_modifier: Number(selectedPanel.price_modifier) || 0,
             } : null;
             addItem(product, doorQty, {
-              selectedSize, accessories: cartAccessories, panelColor: cartPanel, services: cartServices,
+              selectedSize: selectedSize || variants.find(v => v.slug === product.id)?.size || '',
+              accessories: cartAccessories, panelColor: cartPanel, services: cartServices,
             });
             setAddedToCart(true);
             setTimeout(() => setAddedToCart(false), 2000);
