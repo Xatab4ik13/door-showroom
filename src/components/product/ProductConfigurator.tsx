@@ -173,39 +173,45 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setWithKit(false)}
-              className={`px-3 py-2 text-sm rounded border text-left transition-all ${
-                !withKit ? 'border-primary bg-primary/5 text-foreground font-medium' : 'border-border bg-background text-muted-foreground hover:border-primary/50'
+              className={`px-3 py-2.5 text-sm rounded border text-left transition-all ${
+                !withKit ? 'border-primary bg-primary/5 text-foreground' : 'border-border bg-background text-muted-foreground hover:border-primary/50'
               }`}
             >
-              Только полотно
-              <span className="block text-xs text-primary font-bold">{formatPrice(product.price + panelMod)}</span>
+              <span className="block font-medium">Полотно</span>
+              {product.oldPrice ? (
+                <span className="block text-xs text-muted-foreground line-through">{formatPrice(product.oldPrice)}</span>
+              ) : null}
+              <span className="block text-base font-bold text-primary">{formatPrice(product.price + panelMod)}</span>
+              <span className="block text-[10px] text-muted-foreground mt-0.5">Под заказ</span>
             </button>
             <button
               onClick={() => setWithKit(true)}
-              className={`px-3 py-2 text-sm rounded border text-left transition-all ${
-                withKit ? 'border-primary bg-primary/5 text-foreground font-medium' : 'border-border bg-background text-muted-foreground hover:border-primary/50'
+              className={`px-3 py-2.5 text-sm rounded border text-left transition-all ${
+                withKit ? 'border-primary bg-primary/5 text-foreground' : 'border-border bg-background text-muted-foreground hover:border-primary/50'
               }`}
             >
-              Комплект
-              <span className="block text-xs text-primary font-bold">{formatPrice(product.price + panelMod + kitExtra)}</span>
+              <span className="block font-medium">Комплект</span>
+              {product.oldPrice ? (
+                <span className="block text-xs text-muted-foreground line-through">{formatPrice(product.oldPrice + kitExtra)}</span>
+              ) : null}
+              <span className="block text-base font-bold text-primary">{formatPrice(product.price + panelMod + kitExtra)}</span>
+              <span className="block text-[10px] text-primary mt-0.5">Что в комплекте?</span>
             </button>
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            В комплект входят: коробка, полотно и наличники с двух сторон.
-          </p>
-
-          <ul className="mt-3 space-y-1">
-            <li className="text-xs text-muted-foreground flex justify-between gap-2">
-              <span>Полотно × 1</span>
-              <span>{formatPrice(product.price)}</span>
-            </li>
-            {kit.map((k, i) => (
-              <li key={i} className={`text-xs flex justify-between gap-2 ${withKit ? 'text-muted-foreground' : 'text-muted-foreground/50 line-through'}`}>
-                <span className="truncate" title={k.name}>{k.label} × {k.qty}</span>
-                <span className="whitespace-nowrap">{formatPrice(k.price * k.qty)}</span>
+          {withKit && (
+            <ul className="mt-3 space-y-1">
+              <li className="text-xs text-muted-foreground flex justify-between gap-2">
+                <span>Полотно × 1</span>
+                <span>{formatPrice(product.price)}</span>
               </li>
-            ))}
-          </ul>
+              {kit.map((k, i) => (
+                <li key={i} className="text-xs text-muted-foreground flex justify-between gap-2">
+                  <span className="truncate" title={k.name}>{k.label} × {k.qty}</span>
+                  <span className="whitespace-nowrap">{formatPrice(k.price * k.qty)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
