@@ -244,6 +244,25 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
         </div>
       )}
 
+      {/* Opening side */}
+      {openingSides.length > 0 && (
+        <div>
+          <h4 className="text-sm font-bold uppercase tracking-wider text-foreground mb-3" style={{ fontFamily: "'Oswald', sans-serif" }}>
+            Тип открывания двери{selectedSide ? ` — ${selectedSide}` : ''}
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {openingSides.map(side => (
+              <button key={side} onClick={() => setSelectedSide(side)}
+                className={`px-3 py-1.5 text-sm rounded border transition-all ${
+                  selectedSide === side
+                    ? 'border-primary bg-primary text-primary-foreground font-medium'
+                    : 'border-border bg-background text-foreground hover:border-primary/50'
+                }`}>{side}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Panel colors */}
       {panelColors.length > 0 && (
         <div>
@@ -409,6 +428,7 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
             } : null;
             addItem(product, doorQty, {
               selectedSize: selectedSize || variants.find(v => v.slug === product.id)?.size || '',
+              openingSide: selectedSide || undefined,
               accessories: cartAccessories, panelColor: cartPanel, services: cartServices,
             });
             setAddedToCart(true);
