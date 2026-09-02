@@ -1,8 +1,16 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Check, Minus, Plus } from 'lucide-react';
 import { useCart, type CartAccessory, type CartService, type CartPanelColor } from '@/contexts/CartContext';
 import type { CatalogProduct } from '@/data/catalog';
 import type { PanelColor, ProductService, RecommendedProduct } from '@/lib/api';
+import type { KitItem } from '@/lib/description';
+
+export interface SizeVariant {
+  slug: string;
+  size: string;
+  price: number;
+}
 
 interface Accessory {
   name: string;
@@ -22,6 +30,8 @@ interface ProductConfiguratorProps {
   panelColors?: PanelColor[];
   services?: ProductService[];
   recommendations?: RecommendedProduct[];
+  variants?: SizeVariant[];
+  kit?: KitItem[];
 }
 
 const formatPrice = (price: number) =>
