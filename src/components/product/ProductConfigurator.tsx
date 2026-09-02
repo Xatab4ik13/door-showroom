@@ -78,6 +78,18 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
     } catch { return []; }
   }, [apiSpecs, product.id, product.price, isFurniture]);
 
+  const openingSides: string[] = useMemo(() => {
+    if (isFurniture) return [];
+    if (!apiSpecs?._opening_sides) return [];
+    try {
+      const parsed = JSON.parse(apiSpecs._opening_sides);
+      return Array.isArray(parsed) ? parsed.filter(s => typeof s === 'string' && s.trim()) : [];
+    } catch { return []; }
+  }, [apiSpecs, isFurniture]);
+
+  const [selectedSide, setSelectedSide] = useState('');
+  useEffect(() => { setSelectedSide(openingSides[0] || ''); }, [openingSides]);
+
   const [selectedSize, setSelectedSize] = useState(
     sizes.length > 0 ? (sizes.find(s => s.includes('200') && s.includes('70')) || sizes[0]) : ''
   );
@@ -227,6 +239,25 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
                     ? 'border-primary bg-primary text-primary-foreground font-medium'
                     : 'border-border bg-background text-foreground hover:border-primary/50'
                 }`}>{size}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Opening side */}
+      {openingSides.length > 0 && (
+        <div>
+          <h4 className="text-sm font-bold uppercase tracking-wider text-foreground mb-3" style={{ fontFamily: "'Oswald', sans-serif" }}>
+            Тип открывания двери{selectedSide ? ` — ${selectedSide}` : ''}
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {openingSides.map(side => (
+              <button key={side} onClick={() => setSelectedSide(side)}
+                className={`px-3 py-1.5 text-sm rounded border transition-all ${
+                  selectedSide === side
+                    ? 'border-primary bg-primary text-primary-foreground font-medium'
+                    : 'border-border bg-background text-foreground hover:border-primary/50'
+                }`}>{side}</button>
             ))}
           </div>
         </div>
@@ -397,6 +428,7 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
             } : null;
             addItem(product, doorQty, {
               selectedSize: selectedSize || variants.find(v => v.slug === product.id)?.size || '',
+              openingSide: selectedSide || undefined,
               accessories: cartAccessories, panelColor: cartPanel, services: cartServices,
             });
             setAddedToCart(true);

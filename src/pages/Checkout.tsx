@@ -107,9 +107,13 @@ const Checkout = () => {
     setSubmitting(true);
     try {
       const orderItems: { name: string; id: string; quantity: number; price: number }[] = [];
-      items.forEach(({ product, quantity, accessories }) => {
+      items.forEach(({ product, quantity, selectedSize, openingSide, accessories }) => {
+        const opts = [
+          selectedSize ? `Размер: ${selectedSize}` : '',
+          openingSide ? `Открывание: ${openingSide}` : '',
+        ].filter(Boolean).join(', ');
         orderItems.push({
-          name: product.name,
+          name: opts ? `${product.name} (${opts})` : product.name,
           id: product.id,
           quantity,
           price: product.price,

@@ -51,12 +51,24 @@ interface EditForm {
   images: string[];
   specs: SpecPair[];
   pinned_order: string;
+  sizes_text: string;
+  opening_left: boolean;
+  opening_right: boolean;
 }
 
 const blankForm: EditForm = {
   name: '', price: '', old_price: '', description: '',
   category_id: '', manufacturer: '', material: '', color: '',
   supplier_slug: 'manual', images: [], specs: [], pinned_order: '',
+  sizes_text: '', opening_left: false, opening_right: false,
+};
+
+const parseJsonArray = (raw: unknown): string[] => {
+  if (typeof raw !== 'string' || !raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map(String).filter(Boolean) : [];
+  } catch { return []; }
 };
 
 // Internal keys never shown in the structured editor (preserved on save via backend merge)
@@ -207,6 +219,9 @@ const Products = () => {
       images: Array.isArray(p.images) ? p.images : [],
       specs: specsObjToPairs(p.specs),
       pinned_order: p.pinned_order != null ? String(p.pinned_order) : '',
+      sizes_text: parseJsonArray(p.specs?._sizes).join(', '),
+      opening_left: parseJsonArray(p.specs?._opening_sides).includes('Левое'),
+      opening_right: parseJsonArray(p.specs?._opening_sides).includes('Правое'),
     });
   };
 
@@ -246,7 +261,14 @@ const Products = () => {
         material: editForm.material || null,
         color: editForm.color || null,
         images: editForm.images,
-        specs: pairsToSpecsObj(editForm.specs),
+        specs: (() => {
+          const obj: Record<string, string> = pairsToSpecsObj(editForm.specs);
+          const sizeList = editForm.sizes_text.split(',').map(s => s.trim()).filter(Boolean);
+          if (sizeList.length > 0) obj._sizes = JSON.stringify(sizeList);
+          const sides = [editForm.opening_left && 'Левое', editForm.opening_right && 'Правое'].filter(Boolean) as string[];
+          if (sides.length > 0) obj._opening_sides = JSON.stringify(sides);
+          return obj;
+        })(),
         pinned_order: editForm.pinned_order === '' ? null : Number(editForm.pinned_order),
       };
       if (editProduct) {
@@ -637,6 +659,36 @@ const Products = () => {
               <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>Описание</Label>
               <Textarea value={editForm.description}
                 onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} className="mt-1" rows={4} />
+            </div>
+
+            <div className="border border-border rounded-md p-3 space-y-3 bg-secondary/30">
+              <Label className="text-xs uppercase tracking-wider" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                Размеры и сторонность (опции заказа)
+              </Label>
+              <div>
+                <Label className="text-xs text-muted-foreground">Размеры через запятую, мм</Label>
+                <Input value={editForm.sizes_text}
+                  onChange={(e) => setEditForm({ ...editForm, sizes_text: e.target.value })}
+                  placeholder="860x2050, 960x2050" className="mt-1" />
+                <p className="text-[11px] text-muted-foreground mt-1">Показываются кнопками выбора размера на странице товара</p>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Тип открывания двери</Label>
+                <div className="flex gap-4 mt-1.5">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input type="checkbox" checked={editForm.opening_left}
+                      onChange={(e) => setEditForm({ ...editForm, opening_left: e.target.checked })}
+                      className="accent-primary w-4 h-4" />
+                    Левое
+                  </label>
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input type="checkbox" checked={editForm.opening_right}
+                      onChange={(e) => setEditForm({ ...editForm, opening_right: e.target.checked })}
+                      className="accent-primary w-4 h-4" />
+                    Правое
+                  </label>
+                </div>
+              </div>
             </div>
 
             <div>
