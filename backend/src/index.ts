@@ -15,6 +15,7 @@ import productExtrasRouter from './routes/product-extras.js';
 import uploadsRouter from './routes/uploads.js';
 import contentRouter from './routes/content.js';
 import categoriesRouter from './routes/categories.js';
+import leadsRouter from './routes/leads.js';
 import path from 'path';
 import express2 from 'express';
 import { syncDverCom } from './services/dvercom-sync.js';
@@ -57,6 +58,7 @@ app.use('/api/product-extras', productExtrasRouter);
 app.use('/api/uploads', uploadsRouter);
 app.use('/api/content', contentRouter);
 app.use('/api/categories', categoriesRouter);
+app.use('/api/leads', leadsRouter);
 
 // Static serve uploads (in case nginx doesn't handle it)
 const UPLOAD_DIR = process.env.UPLOAD_DIR || path.resolve(process.cwd(), 'uploads');
