@@ -190,6 +190,10 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
               <span className="block text-xs text-primary font-bold">{formatPrice(product.price + panelMod + kitExtra)}</span>
             </button>
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            В комплект входят: коробка, полотно и наличники с двух сторон.
+          </p>
+
           <ul className="mt-3 space-y-1">
             <li className="text-xs text-muted-foreground flex justify-between gap-2">
               <span>Полотно × 1</span>
