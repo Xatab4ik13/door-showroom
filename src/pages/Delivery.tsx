@@ -198,6 +198,67 @@ const Delivery = () => {
           </div>
         </section>
 
+        {/* Тарифы */}
+        <section className="pb-16 md:pb-24 px-4 md:px-8 lg:px-12">
+          <div className="max-w-[1600px] mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold uppercase tracking-wide text-foreground mb-8"
+              style={{ fontFamily: "'Oswald', sans-serif" }}>
+              Стоимость доставки и подъёма
+            </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="rounded-xl border border-border bg-background p-6">
+                <h3 className="text-lg font-bold uppercase tracking-wider text-foreground mb-4" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                  Доставка до подъезда
+                </h3>
+                <ul className="divide-y divide-border" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                  {[
+                    ['По Москве в пределах МКАД', '3 500 ₽'],
+                    ['Москва и МО за МКАД', '3 500 ₽ + 60 ₽/км от МКАД'],
+                  ].map(([n, p]) => (
+                    <li key={n} className="flex items-center justify-between gap-4 py-3">
+                      <span className="text-muted-foreground">{n}</span>
+                      <span className="font-semibold text-foreground whitespace-nowrap">{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="rounded-xl border border-border bg-background p-6">
+                <h3 className="text-lg font-bold uppercase tracking-wider text-foreground mb-4" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                  Подъём межкомнатных дверей
+                </h3>
+                <ul className="divide-y divide-border" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                  {[
+                    ['На лифте', '400 ₽ за дверной комплект'],
+                    ['Без лифта', '400 ₽ за дверной комплект за этаж'],
+                  ].map(([n, p]) => (
+                    <li key={n} className="flex items-center justify-between gap-4 py-3">
+                      <span className="text-muted-foreground">{n}</span>
+                      <span className="font-semibold text-foreground whitespace-nowrap">{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-xl border border-[hsl(205,85%,45%)]/30 bg-[hsl(205,85%,45%)]/5 p-6 space-y-3"
+              style={{ fontFamily: "'Manrope', sans-serif" }}>
+              <p className="text-foreground font-semibold">Обратите внимание!</p>
+              <p className="text-muted-foreground leading-relaxed">
+                Стоимость подъёма двери рассчитана для стандартного полотна шириной до 900 мм, высотой до 2000 мм и весом не более 30 кг.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                В случае, когда вес двери превышает 50 кг, а высота и ширина превышают 2000 мм и 900 мм, подъём возможен только по предварительному согласованию, и окончательная стоимость определяется индивидуально.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                Важно! Если лифт не работает или материал не помещается в лифт — подъём осуществляется по тарифу без лифта.
+              </p>
+            </div>
+          </div>
+        </section>
+
+
+
         {/* Why choose section */}
         <section className="py-16 md:py-24 px-4 md:px-8 lg:px-12 bg-secondary">
           <div className="max-w-[1600px] mx-auto">
