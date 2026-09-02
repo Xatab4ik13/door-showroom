@@ -25,6 +25,7 @@ export interface CartItem {
   product: CatalogProduct;
   quantity: number;
   selectedSize?: string;
+  openingSide?: string;
   accessories: CartAccessory[];
   panelColor?: CartPanelColor | null;
   services?: CartService[];
@@ -32,6 +33,7 @@ export interface CartItem {
 
 export interface AddItemExtras {
   selectedSize?: string;
+  openingSide?: string;
   accessories?: CartAccessory[];
   panelColor?: CartPanelColor | null;
   services?: CartService[];
