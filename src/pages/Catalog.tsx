@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Filter, X, Loader2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import CatalogSidebar from '@/components/catalog/CatalogSidebar';
@@ -133,6 +133,35 @@ const Catalog = () => {
     const start = (page - 1) * ITEMS_PER_PAGE;
     return products.slice(start, start + ITEMS_PER_PAGE);
   }, [products, isApi, page]);
+
+  // Save / restore scroll position so returning from a product keeps the place
+  const SCROLL_KEY = 'catalog-scroll';
+  const restoredRef = useRef(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      try {
+        sessionStorage.setItem(SCROLL_KEY, JSON.stringify({ q: window.location.search, y: window.scrollY }));
+      } catch { /* ignore */ }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (restoredRef.current || loading || displayProducts.length === 0) return;
+    restoredRef.current = true;
+    try {
+      const raw = sessionStorage.getItem(SCROLL_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as { q: string; y: number };
+      if (saved && saved.q === window.location.search && saved.y > 0) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' as ScrollBehavior });
+      }
+    } catch { /* ignore */ }
+  }, [loading, displayProducts.length]);
+
+
 
 
   // Dynamic filter values from facets or fallback

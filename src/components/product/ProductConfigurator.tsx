@@ -5,6 +5,17 @@ import { useCart, type CartAccessory, type CartService, type CartPanelColor } fr
 import type { CatalogProduct } from '@/data/catalog';
 import type { PanelColor, ProductService, RecommendedProduct } from '@/lib/api';
 import type { KitItem } from '@/lib/description';
+import { extractSize } from '@/lib/description';
+
+const ENTRANCE_SIZES = ['860x2050', '880x2050', '960x2050', '980x2050'];
+const ENTRANCE_SIDES = ['Левое (петли слева)', 'Правое (петли справа)'];
+const DOBOR_WIDTHS = [100, 150, 200, 250];
+
+interface DoborOption {
+  width: number;
+  price: number;
+  article: string;
+}
 
 export interface SizeVariant {
   slug: string;
@@ -59,14 +70,26 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
   const { addItem } = useCart();
 
   const isFurniture = product.category === 'furnitura';
+  const isEntrance = product.category === 'vhodnye';
 
   const sizes: string[] = useMemo(() => {
     if (isFurniture) return [];
-    if (!apiSpecs?._sizes) return [];
-    try { return JSON.parse(apiSpecs._sizes); } catch { return []; }
-  }, [apiSpecs, isFurniture]);
+    let list: string[] = [];
+    if (apiSpecs?._sizes) {
+      try {
+        const parsed = JSON.parse(apiSpecs._sizes);
+        if (Array.isArray(parsed)) list = parsed.filter((s): s is string => typeof s === 'string' && !!s.trim());
+      } catch { /* ignore */ }
+    }
+    if (list.length === 0 && isEntrance) list = [...ENTRANCE_SIZES];
+    if (list.length === 0) {
+      const fromName = extractSize(product.name) || extractSize(apiSpecs?.['Размер'] || '') || '';
+      if (fromName) list = [fromName];
+    }
+    return list;
+  }, [apiSpecs, isFurniture, isEntrance, product.name]);
 
-  const accessories: CleanAccessory[] = useMemo(() => {
+  const allAccessories: CleanAccessory[] = useMemo(() => {
     if (isFurniture) return [];
     if (!apiSpecs?._accessories) return [];
     try {
@@ -78,22 +101,50 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
     } catch { return []; }
   }, [apiSpecs, product.id, product.price, isFurniture]);
 
+  const accessories = useMemo(
+    () => allAccessories.filter(a => !a.name.toLowerCase().includes('добор')),
+    [allAccessories],
+  );
+
+  // Доборы: из данных поставщика (с ценами) либо стандартный набор ширин
+  const dobors: DoborOption[] = useMemo(() => {
+    if (isFurniture) return [];
+    const fromSupplier: DoborOption[] = [];
+    allAccessories
+      .filter(a => a.name.toLowerCase().includes('добор'))
+      .forEach(a => {
+        const width = DOBOR_WIDTHS.find(w => a.name.includes(String(w)));
+        if (width && !fromSupplier.some(d => d.width === width)) {
+          fromSupplier.push({ width, price: a.price, article: a.article });
+        }
+      });
+    if (fromSupplier.length > 0) return fromSupplier.sort((a, b) => a.width - b.width);
+    return DOBOR_WIDTHS.map(w => ({ width: w, price: 0, article: `dobor-${w}` }));
+  }, [allAccessories, isFurniture]);
+
   const openingSides: string[] = useMemo(() => {
     if (isFurniture) return [];
-    if (!apiSpecs?._opening_sides) return [];
-    try {
-      const parsed = JSON.parse(apiSpecs._opening_sides);
-      return Array.isArray(parsed) ? parsed.filter(s => typeof s === 'string' && s.trim()) : [];
-    } catch { return []; }
-  }, [apiSpecs, isFurniture]);
+    let list: string[] = [];
+    if (apiSpecs?._opening_sides) {
+      try {
+        const parsed = JSON.parse(apiSpecs._opening_sides);
+        if (Array.isArray(parsed)) list = parsed.filter((s): s is string => typeof s === 'string' && !!s.trim());
+      } catch { /* ignore */ }
+    }
+    if (list.length === 0 && isEntrance) list = [...ENTRANCE_SIDES];
+    return list;
+  }, [apiSpecs, isFurniture, isEntrance]);
 
   const [selectedSide, setSelectedSide] = useState('');
   useEffect(() => { setSelectedSide(openingSides[0] || ''); }, [openingSides]);
 
-  const [selectedSize, setSelectedSize] = useState(
-    sizes.length > 0 ? (sizes.find(s => s.includes('200') && s.includes('70')) || sizes[0]) : ''
-  );
+  const [selectedSize, setSelectedSize] = useState('');
+  useEffect(() => {
+    setSelectedSize(sizes.find(s => s.includes('200') && s.includes('70')) || sizes[0] || '');
+  }, [sizes]);
   const [doorQty, setDoorQty] = useState(1);
+  const [doborQtys, setDoborQtys] = useState<Record<number, number>>({});
+  useEffect(() => { setDoborQtys({}); }, [product.id]);
   const [accessoryQtys, setAccessoryQtys] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
     accessories.forEach(a => { initial[a.article] = a.default_qty; });
@@ -125,16 +176,25 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
     return t;
   }, [services, selectedServices, doorQty]);
 
+  const doborsTotal = useMemo(
+    () => dobors.reduce((s, d) => s + d.price * (doborQtys[d.width] || 0), 0),
+    [dobors, doborQtys],
+  );
+
   const totalPrice = useMemo(() => {
     let total = (product.price + panelMod + (withKit ? kitExtra : 0)) * doorQty;
     accessories.forEach(a => { total += a.price * (accessoryQtys[a.article] || 0); });
+    total += doborsTotal;
     total += servicesTotal;
     total += recoTotal;
     return total;
-  }, [product.price, panelMod, withKit, kitExtra, doorQty, accessories, accessoryQtys, servicesTotal, recoTotal]);
+  }, [product.price, panelMod, withKit, kitExtra, doorQty, accessories, accessoryQtys, doborsTotal, servicesTotal, recoTotal]);
 
   const setAccQty = (article: string, qty: number) => {
     setAccessoryQtys(prev => ({ ...prev, [article]: Math.max(0, qty) }));
+  };
+  const setDoborQty = (width: number, qty: number) => {
+    setDoborQtys(prev => ({ ...prev, [width]: Math.max(0, qty) }));
   };
   const toggleService = (id: number) => {
     setSelectedServices(prev => {
@@ -332,6 +392,33 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
         </div>
       )}
 
+      {/* Доборы */}
+      {dobors.length > 0 && (
+        <div className="border-t border-border pt-3 space-y-2">
+          <h4 className="text-sm font-bold uppercase tracking-wider text-foreground" style={{ fontFamily: "'Oswald', sans-serif" }}>Доборы</h4>
+          {dobors.map(d => (
+            <div key={d.width} className="flex items-center justify-between py-1">
+              <div className="flex-1 min-w-0">
+                <span className="text-sm font-medium text-foreground">Добор {d.width} мм</span>
+                {d.price > 0 ? (
+                  <>
+                    <span className="ml-2 text-sm text-primary font-bold">{formatPrice(d.price)}</span>
+                    <span className="text-xs text-muted-foreground ml-0.5">/шт</span>
+                  </>
+                ) : (
+                  <span className="ml-2 text-xs text-muted-foreground">цена уточняется менеджером</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 ml-2">
+                <button onClick={() => setDoborQty(d.width, (doborQtys[d.width] || 0) - 1)} className="w-8 h-8 rounded border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent transition-colors"><Minus className="w-3 h-3" /></button>
+                <span className="text-sm font-bold text-foreground w-6 text-center">{doborQtys[d.width] || 0}</span>
+                <button onClick={() => setDoborQty(d.width, (doborQtys[d.width] || 0) + 1)} className="w-8 h-8 rounded border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent transition-colors"><Plus className="w-3 h-3" /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Services */}
       {services.length > 0 && (
         <div className="border-t border-border pt-3 space-y-2">
@@ -409,6 +496,9 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
               ...accessories
                 .filter(a => (accessoryQtys[a.article] || 0) > 0)
                 .map(a => ({ article: a.article, name: a.displayName, price: a.price, quantity: accessoryQtys[a.article] || 0 })),
+              ...dobors
+                .filter(d => (doborQtys[d.width] || 0) > 0)
+                .map(d => ({ article: d.article, name: `Добор ${d.width} мм`, price: d.price, quantity: doborQtys[d.width] || 0 })),
               ...recommendations
                 .filter(r => selectedRecos.has(r.id))
                 .map(r => ({ article: `reco-${r.id}`, name: r.name, price: Number(r.price), quantity: 1 })),
