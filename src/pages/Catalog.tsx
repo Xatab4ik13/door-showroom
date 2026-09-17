@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Filter, X, Loader2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import CatalogSidebar from '@/components/catalog/CatalogSidebar';
