@@ -756,6 +756,19 @@ const Products = () => {
               </datalist>
             </div>
 
+            <details className="border border-border rounded-md p-3 bg-secondary/30">
+              <summary className="text-xs uppercase tracking-wider cursor-pointer" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                Как добавить внутренние панели к входной двери
+              </summary>
+              <ol className="list-decimal pl-5 mt-3 space-y-1.5 text-xs text-muted-foreground">
+                <li>Откройте раздел «Доп. опции» в левом меню админки.</li>
+                <li>Выберите категорию «Входные двери» и вкладку «Цвета панелей».</li>
+                <li>Нажмите «Добавить цвет», укажите название (например, «Белый матовый»), загрузите фото панели и доплату в рублях (0 — если без доплаты).</li>
+                <li>Сохраните — панель сразу появится на всех входных дверях в блоке «Цвет внутренней панели».</li>
+                <li>Если для конкретной двери какая-то панель не нужна — откройте этот товар и отметьте её ниже в списке «Доп. опции этого товара».</li>
+              </ol>
+            </details>
+
             {editProduct && (categoryColors.length > 0 || categoryServices.length > 0) && (
               <div className="border border-border rounded-md p-3 bg-secondary/30">
                 <Label className="text-xs uppercase tracking-wider block mb-2" style={{ fontFamily: "'Oswald', sans-serif" }}>
