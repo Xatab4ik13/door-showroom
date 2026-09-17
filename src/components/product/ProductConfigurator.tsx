@@ -496,6 +496,9 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
               ...accessories
                 .filter(a => (accessoryQtys[a.article] || 0) > 0)
                 .map(a => ({ article: a.article, name: a.displayName, price: a.price, quantity: accessoryQtys[a.article] || 0 })),
+              ...dobors
+                .filter(d => (doborQtys[d.width] || 0) > 0)
+                .map(d => ({ article: d.article, name: `Добор ${d.width} мм`, price: d.price, quantity: doborQtys[d.width] || 0 })),
               ...recommendations
                 .filter(r => selectedRecos.has(r.id))
                 .map(r => ({ article: `reco-${r.id}`, name: r.name, price: Number(r.price), quantity: 1 })),
