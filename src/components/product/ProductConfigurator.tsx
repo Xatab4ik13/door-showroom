@@ -176,16 +176,25 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
     return t;
   }, [services, selectedServices, doorQty]);
 
+  const doborsTotal = useMemo(
+    () => dobors.reduce((s, d) => s + d.price * (doborQtys[d.width] || 0), 0),
+    [dobors, doborQtys],
+  );
+
   const totalPrice = useMemo(() => {
     let total = (product.price + panelMod + (withKit ? kitExtra : 0)) * doorQty;
     accessories.forEach(a => { total += a.price * (accessoryQtys[a.article] || 0); });
+    total += doborsTotal;
     total += servicesTotal;
     total += recoTotal;
     return total;
-  }, [product.price, panelMod, withKit, kitExtra, doorQty, accessories, accessoryQtys, servicesTotal, recoTotal]);
+  }, [product.price, panelMod, withKit, kitExtra, doorQty, accessories, accessoryQtys, doborsTotal, servicesTotal, recoTotal]);
 
   const setAccQty = (article: string, qty: number) => {
     setAccessoryQtys(prev => ({ ...prev, [article]: Math.max(0, qty) }));
+  };
+  const setDoborQty = (width: number, qty: number) => {
+    setDoborQtys(prev => ({ ...prev, [width]: Math.max(0, qty) }));
   };
   const toggleService = (id: number) => {
     setSelectedServices(prev => {
