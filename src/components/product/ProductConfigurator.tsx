@@ -5,6 +5,17 @@ import { useCart, type CartAccessory, type CartService, type CartPanelColor } fr
 import type { CatalogProduct } from '@/data/catalog';
 import type { PanelColor, ProductService, RecommendedProduct } from '@/lib/api';
 import type { KitItem } from '@/lib/description';
+import { extractSize } from '@/lib/description';
+
+const ENTRANCE_SIZES = ['860x2050', '880x2050', '960x2050', '980x2050'];
+const ENTRANCE_SIDES = ['Левое (петли слева)', 'Правое (петли справа)'];
+const DOBOR_WIDTHS = [100, 150, 200, 250];
+
+interface DoborOption {
+  width: number;
+  price: number;
+  article: string;
+}
 
 export interface SizeVariant {
   slug: string;
