@@ -227,6 +227,9 @@ const Product = () => {
       {/* Opening systems — only for interior doors (like 169.ru) */}
       {product?.category === 'mezhkomnatnye' && <ProductOpeningTypes />}
 
+      {/* Схема дверного блока в разрезе — для межкомнатных дверей */}
+      {product?.category === 'mezhkomnatnye' && <DoorBlockScheme kit={parsedDesc.kit} />}
+
       <ProductRecommendations items={extras.recommendations} />
     </div>
   );
