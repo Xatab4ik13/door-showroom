@@ -59,14 +59,26 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
   const { addItem } = useCart();
 
   const isFurniture = product.category === 'furnitura';
+  const isEntrance = product.category === 'vhodnye';
 
   const sizes: string[] = useMemo(() => {
     if (isFurniture) return [];
-    if (!apiSpecs?._sizes) return [];
-    try { return JSON.parse(apiSpecs._sizes); } catch { return []; }
-  }, [apiSpecs, isFurniture]);
+    let list: string[] = [];
+    if (apiSpecs?._sizes) {
+      try {
+        const parsed = JSON.parse(apiSpecs._sizes);
+        if (Array.isArray(parsed)) list = parsed.filter((s): s is string => typeof s === 'string' && !!s.trim());
+      } catch { /* ignore */ }
+    }
+    if (list.length === 0 && isEntrance) list = [...ENTRANCE_SIZES];
+    if (list.length === 0) {
+      const fromName = extractSize(product.name) || extractSize(apiSpecs?.['Размер'] || '') || '';
+      if (fromName) list = [fromName];
+    }
+    return list;
+  }, [apiSpecs, isFurniture, isEntrance, product.name]);
 
-  const accessories: CleanAccessory[] = useMemo(() => {
+  const allAccessories: CleanAccessory[] = useMemo(() => {
     if (isFurniture) return [];
     if (!apiSpecs?._accessories) return [];
     try {
@@ -78,22 +90,50 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
     } catch { return []; }
   }, [apiSpecs, product.id, product.price, isFurniture]);
 
+  const accessories = useMemo(
+    () => allAccessories.filter(a => !a.name.toLowerCase().includes('добор')),
+    [allAccessories],
+  );
+
+  // Доборы: из данных поставщика (с ценами) либо стандартный набор ширин
+  const dobors: DoborOption[] = useMemo(() => {
+    if (isFurniture) return [];
+    const fromSupplier: DoborOption[] = [];
+    allAccessories
+      .filter(a => a.name.toLowerCase().includes('добор'))
+      .forEach(a => {
+        const width = DOBOR_WIDTHS.find(w => a.name.includes(String(w)));
+        if (width && !fromSupplier.some(d => d.width === width)) {
+          fromSupplier.push({ width, price: a.price, article: a.article });
+        }
+      });
+    if (fromSupplier.length > 0) return fromSupplier.sort((a, b) => a.width - b.width);
+    return DOBOR_WIDTHS.map(w => ({ width: w, price: 0, article: `dobor-${w}` }));
+  }, [allAccessories, isFurniture]);
+
   const openingSides: string[] = useMemo(() => {
     if (isFurniture) return [];
-    if (!apiSpecs?._opening_sides) return [];
-    try {
-      const parsed = JSON.parse(apiSpecs._opening_sides);
-      return Array.isArray(parsed) ? parsed.filter(s => typeof s === 'string' && s.trim()) : [];
-    } catch { return []; }
-  }, [apiSpecs, isFurniture]);
+    let list: string[] = [];
+    if (apiSpecs?._opening_sides) {
+      try {
+        const parsed = JSON.parse(apiSpecs._opening_sides);
+        if (Array.isArray(parsed)) list = parsed.filter((s): s is string => typeof s === 'string' && !!s.trim());
+      } catch { /* ignore */ }
+    }
+    if (list.length === 0 && isEntrance) list = [...ENTRANCE_SIDES];
+    return list;
+  }, [apiSpecs, isFurniture, isEntrance]);
 
   const [selectedSide, setSelectedSide] = useState('');
   useEffect(() => { setSelectedSide(openingSides[0] || ''); }, [openingSides]);
 
-  const [selectedSize, setSelectedSize] = useState(
-    sizes.length > 0 ? (sizes.find(s => s.includes('200') && s.includes('70')) || sizes[0]) : ''
-  );
+  const [selectedSize, setSelectedSize] = useState('');
+  useEffect(() => {
+    setSelectedSize(sizes.find(s => s.includes('200') && s.includes('70')) || sizes[0] || '');
+  }, [sizes]);
   const [doorQty, setDoorQty] = useState(1);
+  const [doborQtys, setDoborQtys] = useState<Record<number, number>>({});
+  useEffect(() => { setDoborQtys({}); }, [product.id]);
   const [accessoryQtys, setAccessoryQtys] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
     accessories.forEach(a => { initial[a.article] = a.default_qty; });
