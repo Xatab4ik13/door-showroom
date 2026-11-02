@@ -54,13 +54,14 @@ interface EditForm {
   sizes_text: string;
   opening_left: boolean;
   opening_right: boolean;
+  dobor_prices: Record<string, string>;
 }
 
 const blankForm: EditForm = {
   name: '', price: '', old_price: '', description: '',
   category_id: '', manufacturer: '', material: '', color: '',
   supplier_slug: 'manual', images: [], specs: [], pinned_order: '',
-  sizes_text: '', opening_left: false, opening_right: false,
+  sizes_text: '', opening_left: false, opening_right: false, dobor_prices: {},
 };
 
 const parseJsonArray = (raw: unknown): string[] => {
@@ -73,7 +74,7 @@ const parseJsonArray = (raw: unknown): string[] => {
 
 // Internal keys never shown in the structured editor (preserved on save via backend merge)
 const HIDDEN_SPEC_KEYS = new Set([
-  '_sizes', '_accessories',
+  '_sizes', '_accessories', '_dobor_prices', '_opening_sides',
   'source_url', 'supplier_url', 'xml_url', 'import_url', 'sync_id',
 ]);
 
@@ -222,6 +223,12 @@ const Products = () => {
       sizes_text: parseJsonArray(p.specs?._sizes).join(', '),
       opening_left: parseJsonArray(p.specs?._opening_sides).includes('Левое'),
       opening_right: parseJsonArray(p.specs?._opening_sides).includes('Правое'),
+      dobor_prices: (() => {
+        try {
+          const o = JSON.parse(p.specs?._dobor_prices || '{}');
+          return Object.fromEntries(Object.entries(o).map(([k, v]) => [k, String(v)]));
+        } catch { return {}; }
+      })(),
     });
   };
 
@@ -267,6 +274,9 @@ const Products = () => {
           if (sizeList.length > 0) obj._sizes = JSON.stringify(sizeList);
           const sides = [editForm.opening_left && 'Левое', editForm.opening_right && 'Правое'].filter(Boolean) as string[];
           if (sides.length > 0) obj._opening_sides = JSON.stringify(sides);
+          const doborMap: Record<string, number> = {};
+          Object.entries(editForm.dobor_prices).forEach(([w, v]) => { const n = Number(v); if (n > 0) doborMap[w] = n; });
+          obj._dobor_prices = JSON.stringify(doborMap);
           return obj;
         })(),
         pinned_order: editForm.pinned_order === '' ? null : Number(editForm.pinned_order),
@@ -687,6 +697,19 @@ const Products = () => {
                       className="accent-primary w-4 h-4" />
                     Правое
                   </label>
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Цены доборов, ₽ за шт (пусто — «цена уточняется менеджером»)</Label>
+                <div className="grid grid-cols-4 gap-2 mt-1">
+                  {['100', '150', '200', '250'].map(w => (
+                    <div key={w}>
+                      <span className="text-[11px] text-muted-foreground">{w} мм</span>
+                      <Input type="number" min={0} value={editForm.dobor_prices[w] || ''}
+                        onChange={(e) => setEditForm({ ...editForm, dobor_prices: { ...editForm.dobor_prices, [w]: e.target.value } })}
+                        placeholder="0" />
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
