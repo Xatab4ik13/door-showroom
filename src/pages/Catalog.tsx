@@ -7,6 +7,7 @@ import { catalogProducts as mockProducts, categories, type Category, type Tag } 
 import { useProducts } from '@/hooks/useProducts';
 import { useFacets } from '@/hooks/useFacets';
 import { apiProductToCard } from '@/lib/productAdapter';
+import { stripSize } from '@/lib/description';
 import PageSEO from '@/components/PageSEO';
 
 const ITEMS_PER_PAGE = 24;
@@ -119,7 +120,8 @@ const Catalog = () => {
   // Convert API products to card format, or use mock data as fallback
   const products = useMemo(() => {
     if (isApi) {
-      return apiProducts.map(apiProductToCard);
+      // Size variants are merged into one card — show the model name without the size
+      return apiProducts.map(apiProductToCard).map(c => ({ ...c, name: stripSize(c.name) || c.name }));
     }
     if (loading || !error) return [];
     return mockProducts;
