@@ -128,6 +128,20 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
     return DOBOR_WIDTHS.map(w => ({ width: w, price: Number(manual[String(w)]) || 0, article: `dobor-${w}` }));
   }, [allAccessories, isFurniture, apiSpecs]);
 
+  // Наличники, заданные вручную в админке
+  const nalichniki = useMemo(() => {
+    if (isFurniture) return [] as { size: string; price: number; article: string }[];
+    try {
+      const a = JSON.parse(apiSpecs?._nalichniki || '[]');
+      return Array.isArray(a)
+        ? a.filter((n: any) => n?.size).map((n: any, i: number) => ({ size: String(n.size), price: Number(n.price) || 0, article: `nalichnik-${i}` }))
+        : [];
+    } catch { return []; }
+  }, [apiSpecs, isFurniture]);
+  const [nalQtys, setNalQtys] = useState<Record<string, number>>({});
+  useEffect(() => { setNalQtys({}); }, [product.id]);
+  const nalTotal = nalichniki.reduce((s, n) => s + n.price * (nalQtys[n.article] || 0), 0);
+
   const openingSides: string[] = useMemo(() => {
     if (isFurniture) return [];
     let list: string[] = [];
@@ -190,11 +204,11 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
   const totalPrice = useMemo(() => {
     let total = (product.price + panelMod + (withKit ? kitExtra : 0)) * doorQty;
     accessories.forEach(a => { total += a.price * (accessoryQtys[a.article] || 0); });
-    total += doborsTotal;
+    total += doborsTotal + nalTotal;
     total += servicesTotal;
     total += recoTotal;
     return total;
-  }, [product.price, panelMod, withKit, kitExtra, doorQty, accessories, accessoryQtys, doborsTotal, servicesTotal, recoTotal]);
+  }, [product.price, panelMod, withKit, kitExtra, doorQty, accessories, accessoryQtys, doborsTotal, nalTotal, servicesTotal, recoTotal]);
 
   const setAccQty = (article: string, qty: number) => {
     setAccessoryQtys(prev => ({ ...prev, [article]: Math.max(0, qty) }));

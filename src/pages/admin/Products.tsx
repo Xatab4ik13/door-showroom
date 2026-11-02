@@ -55,13 +55,14 @@ interface EditForm {
   opening_left: boolean;
   opening_right: boolean;
   dobor_prices: Record<string, string>;
+  nalichniki: { size: string; price: string }[];
 }
 
 const blankForm: EditForm = {
   name: '', price: '', old_price: '', description: '',
   category_id: '', manufacturer: '', material: '', color: '',
   supplier_slug: 'manual', images: [], specs: [], pinned_order: '',
-  sizes_text: '', opening_left: false, opening_right: false, dobor_prices: {},
+  sizes_text: '', opening_left: false, opening_right: false, dobor_prices: {}, nalichniki: [],
 };
 
 const parseJsonArray = (raw: unknown): string[] => {
@@ -74,7 +75,7 @@ const parseJsonArray = (raw: unknown): string[] => {
 
 // Internal keys never shown in the structured editor (preserved on save via backend merge)
 const HIDDEN_SPEC_KEYS = new Set([
-  '_sizes', '_accessories', '_dobor_prices', '_opening_sides',
+  '_sizes', '_accessories', '_dobor_prices', '_opening_sides', '_nalichniki',
   'source_url', 'supplier_url', 'xml_url', 'import_url', 'sync_id',
 ]);
 
@@ -229,6 +230,12 @@ const Products = () => {
           return Object.fromEntries(Object.entries(o).map(([k, v]) => [k, String(v)]));
         } catch { return {}; }
       })(),
+      nalichniki: (() => {
+        try {
+          const a = JSON.parse(p.specs?._nalichniki || '[]');
+          return Array.isArray(a) ? a.map((n: any) => ({ size: String(n.size || ''), price: String(n.price || '') })) : [];
+        } catch { return []; }
+      })(),
     });
   };
 
@@ -277,6 +284,9 @@ const Products = () => {
           const doborMap: Record<string, number> = {};
           Object.entries(editForm.dobor_prices).forEach(([w, v]) => { const n = Number(v); if (n > 0) doborMap[w] = n; });
           obj._dobor_prices = JSON.stringify(doborMap);
+          obj._nalichniki = JSON.stringify(editForm.nalichniki
+            .filter(n => n.size.trim())
+            .map(n => ({ size: n.size.trim(), price: Number(n.price) || 0 })));
           return obj;
         })(),
         pinned_order: editForm.pinned_order === '' ? null : Number(editForm.pinned_order),
@@ -710,6 +720,25 @@ const Products = () => {
                         placeholder="0" />
                     </div>
                   ))}
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Наличники: размер и цена за шт (пустая цена — «цена уточняется менеджером»)</Label>
+                <div className="space-y-2 mt-1">
+                  {editForm.nalichniki.map((n, i) => (
+                    <div key={i} className="flex gap-2 items-center">
+                      <Input value={n.size} placeholder="70×2150×10 мм" className="flex-1"
+                        onChange={(e) => { const list = [...editForm.nalichniki]; list[i] = { ...n, size: e.target.value }; setEditForm({ ...editForm, nalichniki: list }); }} />
+                      <Input type="number" min={0} value={n.price} placeholder="₽" className="w-28"
+                        onChange={(e) => { const list = [...editForm.nalichniki]; list[i] = { ...n, price: e.target.value }; setEditForm({ ...editForm, nalichniki: list }); }} />
+                      <Button type="button" variant="ghost" size="sm"
+                        onClick={() => setEditForm({ ...editForm, nalichniki: editForm.nalichniki.filter((_, j) => j !== i) })}>✕</Button>
+                    </div>
+                  ))}
+                  <Button type="button" variant="outline" size="sm"
+                    onClick={() => setEditForm({ ...editForm, nalichniki: [...editForm.nalichniki, { size: '', price: '' }] })}>
+                    + Добавить наличник
+                  </Button>
                 </div>
               </div>
             </div>
