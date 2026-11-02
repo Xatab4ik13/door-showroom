@@ -439,6 +439,33 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
         </div>
       )}
 
+      {/* Наличники */}
+      {nalichniki.length > 0 && (
+        <div className="border-t border-border pt-3 space-y-2">
+          <h4 className="text-sm font-bold uppercase tracking-wider text-foreground" style={{ fontFamily: "'Oswald', sans-serif" }}>Наличники</h4>
+          {nalichniki.map(n => (
+            <div key={n.article} className="flex items-center justify-between py-1">
+              <div className="flex-1 min-w-0">
+                <span className="text-sm font-medium text-foreground">Наличник {n.size}</span>
+                {n.price > 0 ? (
+                  <>
+                    <span className="ml-2 text-sm text-primary font-bold">{formatPrice(n.price)}</span>
+                    <span className="text-xs text-muted-foreground ml-0.5">/шт</span>
+                  </>
+                ) : (
+                  <span className="ml-2 text-xs text-muted-foreground">цена уточняется менеджером</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 ml-2">
+                <button onClick={() => setNalQtys(p => ({ ...p, [n.article]: Math.max(0, (p[n.article] || 0) - 1) }))} className="w-8 h-8 rounded border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent transition-colors"><Minus className="w-3 h-3" /></button>
+                <span className="text-sm font-bold text-foreground w-6 text-center">{nalQtys[n.article] || 0}</span>
+                <button onClick={() => setNalQtys(p => ({ ...p, [n.article]: (p[n.article] || 0) + 1 }))} className="w-8 h-8 rounded border border-border bg-background flex items-center justify-center text-foreground hover:bg-accent transition-colors"><Plus className="w-3 h-3" /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Services */}
       {services.length > 0 && (
         <div className="border-t border-border pt-3 space-y-2">
@@ -519,6 +546,9 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
               ...dobors
                 .filter(d => (doborQtys[d.width] || 0) > 0)
                 .map(d => ({ article: d.article, name: `Добор ${d.width} мм`, price: d.price, quantity: doborQtys[d.width] || 0 })),
+              ...nalichniki
+                .filter(n => (nalQtys[n.article] || 0) > 0)
+                .map(n => ({ article: n.article, name: `Наличник ${n.size}`, price: n.price, quantity: nalQtys[n.article] || 0 })),
               ...recommendations
                 .filter(r => selectedRecos.has(r.id))
                 .map(r => ({ article: `reco-${r.id}`, name: r.name, price: Number(r.price), quantity: 1 })),
