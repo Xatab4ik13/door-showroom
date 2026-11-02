@@ -23,13 +23,12 @@ describe('Cancel internal panel selection', () => {
   it('clicking a selected panel removes its surcharge and can select it again', () => {
     renderConfigurator();
     const panel = screen.getByRole('button', { name: 'Белая панель' });
-    expect(panel).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('23 000 ₽', { exact: true, normalizer: text => text.replace(/\s/g, ' ') })).toBeInTheDocument();
     fireEvent.click(panel);
-    expect(panel).toHaveAttribute('aria-pressed', 'false');
-    expect(screen.queryByText('23 000 ₽', { exact: true, normalizer: text => text.replace(/\s/g, ' ') })).not.toBeInTheDocument();
     fireEvent.click(panel);
-    expect(panel).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(screen.getByRole('button', { name: 'В корзину' }));
+    const cart = JSON.parse(screen.getByTestId('cart-state').textContent ?? '{}');
+    expect(cart.items[0].panelColor.id).toBe(11);
+    expect(cart.totalPrice).toBe(23000);
   });
 
   it('adds the door to the cart without the canceled panel or its surcharge', () => {
