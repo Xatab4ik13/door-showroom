@@ -1,4 +1,5 @@
 import type { CatalogProduct } from '@/data/catalog';
+import { isRepeatedArticle } from '@/lib/productSpecDuplicates';
 
 interface ProductSpecsProps {
   product: CatalogProduct;
@@ -68,6 +69,7 @@ const ProductSpecs = ({ product, apiSpecs }: ProductSpecsProps) => {
     for (const [key, val] of Object.entries(apiSpecs)) {
       if (!val || hiddenKeys.has(key.toLowerCase())) continue;
       if (key.startsWith('_')) continue;
+      if (isRepeatedArticle(key, val, apiSpecs)) continue;
       const lowerKey = key.toLowerCase();
       const label = labelMap[lowerKey] || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
       const order = keyOrder[lowerKey] || 50;
