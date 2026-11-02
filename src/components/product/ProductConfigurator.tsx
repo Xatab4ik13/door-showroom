@@ -128,6 +128,13 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
     return DOBOR_WIDTHS.map(w => ({ width: w, price: Number(manual[String(w)]) || 0, article: `dobor-${w}` }));
   }, [allAccessories, isFurniture, apiSpecs]);
 
+  const techSizes: string[] = useMemo(() => {
+    try {
+      const a = JSON.parse(apiSpecs?._tech_sizes || '[]');
+      return Array.isArray(a) ? a.map(String).filter(Boolean) : [];
+    } catch { return []; }
+  }, [apiSpecs]);
+
   // Наличники, заданные вручную в админке
   const nalichniki = useMemo(() => {
     if (isFurniture) return [] as { size: string; price: number; article: string }[];
@@ -307,7 +314,7 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
         </div>
       )}
 
-      {/* Sizes */}
+      {/* Sizes + технические размеры */}
       {sizes.length > 0 && (
         <div>
           <h4 className="text-sm font-bold uppercase tracking-wider text-foreground mb-3" style={{ fontFamily: "'Oswald', sans-serif" }}>Размер</h4>
@@ -321,6 +328,13 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
                 }`}>{size}</button>
             ))}
           </div>
+          {techSizes.length > 0 && (
+            <ul className="mt-3 space-y-1">
+              {techSizes.map((t, i) => (
+                <li key={i} className="text-xs text-muted-foreground">{t}</li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
