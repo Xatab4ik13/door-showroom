@@ -6,6 +6,7 @@ import type { CatalogProduct } from '@/data/catalog';
 import type { PanelColor, ProductService, RecommendedProduct } from '@/lib/api';
 import type { KitItem } from '@/lib/description';
 import { extractSize } from '@/lib/description';
+import { Button } from '@/components/ui/button';
 
 const ENTRANCE_SIZES = ['860x2050', '880x2050', '960x2050', '980x2050'];
 const ENTRANCE_SIDES = ['Левое (петли слева)', 'Правое (петли справа)'];
@@ -367,11 +368,15 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
             {panelColors.map(c => {
               const active = c.id === selectedColorId;
               return (
-                <button
+                <Button
                   key={c.id}
-                  onClick={() => setSelectedColorId(c.id)}
+                  type="button"
+                  variant="ghost"
+                  aria-label={c.name}
+                  aria-pressed={active}
+                  onClick={() => setSelectedColorId(previous => previous === c.id ? null : c.id)}
                   title={c.name + (Number(c.price_modifier) ? ` (+${formatPrice(Number(c.price_modifier))})` : '')}
-                  className={`relative w-16 h-16 rounded-md overflow-hidden border-2 bg-secondary transition-all ${
+                  className={`relative w-16 h-16 p-0 rounded-md overflow-hidden border-2 bg-secondary transition-all ${
                     active ? 'border-primary scale-105' : 'border-border opacity-80 hover:opacity-100'
                   }`}
                 >
@@ -380,7 +385,7 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
                   ) : (
                     <span className="absolute inset-0 flex items-center justify-center text-[10px] text-muted-foreground px-1 text-center">{c.name}</span>
                   )}
-                </button>
+                </Button>
               );
             })}
           </div>
