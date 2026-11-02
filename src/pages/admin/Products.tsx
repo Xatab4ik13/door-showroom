@@ -74,7 +74,7 @@ const parseJsonArray = (raw: unknown): string[] => {
   } catch { return []; }
 };
 
-// Internal keys never shown in the structured editor (preserved on save via backend merge)
+// Internal keys never shown in the structured editor (preserved separately by the backend)
 const HIDDEN_SPEC_KEYS = new Set([
   '_sizes', '_accessories', '_dobor_prices', '_opening_sides', '_nalichniki', '_tech_sizes',
   'source_url', 'supplier_url', 'xml_url', 'import_url', 'sync_id',
@@ -280,9 +280,9 @@ const Products = () => {
         specs: (() => {
           const obj: Record<string, string> = pairsToSpecsObj(editForm.specs);
           const sizeList = editForm.sizes_text.split(',').map(s => s.trim()).filter(Boolean);
-          if (sizeList.length > 0) obj._sizes = JSON.stringify(sizeList);
+          obj._sizes = JSON.stringify(sizeList);
           const sides = [editForm.opening_left && 'Левое', editForm.opening_right && 'Правое'].filter(Boolean) as string[];
-          if (sides.length > 0) obj._opening_sides = JSON.stringify(sides);
+          obj._opening_sides = JSON.stringify(sides);
           const doborMap: Record<string, number> = {};
           Object.entries(editForm.dobor_prices).forEach(([w, v]) => { const n = Number(v); if (n > 0) doborMap[w] = n; });
           obj._dobor_prices = JSON.stringify(doborMap);
@@ -292,6 +292,7 @@ const Products = () => {
           obj._tech_sizes = JSON.stringify(editForm.tech_sizes.split('\n').map(l => l.trim()).filter(Boolean));
           return obj;
         })(),
+        specs_replace: true,
         pinned_order: editForm.pinned_order === '' ? null : Number(editForm.pinned_order),
       };
       if (editProduct) {
