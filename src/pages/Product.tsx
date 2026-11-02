@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import ProductGallery from '@/components/product/ProductGallery';
 import ProductSpecs from '@/components/product/ProductSpecs';
@@ -12,6 +12,8 @@ import { catalogProducts } from '@/data/catalog';
 import { fetchProduct, fetchProducts, fetchProductExtras, type ApiProduct, type ProductExtras } from '@/lib/api';
 import { apiProductToCard } from '@/lib/productAdapter';
 import { parseDescription, stripSize, extractSize } from '@/lib/description';
+import { getCatalogReturn } from '@/lib/catalogNavigation';
+import { Button } from '@/components/ui/button';
 
 const formatPrice = (price: number) =>
   new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(price);
@@ -19,6 +21,8 @@ const formatPrice = (price: number) =>
 const Product = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const catalogReturn = getCatalogReturn(location.state);
   const [selectedColor, setSelectedColor] = useState(0);
   const [loading, setLoading] = useState(true);
   const [apiProduct, setApiProduct] = useState<ApiProduct | null>(null);
@@ -97,19 +101,20 @@ const Product = () => {
     <div className="pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-[1400px] mx-auto">
       <ProductSEO product={product} apiProduct={apiProduct} />
       {/* Breadcrumb */}
-      <button
+      <Button
         type="button"
+        variant="ghost"
         onClick={() => {
-          // If there is a history entry, go back (preserves catalog page & scroll via POP).
-          // Otherwise fall back to a plain catalog link.
-          if (window.history.length > 1) navigate(-1);
-          else navigate('/catalog');
+          navigate(catalogReturn?.url ?? '/catalog', {
+            replace: true,
+            state: catalogReturn ? { catalogReturn } : undefined,
+          });
         }}
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+        className="h-auto p-0 rounded-none text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-transparent mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
         Назад в каталог
-      </button>
+      </Button>
 
       {/* Top section: Gallery + Info + Configurator */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">

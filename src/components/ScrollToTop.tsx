@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
+import { getCatalogReturn } from '@/lib/catalogNavigation';
 
 /**
  * Auto-scroll to top on route change, EXCEPT when the user navigates back/forward
@@ -7,13 +8,13 @@ import { useLocation, useNavigationType } from 'react-router-dom';
  * returning to the catalog from a product keeps the user where they were.
  */
 const ScrollToTop = () => {
-  const { pathname } = useLocation();
+  const { pathname, state } = useLocation();
   const navType = useNavigationType();
 
   useEffect(() => {
-    if (navType === 'POP') return;
+    if (pathname === '/catalog' && (navType === 'POP' || getCatalogReturn(state))) return;
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
-  }, [pathname, navType]);
+  }, [pathname, navType, state]);
 
   return null;
 };
