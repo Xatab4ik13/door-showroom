@@ -118,9 +118,15 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
           fromSupplier.push({ width, price: a.price, article: a.article });
         }
       });
-    if (fromSupplier.length > 0) return fromSupplier.sort((a, b) => a.width - b.width);
-    return DOBOR_WIDTHS.map(w => ({ width: w, price: 0, article: `dobor-${w}` }));
-  }, [allAccessories, isFurniture]);
+    let manual: Record<string, number> = {};
+    try { manual = JSON.parse(apiSpecs?._dobor_prices || '{}') || {}; } catch { /* ignore */ }
+    if (fromSupplier.length > 0) {
+      return fromSupplier
+        .map(d => (d.price > 0 ? d : { ...d, price: Number(manual[String(d.width)]) || 0 }))
+        .sort((a, b) => a.width - b.width);
+    }
+    return DOBOR_WIDTHS.map(w => ({ width: w, price: Number(manual[String(w)]) || 0, article: `dobor-${w}` }));
+  }, [allAccessories, isFurniture, apiSpecs]);
 
   const openingSides: string[] = useMemo(() => {
     if (isFurniture) return [];
