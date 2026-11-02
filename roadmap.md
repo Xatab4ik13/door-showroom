@@ -1,4 +1,5 @@
 # Tasks
+- [x] Item 8: hide erroneous article repeating technical data; verified on the live API's Плэй product and a genuine Фрейм article in preview; 3 regression tests passed.
 - [x] Item 7: implement persistent characteristic deletion while preserving supplier metadata; 5 PostgreSQL regression tests passed.
 - [ ] Item 7: verify admin save and reopen on the live site; blocked by VPS backend deployment and an authenticated admin session.
 - [x] Item 6: clicking the selected internal panel clears it; verified on a real product (23400 → 21400 RUB) and in the cart without the panel; 2 regression tests passed.
