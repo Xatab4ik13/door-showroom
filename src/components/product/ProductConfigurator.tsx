@@ -128,6 +128,13 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
     return DOBOR_WIDTHS.map(w => ({ width: w, price: Number(manual[String(w)]) || 0, article: `dobor-${w}` }));
   }, [allAccessories, isFurniture, apiSpecs]);
 
+  const techSizes: string[] = useMemo(() => {
+    try {
+      const a = JSON.parse(apiSpecs?._tech_sizes || '[]');
+      return Array.isArray(a) ? a.map(String).filter(Boolean) : [];
+    } catch { return []; }
+  }, [apiSpecs]);
+
   // Наличники, заданные вручную в админке
   const nalichniki = useMemo(() => {
     if (isFurniture) return [] as { size: string; price: number; article: string }[];
