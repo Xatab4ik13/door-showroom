@@ -3,6 +3,7 @@ import { pool } from '../db/pool.js';
 import { requireAuth } from '../middleware/auth.js';
 import { normalizeManufacturer, normalizeProductName, normalizeProductDescription } from '../lib/normalize.js';
 import { productModelKeySql } from '../lib/productGrouping.js';
+import { productSpecsUpdateSql } from '../lib/productSpecs.js';
 
 function cleanProduct<T extends { name?: any; description?: any }>(row: T): T {
   if (row && row.name != null) (row as any).name = normalizeProductName(row.name) ?? row.name;
@@ -334,9 +335,10 @@ router.patch('/:id', requireAuth, async (req, res) => {
       params.push(JSON.stringify(val || []));
       fields.push(`images = $${params.length}::jsonb`);
     } else if (key === 'specs') {
-      // Merge with existing specs to preserve internal fields (_sizes, _accessories, source_url, etc.)
+      // The structured editor submits a complete visible list; omitted keys must be removed.
+      // Other PATCH callers keep merge semantics, and hidden supplier fields are preserved.
       params.push(JSON.stringify(val || {}));
-      fields.push(`specs = COALESCE(specs, '{}'::jsonb) || $${params.length}::jsonb`);
+      fields.push(`specs = ${productSpecsUpdateSql(`$${params.length}`, req.body.specs_replace === true)}`);
     } else {
       params.push(val);
       fields.push(`${key} = $${params.length}`);
