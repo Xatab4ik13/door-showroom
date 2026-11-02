@@ -34,6 +34,8 @@ export interface ProductsResponse {
 }
 
 export interface ProductFilters {
+  /** Склеивать одинаковые модели разных размеров в одну карточку */
+  group?: boolean;
   supplier?: string;
   category?: string;
   search?: string;
@@ -62,6 +64,7 @@ export async function fetchProducts(params?: ProductFilters): Promise<ProductsRe
   if (params?.color) searchParams.set('color', params.color);
   if (params?.sort) searchParams.set('sort', params.sort);
   if (params?.order) searchParams.set('order', params.order);
+  if (params?.group) searchParams.set('group', '1');
 
   const res = await fetch(`${API_BASE}/api/products?${searchParams}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
