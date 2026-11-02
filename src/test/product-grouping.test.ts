@@ -39,4 +39,18 @@ describe('size grouping', () => {
     expect(stripSize(`${toscana} 2000Х800 Стекло Сатинат`)).toBe(`${toscana} Стекло Сатинат`);
     expect(stripSize('Модель ДГ2000X900')).toBe('Модель ДГ');
   });
+  it('selects the cheapest size without merging suppliers or categories', async () => {
+    await db.exec(`CREATE TABLE products (id int, supplier_id int, category_id int, name text, price numeric);
+      INSERT INTO products VALUES
+      (1, 1, 2, 'Тоскана ДО 2000Х800 стекло', 12000),
+      (2, 1, 2, 'Тоскана ДО 2000Х700 стекло', 11000),
+      (3, 2, 2, 'Тоскана ДО 2000Х900 стекло', 10000),
+      (4, 1, 3, 'Тоскана ДО 2000Х600 стекло', 9000);`);
+    const result = await db.query<{ id: number }>(`WITH f AS (
+      SELECT p.*, ROW_NUMBER() OVER (
+        PARTITION BY COALESCE(p.supplier_id, 0), p.category_id, ${productModelKeySql()}
+        ORDER BY price ASC, id) rn FROM products p)
+      SELECT id FROM f WHERE rn = 1 ORDER BY id`);
+    expect(result.rows.map(row => row.id)).toEqual([2, 3, 4]);
+  });
 });
