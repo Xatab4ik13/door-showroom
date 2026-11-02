@@ -1,9 +1,12 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import type { CatalogProduct } from '@/data/catalog';
+import type { CatalogReturn } from '@/lib/catalogNavigation';
 
 interface ProductCardProps {
   product: CatalogProduct;
+  catalogReturn?: CatalogReturn;
+  onOpen?: () => void;
 }
 
 const formatPrice = (price: number) =>
@@ -21,13 +24,13 @@ const tagLabels: Record<string, string> = {
   sale: 'Скидка',
 };
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = ({ product, catalogReturn, onOpen }: ProductCardProps) => {
   const discount = product.oldPrice
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
     : null;
 
   return (
-    <Link to={`/product/${product.id}`}>
+    <Link to={`/product/${product.id}`} state={catalogReturn ? { catalogReturn } : undefined} onClick={onOpen}>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}

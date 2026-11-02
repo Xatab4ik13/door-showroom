@@ -1,6 +1,6 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { Filter, X, Loader2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import CatalogSidebar from '@/components/catalog/CatalogSidebar';
 import ProductCard from '@/components/catalog/ProductCard';
 import { catalogProducts as mockProducts, categories, type Category, type Tag } from '@/data/catalog';
@@ -9,6 +9,7 @@ import { useFacets } from '@/hooks/useFacets';
 import { apiProductToCard } from '@/lib/productAdapter';
 import { stripSize } from '@/lib/description';
 import PageSEO from '@/components/PageSEO';
+import { getCatalogReturn, readCatalogSnapshot, saveCatalogSnapshot } from '@/lib/catalogNavigation';
 
 const ITEMS_PER_PAGE = 24;
 
@@ -26,6 +27,11 @@ const validCategories = new Set<string>(['mezhkomnatnye', 'vhodnye', 'furnitura'
 
 const Catalog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const [savedCatalog] = useState(() => {
+    const returnTo = getCatalogReturn(location.state);
+    return readCatalogSnapshot(returnTo?.key ?? location.key, location.pathname + location.search);
+  });
 
   // Read initial state from URL — by default show interior doors first (not all/furniture)
   const urlCategory = searchParams.get('category') || 'mezhkomnatnye';
@@ -36,16 +42,16 @@ const Catalog = () => {
     validCategories.has(urlCategory) ? urlCategory as Category : 'mezhkomnatnye'
   );
   const [subcategory, setSubcategory] = useState<string | null>(urlSubcategory);
-  const [tag, setTag] = useState<Tag | 'all'>('all');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 0]);
-  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
-  const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
-  const [selectedManufacturers, setSelectedManufacturers] = useState<string[]>([]);
+  const [tag, setTag] = useState<Tag | 'all'>(savedCatalog?.filters.tag ?? 'all');
+  const [priceRange, setPriceRange] = useState<[number, number]>(savedCatalog?.filters.priceRange ?? [0, 0]);
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>(savedCatalog?.filters.materials ?? []);
+  const [selectedFinishes, setSelectedFinishes] = useState<string[]>(savedCatalog?.filters.finishes ?? []);
+  const [selectedManufacturers, setSelectedManufacturers] = useState<string[]>(savedCatalog?.filters.manufacturers ?? []);
   const [mobileFilters, setMobileFilters] = useState(false);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(savedCatalog?.filters.search ?? '');
   const [page, setPage] = useState(urlPage);
-  const [sort, setSort] = useState<'updated_at' | 'price' | 'name'>('updated_at');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sort, setSort] = useState<'updated_at' | 'price' | 'name'>(savedCatalog?.filters.sort ?? 'updated_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(savedCatalog?.filters.order ?? 'desc');
 
   // Sync URL params when category/subcategory/page change
   useEffect(() => {
@@ -53,7 +59,9 @@ const Catalog = () => {
     if (category !== 'all') params.category = category;
     if (subcategory) params.sub = subcategory;
     if (page > 1) params.page = String(page);
-    setSearchParams(params, { replace: true });
+    if (new URLSearchParams(params).toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true, state: location.state });
+    }
   }, [category, subcategory, page, setSearchParams]);
 
   // Sync state when URL changes externally (e.g. browser back/forward)
@@ -137,32 +145,27 @@ const Catalog = () => {
     return products.slice(start, start + ITEMS_PER_PAGE);
   }, [products, isApi, page]);
 
-  // Save / restore scroll position so returning from a product keeps the place
-  const SCROLL_KEY = 'catalog-scroll';
+  // Capture at the card click, before the product route resets the scroll.
   const restoredRef = useRef(false);
+  const catalogReturn = { key: location.key, url: location.pathname + location.search };
+  const rememberCatalog = () => {
+    saveCatalogSnapshot(catalogReturn.key, {
+      url: catalogReturn.url,
+      y: window.scrollY,
+      filters: { tag, priceRange, materials: selectedMaterials, finishes: selectedFinishes,
+        manufacturers: selectedManufacturers, search, sort, order: sortOrder },
+    });
+  };
 
-  useEffect(() => {
-    const onScroll = () => {
-      try {
-        sessionStorage.setItem(SCROLL_KEY, JSON.stringify({ q: window.location.search, y: window.scrollY }));
-      } catch { /* ignore */ }
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  useEffect(() => {
-    if (restoredRef.current || loading || displayProducts.length === 0) return;
-    restoredRef.current = true;
-    try {
-      const raw = sessionStorage.getItem(SCROLL_KEY);
-      if (!raw) return;
-      const saved = JSON.parse(raw) as { q: string; y: number };
-      if (saved && saved.q === window.location.search && saved.y > 0) {
-        window.scrollTo({ top: saved.y, behavior: 'instant' as ScrollBehavior });
-      }
-    } catch { /* ignore */ }
-  }, [loading, displayProducts.length]);
+  useLayoutEffect(() => {
+    if (restoredRef.current || loading || !savedCatalog) return;
+    // Wait for cards to exist, not the shorter loading placeholder.
+    const frame = requestAnimationFrame(() => {
+      window.scrollTo({ top: savedCatalog.y, behavior: 'instant' as ScrollBehavior });
+      restoredRef.current = true;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [loading, displayProducts.length, savedCatalog]);
 
 
 
@@ -405,7 +408,7 @@ const Catalog = () => {
             <>
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {displayProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard key={product.id} product={product} catalogReturn={catalogReturn} onOpen={rememberCatalog} />
                 ))}
               </div>
               {renderPagination()}
