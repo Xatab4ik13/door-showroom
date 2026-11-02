@@ -34,6 +34,7 @@ export interface ProductsResponse {
 }
 
 export interface ProductFilters {
+  model_id?: number;
   /** Склеивать одинаковые модели разных размеров в одну карточку */
   group?: boolean;
   supplier?: string;
@@ -52,6 +53,7 @@ export interface ProductFilters {
 
 export async function fetchProducts(params?: ProductFilters): Promise<ProductsResponse> {
   const searchParams = new URLSearchParams();
+  if (params?.model_id) searchParams.set('model_id', String(params.model_id));
   if (params?.supplier) searchParams.set('supplier', params.supplier);
   if (params?.category) searchParams.set('category', params.category);
   if (params?.search) searchParams.set('search', params.search);

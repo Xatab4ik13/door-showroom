@@ -68,16 +68,17 @@ export function parseDescription(raw?: string | null): ParsedDescription {
   };
 }
 
-/** "Фрейм 10 шпон Ясень белоснежный, глухое 800*2000" -> base without the size */
+/** Remove dimensions anywhere in the name, retaining finish and glass details. */
 export function stripSize(name: string): string {
   return name
-    .replace(/\s*\d{3,4}\s*[*х×x]\s*\d{3,4}\s*$/i, '')
+    .replace(/(?<!\d)\d{3,4}\s*[*х×x]\s*\d{3,4}(?!\d)/gi, ' ')
+    .replace(/\s+/g, ' ')
     .replace(/[,\s]+$/, '')
     .trim();
 }
 
 /** "800*2000" from the product name, or null */
 export function extractSize(name: string): string | null {
-  const m = name.match(/(\d{3,4})\s*[*х×x]\s*(\d{3,4})\s*$/i);
+  const m = name.match(/(?<!\d)(\d{3,4})\s*[*х×x]\s*(\d{3,4})(?!\d)/i);
   return m ? `${m[1]}×${m[2]}` : null;
 }

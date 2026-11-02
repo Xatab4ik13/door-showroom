@@ -38,10 +38,10 @@ const Product = () => {
         // Size grid: sibling products that share the same model name
         const base = stripSize(data.name);
         if (base && base !== data.name) {
-          fetchProducts({ search: base, limit: 60 })
+          fetchProducts({ model_id: data.id, limit: 100 })
             .then((res) => {
               const list = res.products
-                .filter((p) => stripSize(p.name) === base && extractSize(p.name))
+                .filter((p) => extractSize(p.name))
                 .map((p) => ({
                   slug: p.slug,
                   size: extractSize(p.name) as string,

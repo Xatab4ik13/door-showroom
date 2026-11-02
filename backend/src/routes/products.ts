@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { pool } from '../db/pool.js';
 import { requireAuth } from '../middleware/auth.js';
 import { normalizeManufacturer, normalizeProductName, normalizeProductDescription } from '../lib/normalize.js';
+import { productModelKeySql } from '../lib/productGrouping.js';
 
 function cleanProduct<T extends { name?: any; description?: any }>(row: T): T {
   if (row && row.name != null) (row as any).name = normalizeProductName(row.name) ?? row.name;
@@ -15,7 +16,7 @@ const router = Router();
 // GET /api/products — public listing with filters & pagination
 router.get('/', async (req, res) => {
   const {
-    supplier, category, search,
+    supplier, category, search, model_id,
     page = '1', limit = '20',
     price_min, price_max,
     manufacturer, material, color,
@@ -26,6 +27,13 @@ router.get('/', async (req, res) => {
   const offset = (Number(page) - 1) * Number(limit);
   const conditions: string[] = ["p.sync_status = 'active'"];
   const params: any[] = [];
+
+  if (model_id) {
+    params.push(Number(model_id));
+    conditions.push(`(COALESCE(p.supplier_id, 0), p.category_id, ${productModelKeySql()}) =
+      (SELECT COALESCE(m.supplier_id, 0), m.category_id, ${productModelKeySql('m.name')}
+       FROM products m WHERE m.id = $${params.length})`);
+  }
 
   if (supplier) {
     params.push(supplier);
@@ -100,8 +108,8 @@ router.get('/', async (req, res) => {
 
   params.push(Number(limit), offset);
 
-  // Base model name without trailing size ("..., 700*2000") — used to merge size variants
-  const BASE_KEY = `regexp_replace(p.name, '[,\\s]*\\d{3,4}\\s*[*хx×Х]\\s*\\d{3,4}\\s*$', '', 'i')`;
+  // Remove size anywhere, retaining model, finish and glass differences.
+  const BASE_KEY = productModelKeySql();
   const ORDER = `pinned_order ASC NULLS LAST,
                 CASE category_slug
                   WHEN 'vhodnye' THEN 1
@@ -118,7 +126,7 @@ router.get('/', async (req, res) => {
         ? `WITH f AS (
              SELECT p.*, s.name as supplier_name, s.slug as supplier_slug, c.name as category_name, c.slug as category_slug,
                     ROW_NUMBER() OVER (
-                      PARTITION BY COALESCE(p.supplier_id, 0), ${BASE_KEY}
+                      PARTITION BY COALESCE(p.supplier_id, 0), p.category_id, ${BASE_KEY}
                       ORDER BY p.pinned_order ASC NULLS LAST, p.price ASC NULLS LAST, p.id
                     ) AS rn
              FROM products p
@@ -141,7 +149,7 @@ router.get('/', async (req, res) => {
       params,
     ),
     pool.query(
-      `SELECT ${grouped ? `COUNT(DISTINCT (COALESCE(p.supplier_id, 0), ${BASE_KEY}))` : 'COUNT(*)'} FROM products p
+      `SELECT ${grouped ? `COUNT(DISTINCT (COALESCE(p.supplier_id, 0), p.category_id, ${BASE_KEY}))` : 'COUNT(*)'} FROM products p
        LEFT JOIN suppliers s ON s.id = p.supplier_id
        LEFT JOIN categories c ON c.id = p.category_id
        ${where}`,
