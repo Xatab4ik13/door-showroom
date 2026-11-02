@@ -19,8 +19,9 @@ router.get('/', async (req, res) => {
     page = '1', limit = '20',
     price_min, price_max,
     manufacturer, material, color,
-    sort = 'updated_at', order = 'desc',
+    sort = 'updated_at', order = 'desc', group,
   } = req.query;
+  const grouped = group === '1' || group === 'true';
 
   const offset = (Number(page) - 1) * Number(limit);
   const conditions: string[] = ["p.sync_status = 'active'"];
@@ -99,27 +100,48 @@ router.get('/', async (req, res) => {
 
   params.push(Number(limit), offset);
 
-  const [dataRes, countRes] = await Promise.all([
-    pool.query(
-      `SELECT p.*, s.name as supplier_name, s.slug as supplier_slug, c.name as category_name
-       FROM products p
-       LEFT JOIN suppliers s ON s.id = p.supplier_id
-       LEFT JOIN categories c ON c.id = p.category_id
-       ${where}
-       ORDER BY p.pinned_order ASC NULLS LAST,
-                CASE c.slug
+  // Base model name without trailing size ("..., 700*2000") — used to merge size variants
+  const BASE_KEY = `regexp_replace(p.name, '[,\\s]*\\d{3,4}\\s*[*хx×Х]\\s*\\d{3,4}\\s*$', '', 'i')`;
+  const ORDER = `pinned_order ASC NULLS LAST,
+                CASE category_slug
                   WHEN 'vhodnye' THEN 1
                   WHEN 'mezhkomnatnye' THEN 2
                   WHEN 'biometricheskiy-zamok' THEN 3
                   WHEN 'furnitura' THEN 9
                   ELSE 5
                 END,
-                ${sortCol} ${sortOrder}
-       LIMIT $${params.length - 1} OFFSET $${params.length}`,
+                ${sortCol.replace('p.', '')} ${sortOrder}`;
+
+  const [dataRes, countRes] = await Promise.all([
+    pool.query(
+      grouped
+        ? `WITH f AS (
+             SELECT p.*, s.name as supplier_name, s.slug as supplier_slug, c.name as category_name, c.slug as category_slug,
+                    ROW_NUMBER() OVER (
+                      PARTITION BY COALESCE(p.supplier_id, 0), ${BASE_KEY}
+                      ORDER BY p.pinned_order ASC NULLS LAST, p.price ASC NULLS LAST, p.id
+                    ) AS rn
+             FROM products p
+             LEFT JOIN suppliers s ON s.id = p.supplier_id
+             LEFT JOIN categories c ON c.id = p.category_id
+             ${where}
+           )
+           SELECT * FROM f WHERE rn = 1
+           ORDER BY ${ORDER}
+           LIMIT $${params.length - 1} OFFSET $${params.length}`
+        : `SELECT * FROM (
+             SELECT p.*, s.name as supplier_name, s.slug as supplier_slug, c.name as category_name, c.slug as category_slug
+             FROM products p
+             LEFT JOIN suppliers s ON s.id = p.supplier_id
+             LEFT JOIN categories c ON c.id = p.category_id
+             ${where}
+           ) f
+           ORDER BY ${ORDER}
+           LIMIT $${params.length - 1} OFFSET $${params.length}`,
       params,
     ),
     pool.query(
-      `SELECT COUNT(*) FROM products p
+      `SELECT ${grouped ? `COUNT(DISTINCT (COALESCE(p.supplier_id, 0), ${BASE_KEY}))` : 'COUNT(*)'} FROM products p
        LEFT JOIN suppliers s ON s.id = p.supplier_id
        LEFT JOIN categories c ON c.id = p.category_id
        ${where}`,

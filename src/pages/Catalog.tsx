@@ -102,6 +102,7 @@ const Catalog = () => {
   };
 
   const { products: apiProducts, total, loading, error, isApi } = useProducts({
+    group: true,
     search: buildSearch(),
     category: apiCategory,
     page,
