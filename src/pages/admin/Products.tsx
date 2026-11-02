@@ -56,13 +56,14 @@ interface EditForm {
   opening_right: boolean;
   dobor_prices: Record<string, string>;
   nalichniki: { size: string; price: string }[];
+  tech_sizes: string;
 }
 
 const blankForm: EditForm = {
   name: '', price: '', old_price: '', description: '',
   category_id: '', manufacturer: '', material: '', color: '',
   supplier_slug: 'manual', images: [], specs: [], pinned_order: '',
-  sizes_text: '', opening_left: false, opening_right: false, dobor_prices: {}, nalichniki: [],
+  sizes_text: '', opening_left: false, opening_right: false, dobor_prices: {}, nalichniki: [], tech_sizes: '',
 };
 
 const parseJsonArray = (raw: unknown): string[] => {
@@ -75,7 +76,7 @@ const parseJsonArray = (raw: unknown): string[] => {
 
 // Internal keys never shown in the structured editor (preserved on save via backend merge)
 const HIDDEN_SPEC_KEYS = new Set([
-  '_sizes', '_accessories', '_dobor_prices', '_opening_sides', '_nalichniki',
+  '_sizes', '_accessories', '_dobor_prices', '_opening_sides', '_nalichniki', '_tech_sizes',
   'source_url', 'supplier_url', 'xml_url', 'import_url', 'sync_id',
 ]);
 
@@ -236,6 +237,7 @@ const Products = () => {
           return Array.isArray(a) ? a.map((n: any) => ({ size: String(n.size || ''), price: String(n.price || '') })) : [];
         } catch { return []; }
       })(),
+      tech_sizes: parseJsonArray(p.specs?._tech_sizes).join('\n'),
     });
   };
 
@@ -287,6 +289,7 @@ const Products = () => {
           obj._nalichniki = JSON.stringify(editForm.nalichniki
             .filter(n => n.size.trim())
             .map(n => ({ size: n.size.trim(), price: Number(n.price) || 0 })));
+          obj._tech_sizes = JSON.stringify(editForm.tech_sizes.split('\n').map(l => l.trim()).filter(Boolean));
           return obj;
         })(),
         pinned_order: editForm.pinned_order === '' ? null : Number(editForm.pinned_order),
@@ -740,6 +743,13 @@ const Products = () => {
                     + Добавить наличник
                   </Button>
                 </div>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Технические размеры (каждая строка отдельно)</Label>
+                <Textarea value={editForm.tech_sizes} rows={3} className="mt-1"
+                  onChange={(e) => setEditForm({ ...editForm, tech_sizes: e.target.value })}
+                  placeholder={'Коробка: 76×26×45 мм\nНаличник: 70×2150×10 мм'} />
+                <p className="text-[11px] text-muted-foreground mt-1">Показываются под выбором размера на странице товара</p>
               </div>
             </div>
 
