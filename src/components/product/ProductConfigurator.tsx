@@ -307,7 +307,7 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
         </div>
       )}
 
-      {/* Sizes */}
+      {/* Sizes + технические размеры */}
       {sizes.length > 0 && (
         <div>
           <h4 className="text-sm font-bold uppercase tracking-wider text-foreground mb-3" style={{ fontFamily: "'Oswald', sans-serif" }}>Размер</h4>
@@ -321,6 +321,13 @@ const ProductConfigurator = ({ product, apiSpecs, panelColors = [], services = [
                 }`}>{size}</button>
             ))}
           </div>
+          {techSizes.length > 0 && (
+            <ul className="mt-3 space-y-1">
+              {techSizes.map((t, i) => (
+                <li key={i} className="text-xs text-muted-foreground">{t}</li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
